@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/my_events"
+        android:enabled="true"
+        android:icon="@drawable/ic_my_events"
+        android:title="@string/text_my_events"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/events_near_me"
+        android:enabled="true"
+        android:icon="@drawable/ic_events_near_me"
+        android:title="@string/text_events_near_me"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/create_event"
+        android:enabled="true"
+        android:icon="@drawable/ic_create_event"
+        android:title="@string/text_create_event"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/my_account"
+        android:enabled="true"
+        android:icon="@drawable/ic_my_account"
+        android:title="@string/text_my_account"
+        app:showAsAction="ifRoom"/>
+</menu>
