@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -27,6 +28,7 @@ public class MyEventsFragment extends Fragment {
     public ArrayList<HashMap<String, String>> eventList;
     public JSONObject eventDetails;
     private TextView test;
+    public ProgressBar spinner;
 
     public static MyEventsFragment newInstance(Bundle eventsInfo) {
         MyEventsFragment fragment = new MyEventsFragment();
@@ -56,6 +58,7 @@ public class MyEventsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_my_events, container, false);
         listView = (ListView) view.findViewById(R.id.list);
         test = (TextView) view.findViewById(R.id.test_my_events);
+        spinner = (ProgressBar) view.findViewById(R.id.spinner);
         return view;
     }
 
@@ -80,6 +83,12 @@ public class MyEventsFragment extends Fragment {
     private class GetEvents extends AsyncTask<Void, Void, Void> {
 
         @Override
+        protected  void onPreExecute() {
+            super.onPreExecute();
+            spinner.setVisibility(View.VISIBLE);
+        }
+
+        @Override
         protected Void doInBackground(Void... params){
             String description;
             String name;
@@ -89,6 +98,7 @@ public class MyEventsFragment extends Fragment {
             String city = "";
             String longitude = "";
             String latitude = "";
+            String source = "";
 
             if(eventDetails != null) {
                 try {
@@ -123,6 +133,13 @@ public class MyEventsFragment extends Fragment {
 //                            Log.d("Start time is", startTime);
                         } else {
                             startTime = "No time given";
+                        }
+
+                        if(event.has("cover")){
+                            JSONObject cover = event.getJSONObject("cover");
+                            if(cover.has("source")){
+                                source = cover.getString("source");
+                            }
                         }
 
                         // Has to be included
@@ -163,6 +180,7 @@ public class MyEventsFragment extends Fragment {
                         eventMap.put("city", city);
                         eventMap.put("latitude", latitude);
                         eventMap.put("longitude", longitude);
+                        eventMap.put("source", source);
 
                         eventList.add(eventMap);
                     }
@@ -193,6 +211,7 @@ public class MyEventsFragment extends Fragment {
 
             }
 
+            Log.d("FINISHED", "DoInBackground is finished");
             return null;
         }
 
@@ -206,6 +225,15 @@ public class MyEventsFragment extends Fragment {
                     new int[]{R.id.name, R.id.start_time, R.id.id, R.id.city});
             listView.setAdapter(adapter);
             test.setVisibility(TextView.INVISIBLE);
+            spinner.setVisibility(View.INVISIBLE);
+
+            // Makes list smaller for testing inclusion of images
+//            ArrayList<HashMap<String, String>> toSend = new ArrayList<HashMap<String, String>>();
+//            toSend.add(eventList.get(0));
+
+            // Currently nothing displays so that's fun
+//            CustomList adapter = new CustomList(getActivity(), toSend);
+//            listView.setAdapter(adapter);
         }
 
     }
