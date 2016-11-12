@@ -4,6 +4,12 @@
     android:layout_height="wrap_content"
     android:paddingLeft="10dp">
 
+    <!--Doesn't currently work so removed -->
+    <!--<ImageView-->
+        <!--android:id="@+id/event_icon"-->
+        <!--android:layout_height="50dp"-->
+        <!--android:layout_width="50dp"/>-->
+
     <TextView
         android:id="@+id/name"
         android:textColor="@color/colorAccent"
@@ -32,5 +38,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="2dip"/>
+
 
 </LinearLayout>
