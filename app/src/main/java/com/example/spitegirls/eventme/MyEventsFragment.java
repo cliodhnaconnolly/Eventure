@@ -16,8 +16,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -68,7 +66,7 @@ public class MyEventsFragment extends Fragment {
                 String eventsDetailsString = getArguments().getString("allEvents");
                 Log.d("INPUT IS" , "<" + eventsDetailsString + ">");
                 eventDetails = new JSONObject(eventsDetailsString);
-                new GetEvents().execute(eventDetails.toString());
+                new GetEvents().execute();
             } catch (JSONException e) { e.printStackTrace(); }
         } else {
             Log.d("INSTEAD", "IS NULL");
@@ -79,11 +77,20 @@ public class MyEventsFragment extends Fragment {
     // Used help from on how to parse
     // http://www.androidhive.info/2012/01/android-json-parsing-tutorial/
 
-    private class GetEvents extends AsyncTask<String, Void, Void> {
+    private class GetEvents extends AsyncTask<Void, Void, Void> {
 
         @Override
-        protected Void doInBackground(String... params){
-            if(params.toString() != null) {
+        protected Void doInBackground(Void... params){
+            String description;
+            String name;
+            String startTime;
+            String id;
+            String country = "";
+            String city = "";
+            String longitude = "";
+            String latitude = "";
+
+            if(eventDetails != null) {
                 try {
 //                    JSONObject jsonObj = new JSONObject(params.toString());
 //                    Log.d("PARAMS IS ", params.toString());
@@ -97,21 +104,55 @@ public class MyEventsFragment extends Fragment {
                     for (int i = 0; i < events.length(); i++) {
                         JSONObject event = events.optJSONObject(i);
 
-                        String description = event.getString("description");
-                        Log.d("Description is", description);
-                        String name = event.getString("name");
-                        Log.d("NAme is", name);
-                        String startTime = event.getString("start_time");
-                        Log.d("Start time is", startTime);
-                        String id = event.getString("id");
-                        Log.d("id is", id);
+                        if(event.has("description")){
+                            description = event.getString("description");
+//                            Log.d("Description is", description);
+                        } else {
+                            description = "No description given";
+                        }
 
-                        JSONObject place = event.getJSONObject("place");
-                        JSONObject location = place.getJSONObject("location");
-                        String country = location.getString("country");
-                        String city = location.getString("city");
-                        String latitude = location.getString("latitude");
-                        String longitude = location.getString("longitude");
+                        if(event.has("name")){
+                            name = event.getString("name");
+//                            Log.d("Name is", name);
+                        } else {
+                            name = "No name given";
+                        }
+
+                        if(event.has("start_time")){
+                            startTime = event.getString("start_time");
+//                            Log.d("Start time is", startTime);
+                        } else {
+                            startTime = "No time given";
+                        }
+
+                        // Has to be included
+                        id = event.getString("id");
+//                        Log.d("id is", id);
+
+                        if(event.has("place")){
+                            JSONObject place = event.getJSONObject("place");
+                            if(place.has("location")){
+                                JSONObject location = place.getJSONObject("location");
+                                if(location.has("country")){
+                                    country = location.getString("country");
+                                } else { country = ""; }
+                                if(location.has("city")){
+                                    city = location.getString("city");
+                                } else { city = ""; }
+                                if(location.has("latitude")){
+                                    latitude = location.getString("latitude");
+                                } else { latitude = ""; }
+                                if(location.has("longitude")){
+                                    longitude = location.getString("longitude");
+                                } else { longitude = ""; }
+                            }
+                        }
+//                        JSONObject place = event.getJSONObject("place");
+//                        JSONObject location = place.getJSONObject("location");
+//                        String country = location.getString("country");
+//                        String city = location.getString("city");
+//                        String latitude = location.getString("latitude");
+//                        String longitude = location.getString("longitude");
 
                         HashMap<String, String> eventMap = new HashMap<>();
                         eventMap.put("description", description);
@@ -161,7 +202,7 @@ public class MyEventsFragment extends Fragment {
 
             ListAdapter adapter = new SimpleAdapter(
                     getActivity(), eventList, R.layout.list_layout,
-                    new String[]{"name", "start_time", "id", "city"},
+                    new String[]{"name", "startTime", "id", "city"},
                     new int[]{R.id.name, R.id.start_time, R.id.id, R.id.city});
             listView.setAdapter(adapter);
             test.setVisibility(TextView.INVISIBLE);
