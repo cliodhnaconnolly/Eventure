@@ -4,7 +4,7 @@
     <string name="facebook_app_id">1167128870029414</string>
 
     <string name="text_my_events">My Events</string>
-    <string name="text_events_near_me">Events Near Me</string>
+    <string name="text_events_near_me">Nearby Events</string>
     <string name="text_create_event">Create Events</string>
     <string name="text_my_account">My Account</string>
     <string name="title_activity_my_account">MyAccount</string>
