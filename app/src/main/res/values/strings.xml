@@ -10,7 +10,11 @@
     <string name="title_activity_my_account">MyAccount</string>
 
     <string name="text_welcome">Welcome to EventMe</string>
-
+    <string name="text_create_your_event">Create your event...</string>
+    <string name="text_event_name">Event Name</string>
+    <string name="text_location">Location</string>
+    <string name="text_date_time">Date/Time</string>
+    <string name="text_description">Description</string>
     <string name="no_internet">No connections available</string>
 
     <!-- TODO: Remove or change this placeholder text -->

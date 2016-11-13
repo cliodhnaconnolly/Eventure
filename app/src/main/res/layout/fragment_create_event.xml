@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,7 +7,100 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="In Create Event fragment"
-        android:layout_margin="16dp"/>
+        android:text="@string/text_create_your_event"
+        android:layout_margin="16dp"
+        android:id="@+id/textView"
+        android:textSize="22sp" />
 
-</FrameLayout>
+    <TextView
+        android:text="@string/text_event_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textViewEventName"
+        android:layout_below="@+id/textView"
+        android:layout_alignStart="@+id/textView" />
+
+    <TextView
+        android:text="@string/text_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textViewEventName"
+        android:layout_alignStart="@+id/textViewEventName"
+        android:layout_marginTop="25dp"
+        android:id="@+id/textViewLocation" />
+
+    <TextView
+        android:text="@string/text_date_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textViewLocation"
+        android:layout_alignStart="@+id/textViewLocation"
+        android:layout_marginTop="25dp"
+        android:id="@+id/textViewDateTime" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:layout_marginStart="41dp"
+        android:id="@+id/editTextEventName"
+        android:textSize="14sp"
+        android:layout_alignBaseline="@+id/textViewEventName"
+        android:layout_alignBottom="@+id/textViewEventName"
+        android:layout_toEndOf="@+id/textViewEventName" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:ems="10"
+        android:id="@+id/editTextLocation"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif"
+        android:layout_alignBaseline="@+id/textViewLocation"
+        android:layout_alignBottom="@+id/textViewLocation"
+        android:layout_alignStart="@+id/editTextEventName" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="date"
+        android:ems="10"
+        android:layout_alignTop="@+id/textViewDateTime"
+        android:layout_alignStart="@+id/editTextLocation"
+        android:id="@+id/editTextDate"
+        android:textSize="14sp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="time"
+        android:ems="10"
+        android:id="@+id/editTextTime"
+        android:textSize="14sp"
+        android:layout_below="@+id/editTextDate"
+        android:layout_alignStart="@+id/editTextDate" />
+
+    <TextView
+        android:text="@string/text_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textViewDescription"
+        android:layout_centerVertical="true"
+        android:layout_alignStart="@+id/textViewDateTime" />
+
+    <EditText
+        android:layout_height="wrap_content"
+        android:paddingRight="16dp"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/editText"
+        android:lines="5"
+        android:textSize="14sp"
+        android:layout_width="match_parent"
+        android:layout_below="@+id/textViewDescription"
+        android:layout_alignStart="@+id/textViewDescription"
+        android:contentDescription="Tell us about your event" />
+
+</RelativeLayout>
