@@ -48,12 +48,13 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
         FacebookSdk.sdkInitialize(getApplicationContext());
 
-//        eventList = new HashSet<HashMap<String, String>>();
-
         Bundle inBundle = getIntent().getExtras();
         final String name = inBundle.get("name").toString();
         final String surname = inBundle.get("surname").toString();
         final String imageUrl = inBundle.get("imageUrl").toString();
+
+        // Behaviour should match official Google guidelines
+        // https://material.google.com/components/bottom-navigation.html#bottom-navigation-behavior
 
         BottomNavigationView bottomBar = (BottomNavigationView)
                 findViewById(R.id.bottom_navigation);
@@ -66,37 +67,31 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                         switch (item.getItemId()) {
                             case R.id.my_events:
                                 getEventDetails();
-                               // decipherEvents();
-                                //new GetEvents().execute(eventDetails.toString());
+
                                 if(eventDetails != null){
                                     Bundle args = new Bundle();
                                     String eventDetailsString = eventDetails.toString();
                                     args.putString("allEvents", eventDetailsString);
                                     eventsFragment = MyEventsFragment.newInstance(args);
                                     transaction.replace(R.id.my_frame, eventsFragment);
-                                    transaction.addToBackStack(null);
                                     transaction.commit();
                                 } else {
                                     transaction.replace(R.id.my_frame, new MyEventsFragment());
-                                    transaction.addToBackStack(null);
                                     transaction.commit();
                                 }
                                 break;
                             case R.id.events_near_me:
                                 transaction.replace(R.id.my_frame, new EventsNearMeFragment());
-                                transaction.addToBackStack(null);
                                 transaction.commit();
                                 break;
                             case R.id.create_event:
                                 transaction.replace(R.id.my_frame, new CreateEventFragment());
-                                transaction.addToBackStack(null);
                                 transaction.commit();
                                 break;
                             case R.id.my_account:
                                 Log.d("NAME IS ", "Name is " + name);
                                 accountFragment = MyAccountFragment.newInstance(name, surname, imageUrl);
                                 transaction.replace(R.id.my_frame, accountFragment);
-                                transaction.addToBackStack(null);
                                 transaction.commit();
                                 break;
                         }
@@ -121,6 +116,11 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                         personalDetails = object;
                         try {
                             eventDetails = object.getJSONObject("events");
+                            if(eventDetails.has("cover")){
+                                Log.d("COVER EXISTS MAN", "true");
+                            } else { Log.d("No covers", "such sad"); }
+                            // http://stackoverflow.com/questions/32329863/facebook-graph-api-not-returning-null-for-cover-photo
+                            // Still not working but interesting
                         } catch (Exception e) { e.printStackTrace(); }
                     }
                 });
@@ -141,22 +141,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                     Log.d("RESPONSE", "<" + response.toString() + ">");
                 }
             }
-                ).executeAsync();
-//        Bundle parameters2 = new Bundle();
-//        parameters2.putString("fields", "id,name,picture");
-//        eventRequest.setParameters(parameters2);
-//        eventRequest.executeAsync();
-//        Log.d("PARAMETERS 2 HAS", "<" + parameters2.toString() + ">");
-
-
-    }
-
-    public void decipherEvents(){
-        try {
-            JSONObject events = personalDetails.getJSONObject("events");
-            Log.d("HOW MANY?", "This many " + events.length());
-        } catch (JSONException e) { e.printStackTrace(); }
-
+            ).executeAsync();
 
     }
 
@@ -172,80 +157,4 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         finish();
     }
 
-    // Used help from on how to parse
-    // http://www.androidhive.info/2012/01/android-json-parsing-tutorial/
-
-    // Currently in MyEventsFragment
-
-//    private class GetEvents extends AsyncTask<String, Void, String> {
-//
-//        @Override
-//        protected String doInBackground(String... params){
-//            if(params.toString() != null) {
-//                try {
-//                    JSONObject jsonObj = new JSONObject(params.toString());
-//
-//                    Log.d("INITIAL PARAMS", params.toString());
-//
-//                    JSONArray events = jsonObj.getJSONArray("events");
-//
-//                    for (int i = 0; i < events.length(); i++) {
-//                        JSONObject event = events.optJSONObject(i);
-//
-//                        String description = event.getString("description");
-//                        String name = event.getString("name");
-//                        String startTime = event.getString("start_time");
-//                        String id = event.getString("id");
-//
-//                        JSONObject location = event.getJSONObject("location");
-//                        String country = location.getString("country");
-//                        String city = location.getString("city");
-//                        String latitude = location.getString("latitude");
-//                        String longitude = location.getString("longitude");
-//
-//                        HashMap<String, String> eventMap = new HashMap<>();
-//                        eventMap.put("description", description);
-//                        eventMap.put("name", name);
-//                        eventMap.put("startTime", startTime);
-//                        eventMap.put("id", id);
-//                        eventMap.put("country", country);
-//                        eventMap.put("city", city);
-//                        eventMap.put("latitude", latitude);
-//                        eventMap.put("longitude", longitude);
-//
-//                        eventList.add(eventMap);
-//                    }
-//                } catch (final JSONException e) {
-//                    Log.e(TAG, "Json parsing error: " + e.getMessage());
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Toast.makeText(getApplicationContext(),
-//                                    "Json parsing error: " + e.getMessage(),
-//                                    Toast.LENGTH_LONG)
-//                                    .show();
-//                        }
-//                    });
-//                }
-//            }
-//            else {
-//                Log.e(TAG, "Couldn't get json from server.");
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Toast.makeText(getApplicationContext(),
-//                                "Couldn't get json from server. Check LogCat for possible errors!",
-//                                Toast.LENGTH_LONG)
-//                                .show();
-//                    }
-//                });
-//
-//            }
-//
-//            return null;
-//        }
-//
-//
-//
-//    }
 }

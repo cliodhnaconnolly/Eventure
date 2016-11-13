@@ -137,10 +137,12 @@ public class MyEventsFragment extends Fragment {
                         }
 
                         if(event.has("cover")){
+                            Log.d("COVER EXISTS", "yay");
                             JSONObject cover = event.getJSONObject("cover");
                             if(cover.has("source")){
                                 source = cover.getString("source");
                             }
+                            Log.d("SOURCE IS ", source);
                         }
 
                         // Has to be included
