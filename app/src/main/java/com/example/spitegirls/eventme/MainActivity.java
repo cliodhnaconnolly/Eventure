@@ -74,24 +74,29 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                     args.putString("allEvents", eventDetailsString);
                                     eventsFragment = MyEventsFragment.newInstance(args);
                                     transaction.replace(R.id.my_frame, eventsFragment);
+                                    transaction.addToBackStack(null);
                                     transaction.commit();
                                 } else {
                                     transaction.replace(R.id.my_frame, new MyEventsFragment());
+                                    transaction.addToBackStack(null);
                                     transaction.commit();
                                 }
                                 break;
                             case R.id.events_near_me:
                                 transaction.replace(R.id.my_frame, new EventsNearMeFragment());
+                                transaction.addToBackStack(null);
                                 transaction.commit();
                                 break;
                             case R.id.create_event:
                                 transaction.replace(R.id.my_frame, new CreateEventFragment());
+                                transaction.addToBackStack(null);
                                 transaction.commit();
                                 break;
                             case R.id.my_account:
                                 Log.d("NAME IS ", "Name is " + name);
                                 accountFragment = MyAccountFragment.newInstance(name, surname, imageUrl);
                                 transaction.replace(R.id.my_frame, accountFragment);
+                                transaction.addToBackStack(null);
                                 transaction.commit();
                                 break;
                         }

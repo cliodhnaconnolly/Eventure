@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -224,8 +225,28 @@ public class MyEventsFragment extends Fragment {
                     new String[]{"name", "startTime", "id", "city"},
                     new int[]{R.id.name, R.id.start_time, R.id.id, R.id.city});
             listView.setAdapter(adapter);
+            // Try change to GONE instead
             test.setVisibility(TextView.INVISIBLE);
             spinner.setVisibility(View.INVISIBLE);
+
+            // Adding functionality for user clicks
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Log.d("INT I IS", Integer.toString(i));
+                    Log.d("LONG L IS", Long.toString(l));
+
+                    Bundle args = new Bundle();
+                    args.putSerializable("hashmap", eventList.get(i));
+
+                    EventDetailsFragment eventFrag = EventDetailsFragment.newInstance(args);
+                    getActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.my_frame, eventFrag)
+                            .addToBackStack(null)
+                            .commit();
+                }
+            });
+
 
             // Makes list smaller for testing inclusion of images
 //            ArrayList<HashMap<String, String>> toSend = new ArrayList<HashMap<String, String>>();
