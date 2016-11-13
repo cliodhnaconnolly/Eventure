@@ -14,6 +14,11 @@ import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,6 +26,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 import static com.facebook.GraphRequest.TAG;
 
 public class MyEventsFragment extends Fragment {
@@ -94,18 +100,15 @@ public class MyEventsFragment extends Fragment {
             String description;
             String name;
             String startTime;
-            String id;
+            String id = "";
             String country = "";
             String city = "";
             String longitude = "";
             String latitude = "";
-            String source = "";
+            //String source = "";
 
             if(eventDetails != null) {
                 try {
-//                    JSONObject jsonObj = new JSONObject(params.toString());
-//                    Log.d("PARAMS IS ", params.toString());
-
                     JSONObject jsonObject = eventDetails;
 
                     Log.d("INITIAL PARAMS", params.toString());
@@ -136,18 +139,43 @@ public class MyEventsFragment extends Fragment {
                             startTime = "No time given";
                         }
 
-                        if(event.has("cover")){
-                            Log.d("COVER EXISTS", "yay");
-                            JSONObject cover = event.getJSONObject("cover");
-                            if(cover.has("source")){
-                                source = cover.getString("source");
-                            }
-                            Log.d("SOURCE IS ", source);
-                        }
-
                         // Has to be included
                         id = event.getString("id");
 //                        Log.d("id is", id);
+
+                        // Kinda works but all outta order man due to Async vs Async
+//                        Bundle coverBundle = new Bundle();
+//                        coverBundle.putString("fields", "cover");
+//                        // Getting cover photo from event_id
+//                        new GraphRequest(
+//                                AccessToken.getCurrentAccessToken(),
+//                                "/" + id,
+//                                coverBundle,
+//                                HttpMethod.GET,
+//                                new GraphRequest.Callback() {
+//                                    public void onCompleted(GraphResponse response) {
+//                                        /* handle the result */
+//                                        //Log.d("RESPONSE", "<" + response.getRawResponse() + ">");
+//                                       // try {
+//                                        JSONObject responseJSONObject = response.getJSONObject();
+////                                            JSONObject test = response.getJSONObject();
+//                                            if (responseJSONObject != null && responseJSONObject.has("cover")) {
+//                                                //Log.d("THERE IS", "A COVER");
+//                                                try {
+//                                                    JSONObject cover = responseJSONObject.getJSONObject("cover");
+//                                                    sourceMap.put(id, cover.getString("source"));
+//                                                    Log.d("ID IS", id);
+////                                                    Log.d("SOURCE IS", sourceList.get(sourceList.size()-1));
+//                                                } catch ( JSONException e ) { e.printStackTrace(); }
+//                                            } else {
+//                                                //Log.d("FALSE", "ALARM");
+//                                            }
+//                                        //} catch (JSONException e) { e.printStackTrace(); }
+//                                    }
+//                                }
+//                        ).executeAsync();
+                        //Log.d("TEST", "damn things not working");
+//                        Log.d("SOURCE IS", "<" + source  + ">");
 
                         if(event.has("place")){
                             JSONObject place = event.getJSONObject("place");
@@ -167,12 +195,6 @@ public class MyEventsFragment extends Fragment {
                                 } else { longitude = ""; }
                             }
                         }
-//                        JSONObject place = event.getJSONObject("place");
-//                        JSONObject location = place.getJSONObject("location");
-//                        String country = location.getString("country");
-//                        String city = location.getString("city");
-//                        String latitude = location.getString("latitude");
-//                        String longitude = location.getString("longitude");
 
                         HashMap<String, String> eventMap = new HashMap<>();
                         eventMap.put("description", description);
@@ -183,35 +205,18 @@ public class MyEventsFragment extends Fragment {
                         eventMap.put("city", city);
                         eventMap.put("latitude", latitude);
                         eventMap.put("longitude", longitude);
-                        eventMap.put("source", source);
+//                        eventMap.put("source", source);
+//                        Log.d("SOURCE IS NOW", source);
+//                        Log.d("EVENTMAP SRC", eventMap.get("source"));
 
                         eventList.add(eventMap);
                     }
                 } catch (final JSONException e) {
                     Log.e(TAG, "Json parsing error: " + e.toString());
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Toast.makeText(getApplicationContext(),
-//                                    "Json parsing error: " + e.getMessage(),
-//                                    Toast.LENGTH_LONG)
-//                                    .show();
-//                        }
-//                    });
                 }
             }
             else {
                 Log.e(TAG, "Couldn't get json from server.");
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Toast.makeText(getApplicationContext(),
-//                                "Couldn't get json from server. Check LogCat for possible errors!",
-//                                Toast.LENGTH_LONG)
-//                                .show();
-//                    }
-//                });
-
             }
 
             Log.d("FINISHED", "DoInBackground is finished");
@@ -240,6 +245,8 @@ public class MyEventsFragment extends Fragment {
 
                     Bundle args = new Bundle();
                     args.putSerializable("hashmap", eventList.get(i));
+//                    Log.d("TEST", "<" + sourceMap.get(eventList.get(i).get("id")) + ">");
+//                    args.putSerializable("source", sourceMap.get(eventList.get(i).get("id")));
 
                     EventDetailsFragment eventFrag = EventDetailsFragment.newInstance(args);
                     getActivity().getSupportFragmentManager().beginTransaction()

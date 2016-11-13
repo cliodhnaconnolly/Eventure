@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     MyAccountFragment accountFragment;
     MyEventsFragment eventsFragment;
+    HashMap<String, String> sources;
     private AccessToken accessToken;
     private JSONObject personalDetails;
     private JSONObject eventDetails;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         setContentView(R.layout.activity_main);
 
         FacebookSdk.sdkInitialize(getApplicationContext());
+        sources = new HashMap<String, String>();
 
         Bundle inBundle = getIntent().getExtras();
         final String name = inBundle.get("name").toString();
@@ -72,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                 case R.id.my_events:
                                     getEventDetails();
 
+                                    // Think this if causes the loading problems
                                     if (eventDetails != null) {
                                         Bundle args = new Bundle();
                                         String eventDetailsString = eventDetails.toString();
@@ -123,11 +126,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                         personalDetails = object;
                         try {
                             eventDetails = object.getJSONObject("events");
-                            if(eventDetails.has("cover")){
-                                Log.d("COVER EXISTS MAN", "true");
-                            } else { Log.d("No covers", "such sad"); }
-                            // http://stackoverflow.com/questions/32329863/facebook-graph-api-not-returning-null-for-cover-photo
-                            // Still not working but interesting
                         } catch (Exception e) { e.printStackTrace(); }
                     }
                 });
@@ -137,20 +135,40 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         request.executeAsync();
         Log.d("PARAMETERS HAS", "<" + parameters.toString() + ">");
 
-        new GraphRequest(
-            AccessToken.getCurrentAccessToken(),
-            "/{event-id}",
-            null,
-            HttpMethod.GET,
-            new GraphRequest.Callback() {
-                public void onCompleted(GraphResponse response) {
-                    /* handle the result */
-                    Log.d("RESPONSE", "<" + response.toString() + ">");
-                }
-            }
-            ).executeAsync();
-
     }
+
+    // Doesn't work but keeping here for the moment
+//    public void getCoverPhotos() {
+//        try {
+//            JSONArray events = eventDetails.getJSONArray("data");
+//            for(int i=0; i<events.length(); i++){
+//                JSONObject event = events.optJSONObject(i);
+//                Bundle coverBundle = new Bundle();
+//                coverBundle.putString("fields", "cover,id");
+//                // Getting cover photo from event_id
+//                new GraphRequest(
+//                        AccessToken.getCurrentAccessToken(),
+//                        "/" + event.getString("id"),
+//                        coverBundle,
+//                        HttpMethod.GET,
+//                        new GraphRequest.Callback() {
+//                            public void onCompleted(GraphResponse response) {
+//                                JSONObject responseJSONObject = response.getJSONObject();
+//                                Log.d("RESPONSE IS", "<" + responseJSONObject.toString() + ">");
+//                                if (responseJSONObject != null && responseJSONObject.has("cover")) {
+//                                    try {
+//                                        sources.put(responseJSONObject.getString("id"), responseJSONObject.getString("source"));
+//                                    } catch (JSONException e) { e.printStackTrace(); }
+//                                } else {
+//                                    Log.d("FALSE", "ALARM");
+//                                }
+//
+//                            }
+//                        }
+//                ).executeAsync();
+//            }
+//        } catch (JSONException e) { e.printStackTrace(); }
+//    }
 
     @Override
     public void onLogoutItemSelected(String info){
