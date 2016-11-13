@@ -1,6 +1,9 @@
 package com.example.spitegirls.eventme;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -64,38 +67,42 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                        switch (item.getItemId()) {
-                            case R.id.my_events:
-                                getEventDetails();
+                        if(isNetworkAvailable()) {
+                            switch (item.getItemId()) {
+                                case R.id.my_events:
+                                    getEventDetails();
 
-                                if(eventDetails != null){
-                                    Bundle args = new Bundle();
-                                    String eventDetailsString = eventDetails.toString();
-                                    args.putString("allEvents", eventDetailsString);
-                                    eventsFragment = MyEventsFragment.newInstance(args);
-                                    transaction.replace(R.id.my_frame, eventsFragment);
+                                    if (eventDetails != null) {
+                                        Bundle args = new Bundle();
+                                        String eventDetailsString = eventDetails.toString();
+                                        args.putString("allEvents", eventDetailsString);
+                                        eventsFragment = MyEventsFragment.newInstance(args);
+                                        transaction.replace(R.id.my_frame, eventsFragment);
+                                        transaction.commit();
+                                    } else {
+                                        transaction.replace(R.id.my_frame, new MyEventsFragment());
+                                        transaction.commit();
+                                    }
+                                    break;
+                                case R.id.events_near_me:
+                                    transaction.replace(R.id.my_frame, new EventsNearMeFragment());
                                     transaction.commit();
-                                } else {
-                                    transaction.replace(R.id.my_frame, new MyEventsFragment());
+                                    break;
+                                case R.id.create_event:
+                                    transaction.replace(R.id.my_frame, new CreateEventFragment());
                                     transaction.commit();
-                                }
-                                break;
-                            case R.id.events_near_me:
-                                transaction.replace(R.id.my_frame, new EventsNearMeFragment());
-                                transaction.commit();
-                                break;
-                            case R.id.create_event:
-                                transaction.replace(R.id.my_frame, new CreateEventFragment());
-                                transaction.commit();
-                                break;
-                            case R.id.my_account:
-                                Log.d("NAME IS ", "Name is " + name);
-                                accountFragment = MyAccountFragment.newInstance(name, surname, imageUrl);
-                                transaction.replace(R.id.my_frame, accountFragment);
-                                transaction.commit();
-                                break;
+                                    break;
+                                case R.id.my_account:
+                                    Log.d("NAME IS ", "Name is " + name);
+                                    accountFragment = MyAccountFragment.newInstance(name, surname, imageUrl);
+                                    transaction.replace(R.id.my_frame, accountFragment);
+                                    transaction.commit();
+                                    break;
+                            }
+                        } else {
+                            transaction.replace(R.id.my_frame, new NoInternetFragment());
+                            transaction.commit();
                         }
-
                         return false;
                     }
                 }
@@ -155,6 +162,13 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         Intent login = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(login);
         finish();
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 }

@@ -7,10 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-/**
- * Created by Clíodhna on 08/11/2016.
- */
-
 public class CreateEventFragment extends android.support.v4.app.Fragment {
 
     public static CreateEventFragment newInstance() {

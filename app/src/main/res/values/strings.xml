@@ -11,6 +11,8 @@
 
     <string name="text_welcome">Welcome to EventMe</string>
 
+    <string name="no_internet">No connections available</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
