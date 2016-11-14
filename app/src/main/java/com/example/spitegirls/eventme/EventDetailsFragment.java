@@ -110,7 +110,6 @@ public class EventDetailsFragment extends Fragment{
 
     private void getCoverPhotoSource(String id){
 
-        
         Bundle coverBundle = new Bundle();
         coverBundle.putString("fields", "cover,id");
         // Getting cover photo from event_id
