@@ -20,6 +20,10 @@
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
 
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyARE3MaJovIQSAjhFcqvYgktKcDtZKdIE8" />
+
         <activity android:name=".MainActivity"
             android:label="It's an Eventure, man!"/>
     </application>
