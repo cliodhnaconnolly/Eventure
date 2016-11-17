@@ -30,18 +30,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
-
 
 public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    //    public static EventsNearMeFragment newInstance() {
-//        return new EventsNearMeFragment();
-//    }
-//
-//    public EventsNearMeFragment() {
-//
-//    }
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private MapView mapView;
@@ -67,6 +58,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         mMap.setMyLocationEnabled(true);
     }
 
+    // Not meant to be using this method, deprecated = --marks
     @Override
     public void onAttach(final Activity activity) {
         super.onAttach(activity);

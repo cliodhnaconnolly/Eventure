@@ -107,10 +107,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         );
     }
 
-    public MainActivity thisActivity() {
-        return this;
-    }
-
     public void getEventDetails() {
         // May need to make this wait for a bit
         GraphRequest request = GraphRequest.newMeRequest(
