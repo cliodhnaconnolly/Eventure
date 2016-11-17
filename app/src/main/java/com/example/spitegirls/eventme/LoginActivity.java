@@ -1,7 +1,12 @@
 package com.example.spitegirls.eventme;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
@@ -42,6 +47,9 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        checkInternetConnection();
+
         FacebookSdk.sdkInitialize(getApplicationContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
@@ -78,6 +86,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onError(FacebookException e) {
+                checkInternetConnection();
             }
         };
         loginButton.setReadPermissions("user_friends", "user_events");
@@ -127,5 +136,24 @@ public class LoginActivity extends AppCompatActivity {
         LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "user_friends",
                 "user_birthday", "user_events", "user_location"));
         LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("rsvp_event", "publish_actions"));
+    }
+
+    public void checkInternetConnection(){
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if(!(cm.getActiveNetworkInfo() != null &&
+                cm.getActiveNetworkInfo().isConnectedOrConnecting())){
+            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+            alertDialog.setMessage("No internet connection detected")
+                    .setCancelable(false)
+                    .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, final int id) {
+                            startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                            return; //Dialog box will disappear after user comes back for settings
+                        }
+                    });
+            final AlertDialog alertMessage = alertDialog.create();
+            alertMessage.show();
+        }
     }
 }
