@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -49,13 +50,26 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         Marker UCDLibraryMarker = mMap.addMarker(new MarkerOptions().position(UCDLibrary).title("UCD Library").snippet(snippet));
         mMap.addMarker(new MarkerOptions().position(UCD).title("Marker in UCD"));
         mMap.setMinZoomPreference(12);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(UCD, 17));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), 17));
         //mMap.animateCamera(CameraUpdateFactory.zoomBy(10));
 
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         mMap.setMyLocationEnabled(true);
+    }
+
+    private LatLng getCoords() {
+        LatLng coords = null;
+        LocationManager lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+        if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return coords;
+        }
+        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        String longitude = Double.toString(location.getLongitude());
+        String latitude = Double.toString(location.getLatitude());
+        coords = new LatLng(location.getLatitude(), location.getLongitude());
+        return coords;
     }
 
     // Not meant to be using this method, deprecated = --marks
