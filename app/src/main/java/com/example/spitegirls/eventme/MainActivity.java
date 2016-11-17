@@ -8,13 +8,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.facebook.AccessToken;
-import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -25,24 +24,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.ArrayList;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.facebook.GraphRequest.TAG;
 
 // This is the most useful thing I've found RE:fragments
 // https://guides.codepath.com/android/Creating-and-Using-Fragments#fragment-lifecycle
 
+// How to branch and merge
+// https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
+
 public class MainActivity extends AppCompatActivity implements MyAccountFragment.OnItemSelectedListener {
 
     MyAccountFragment accountFragment;
     MyEventsFragment eventsFragment;
-    HashMap<String, String> sources;
-    private AccessToken accessToken;
-    private JSONObject personalDetails;
-    private JSONObject eventDetails;
-//    public HashSet<HashMap<String, String>> eventList;
+
+    public JSONObject unparsedEventsData;
+    public ArrayList<Event> parsedEventsList;
 
 
     @Override
@@ -50,8 +48,10 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        Log.d("IN ONCREAT", "WORK CHrIST");
+
         FacebookSdk.sdkInitialize(getApplicationContext());
-        sources = new HashMap<String, String>();
 
         Bundle inBundle = getIntent().getExtras();
         final String name = inBundle.get("name").toString();
@@ -66,26 +66,22 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
         bottomBar.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
+
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                         if(isNetworkAvailable()) {
                             switch (item.getItemId()) {
                                 case R.id.my_events:
-                                    getEventDetails();
-
-                                    // Think this if causes the loading problems
-                                    if (eventDetails != null) {
-                                        Bundle args = new Bundle();
-                                        String eventDetailsString = eventDetails.toString();
-                                        args.putString("allEvents", eventDetailsString);
-                                        eventsFragment = MyEventsFragment.newInstance(args);
-                                        transaction.replace(R.id.my_frame, eventsFragment);
-                                        transaction.commit();
-                                    } else {
+                                    // Checks if data to display is ready
+                                    if(parsedEventsList == null) {
                                         transaction.replace(R.id.my_frame, new MyEventsFragment());
                                         transaction.commit();
+                                        getEventDetails();
+                                    } else {
+                                        setUpMyEventsFragmentWithData();
                                     }
+
                                     break;
                                 case R.id.events_near_me:
                                     transaction.replace(R.id.my_frame, new EventsNearMeFragment());
@@ -96,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                     transaction.commit();
                                     break;
                                 case R.id.my_account:
-                                    Log.d("NAME IS ", "Name is " + name);
                                     accountFragment = MyAccountFragment.newInstance(name, surname, imageUrl);
                                     transaction.replace(R.id.my_frame, accountFragment);
                                     transaction.commit();
@@ -112,63 +107,90 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         );
     }
 
+    public MainActivity thisActivity() {
+        return this;
+    }
+
     public void getEventDetails() {
-       // May need to make this wait for a bit
-        accessToken = AccessToken.getCurrentAccessToken();
+        // May need to make this wait for a bit
         GraphRequest request = GraphRequest.newMeRequest(
-                accessToken,
+                AccessToken.getCurrentAccessToken(),
                 new GraphRequest.GraphJSONObjectCallback() {
                     @Override
-                    public void onCompleted(
-                            JSONObject object,
-                            GraphResponse response) {
-                        Log.d("PERSONAL DETAILS", "<" + object.toString() + ">");
-                        personalDetails = object;
+                    public void onCompleted( JSONObject object, GraphResponse response) {
                         try {
-                            eventDetails = object.getJSONObject("events");
-                        } catch (Exception e) { e.printStackTrace(); }
+                            setUnparsedEventData(object.getJSONObject("events"));
+                            Log.d("FINISHED", "getEventDetails()");
+                        } catch (JSONException e) { e.printStackTrace(); }
                     }
                 });
         Bundle parameters = new Bundle();
         parameters.putString("fields", "id,name,link,events");
         request.setParameters(parameters);
         request.executeAsync();
-        Log.d("PARAMETERS HAS", "<" + parameters.toString() + ">");
 
     }
 
-    // Doesn't work but keeping here for the moment
-//    public void getCoverPhotos() {
-//        try {
-//            JSONArray events = eventDetails.getJSONArray("data");
-//            for(int i=0; i<events.length(); i++){
-//                JSONObject event = events.optJSONObject(i);
-//                Bundle coverBundle = new Bundle();
-//                coverBundle.putString("fields", "cover,id");
-//                // Getting cover photo from event_id
-//                new GraphRequest(
-//                        AccessToken.getCurrentAccessToken(),
-//                        "/" + event.getString("id"),
-//                        coverBundle,
-//                        HttpMethod.GET,
-//                        new GraphRequest.Callback() {
-//                            public void onCompleted(GraphResponse response) {
-//                                JSONObject responseJSONObject = response.getJSONObject();
-//                                Log.d("RESPONSE IS", "<" + responseJSONObject.toString() + ">");
-//                                if (responseJSONObject != null && responseJSONObject.has("cover")) {
-//                                    try {
-//                                        sources.put(responseJSONObject.getString("id"), responseJSONObject.getString("source"));
-//                                    } catch (JSONException e) { e.printStackTrace(); }
-//                                } else {
-//                                    Log.d("FALSE", "ALARM");
-//                                }
-//
-//                            }
-//                        }
-//                ).executeAsync();
-//            }
-//        } catch (JSONException e) { e.printStackTrace(); }
-//    }
+    private void getExtraEventDetails() {
+        Bundle bundle = new Bundle();
+        // Add extra fields to this bundle of shit you want to receive
+        bundle.putString("fields", "cover");
+        Log.d("IN", "getExtraEventsDetails");
+        // Use public variable parsedEventsList
+        for(final Event event : parsedEventsList){
+            new GraphRequest(
+                    AccessToken.getCurrentAccessToken(),
+                    "/" + event.id,
+                    bundle,
+                    HttpMethod.GET,
+                    new GraphRequest.Callback() {
+                        @Override
+                        public void onCompleted(GraphResponse response) {
+                            JSONObject responseJSONObject = response.getJSONObject();
+                            if (responseJSONObject != null && responseJSONObject.has("cover")) {
+                                try {
+                                    event.coverURL = responseJSONObject.getString("source");
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                Log.d("FINISHED", "getExtraEventDetails");
+                            }
+                            // Call method to set up new fragment
+                            setUpMyEventsFragmentWithData();
+                        }
+                    }
+            ).executeAsync();
+        }
+
+    }
+
+    private void setUpMyEventsFragmentWithData() {
+        Bundle args = new Bundle();
+        args.putSerializable("arraylist", parsedEventsList);
+        eventsFragment = MyEventsFragment.newInstance(args);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.my_frame, eventsFragment);
+        transaction.commit();
+        Log.d("FINISHED", "setUpMyEventsFragmetnWithData");
+    }
+
+    private void setUnparsedEventData(JSONObject obj){
+        unparsedEventsData = obj;
+
+        Log.d("UNPARSED", unparsedEventsData.toString());
+        new GetEvents().execute();
+    }
+
+    public void setParsedEventsList(ArrayList<Event> eventsList) {
+        parsedEventsList = eventsList;
+        Log.d("IN", "SETPARSEDEVENTS LIST");
+        setUpMyEventsFragmentWithData();
+
+        // Currently doesn't work so we're going to stop going down the rabbit hole at this stage
+        // Make call to getExtraDetails
+        // getExtraEventDetails();
+    }
 
     @Override
     public void onLogoutItemSelected(String info){
@@ -182,11 +204,124 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         finish();
     }
 
+    // Checks if a connection is available
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
+
+    // Used help from on how to parse
+    // http://www.androidhive.info/2012/01/android-json-parsing-tutorial/
+
+    public class GetEvents extends AsyncTask<Void, Void, Void> {
+
+        // Received data
+        private JSONObject eventData;
+        // Generated data
+        public ArrayList<Event> eventsList;
+
+        @Override
+        protected void onPreExecute() {
+
+            eventData = unparsedEventsData;
+            eventsList = new ArrayList<Event>();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params){
+            String description;
+            String name;
+            String startTime;
+            String id = "";
+            String country = "";
+            String city = "";
+            String longitude = "";
+            String latitude = "";
+
+            if(eventData.toString() != null) {
+                try {
+                    JSONArray events = eventData.getJSONArray("data");
+                    //Log.d("events is ", events.toString());
+
+                    for (int i = 0; i < events.length(); i++) {
+                        JSONObject event = events.optJSONObject(i);
+                        //Log.d("Event is", event.toString());
+
+                        if (event.has("description")) {
+                            description = event.getString("description");
+//                            Log.d("Description is", description);
+                        } else {
+                            description = "No description given";
+                        }
+
+                        if (event.has("name")) {
+                            name = event.getString("name");
+//                            Log.d("Name is", name);
+                        } else {
+                            name = "No title given";
+                        }
+
+                        if (event.has("start_time")) {
+                            startTime = event.getString("start_time");
+//                            Log.d("Start time is", startTime);
+                        } else {
+                            startTime = "No time given";
+                        }
+
+                        // Can't be null
+                        id = event.getString("id");
+//                        Log.d("id is", id);
+
+                        if (event.has("place")) {
+                            JSONObject place = event.getJSONObject("place");
+                            if (place.has("location")) {
+                                JSONObject location = place.getJSONObject("location");
+                                if (location.has("country")) {
+                                    country = location.getString("country");
+                                } else {
+                                    country = "";
+                                }
+                                if (location.has("city")) {
+                                    city = location.getString("city");
+                                } else {
+                                    city = "";
+                                }
+                                if (location.has("latitude")) {
+                                    latitude = location.getString("latitude");
+                                } else {
+                                    latitude = "";
+                                }
+                                if (location.has("longitude")) {
+                                    longitude = location.getString("longitude");
+                                } else {
+                                    longitude = "";
+                                }
+                            }
+                        }
+
+                        eventsList.add(new Event(description, name, id, country, city, startTime, latitude, longitude));
+                    }
+                } catch (final JSONException e) {
+                    Log.e(TAG, "Json parsing error: " + e.getMessage());
+                }
+            }
+            else {
+                Log.e(TAG, "Couldn't get json from server.");
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            Log.d("FINISHED", "getEvents.execute");
+            setParsedEventsList(eventsList);
+
+        }
+    }
+
 
 }
