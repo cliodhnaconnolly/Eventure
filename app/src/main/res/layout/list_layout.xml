@@ -27,7 +27,6 @@
     <TableRow>
         <TextView
             android:id="@+id/start_time"
-            android:textColor="@color/colorPrimary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="2dip"/>
@@ -36,7 +35,6 @@
     <TableRow>
         <TextView
             android:id="@+id/id"
-            android:textColor="@color/colorPrimary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="2dip"/>
@@ -45,7 +43,6 @@
     <TableRow>
         <TextView
             android:id="@+id/city"
-            android:textColor="@color/colorPrimary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="2dip"/>
