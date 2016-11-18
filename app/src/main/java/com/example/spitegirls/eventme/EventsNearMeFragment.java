@@ -39,6 +39,18 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     private MapView mapView;
     private Context mContext;
 
+    public static EventsNearMeFragment newInstance(Bundle bundle) {
+        EventsNearMeFragment fragment = new EventsNearMeFragment();
+        if(bundle != null){
+            fragment.setArguments(bundle);
+//            Log.d("INPUT TO ", bundle.toString());
+//            Log.d("SET ARGS", fragment.getArguments().toString());
+
+        }
+        return fragment;
+    }
+
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;

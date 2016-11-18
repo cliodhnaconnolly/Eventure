@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     MyAccountFragment accountFragment;
     MyEventsFragment eventsFragment;
+    EventsNearMeFragment eventsNearFragment;
 
     public JSONObject unparsedEventsData;
     public ArrayList<Event> parsedEventsList;
@@ -131,8 +132,17 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
                                     break;
                                 case R.id.events_near_me:
-                                    transaction.replace(R.id.my_frame, new EventsNearMeFragment());
-                                    transaction.commit();
+                                    //Makes sure data is pulled in case they go to map first. Sets up events for events near me fragment.
+                                    if(!gotFBdata && parsedEventsList == null) {
+                                        transaction.replace(R.id.my_frame, new EventsNearMeFragment());
+                                        transaction.commit();
+                                        getEventDetails();
+                                    } else if(!gotFBdata){
+                                        getEventDetails();
+                                        setUpEventsNearMeFragmentWithData();
+                                    } else {
+                                        setUpEventsNearMeFragmentWithData();
+                                    }
                                     break;
                                 case R.id.create_event:
                                     transaction.replace(R.id.my_frame, new CreateEventFragment());
@@ -317,6 +327,16 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         Log.d("FINISHED", "setUpMyEventsFragmetnWithData");
     }
 
+    private void setUpEventsNearMeFragmentWithData(){
+        Bundle args = new Bundle();
+        args.putSerializable("arraylist", parsedEventsList);
+        eventsNearFragment = EventsNearMeFragment.newInstance(args);
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.my_frame, eventsNearFragment);
+        transaction.commit();
+        Log.d("FINISHED", "SetUpEventsNearMeFragmentWithData");
+    }
+
     private void setUnparsedEventData(JSONObject obj){
         unparsedEventsData = obj;
 
@@ -335,6 +355,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         gotFBdata = true;
 
         setUpMyEventsFragmentWithData();
+        Log.d("BEFORE", "setIpEventsNearMeFragmentWithData In SetParsedEventsList");
+        setUpEventsNearMeFragmentWithData();
 
         // Currently doesn't work so we're going to stop going down the rabbit hole at this stage
         // Make call to getExtraDetails
