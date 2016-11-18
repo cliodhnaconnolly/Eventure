@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,16 +71,44 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
             Event currEvent = getEvent(i);
             if(eventCheck(currEvent) == true){
                 Log.d("STARTING TO ADD MARKER", currEvent.name);
-                LatLng FirstEvent = new LatLng(Double.parseDouble(currEvent.latitude), Double.parseDouble(currEvent.longitude));
-                mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet(currEvent.startTime));
-                Log.d("ADDED MARKER", currEvent.name);
+                try {
+                    Double latitude = Double.parseDouble(currEvent.latitude);
+                    Double longitude = Double.parseDouble(currEvent.longitude);
+                    LatLng FirstEvent = new LatLng(latitude, longitude);
+                    mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet(currEvent.startTime));
+                    Log.d("ADDED MARKER", currEvent.name);
+                }catch(NumberFormatException e){
+
+                }
             }
             else {
                 Log.d("NO MARKER, YEAR IS:", currEvent.startTime.substring(0,4));
             }
-
         }
 
+        // The Following Code is the part where I hope to call the Event Fragment.
+        // Currently the bundle being passed contains all the Events.
+        // I need to figure out how to pass a bundle containing only one event.
+        // I tried doing some sort of loop methodology With it earlier but that just broke the code.
+        // Any help is appreciated on it and if any info is needed ask me(Brian)
+
+//            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+//                @Override
+//                public boolean onMarkerClick(Marker arg0) {
+//                    EventDetailsFragment eventFrag = new EventDetailsFragment();
+//                    eventFrag.setArguments(bundle);
+//                    if (arg0.isVisible()) { // if marker source is visible (i.e. marker created)
+//                        Log.d("ENTERED IF STATEMENT", "Clickable Marker");
+//                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+//                        transaction.replace(R.id.my_frame, eventFrag);
+//                        transaction.addToBackStack(null);
+//                        transaction.commit();
+//                        return true;
+//                    }
+//                    Log.d("FAILED IF STATEMENT", "No listener created");
+//                    return false;
+//                }
+//            });
         mMap.setMinZoomPreference(10);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), 17));
 
