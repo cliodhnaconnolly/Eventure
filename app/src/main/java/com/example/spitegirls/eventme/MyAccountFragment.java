@@ -37,13 +37,9 @@ public class MyAccountFragment extends Fragment {
         listener.onLogoutItemSelected("Log me out!!");
     }
 
-    public static MyAccountFragment newInstance(String name, String surname, String imageUrl) {
+    public static MyAccountFragment newInstance(Bundle inBundle) {
         MyAccountFragment fragment =  new MyAccountFragment();
-        Bundle args = new Bundle();
-        args.putString("name", name);
-        args.putString("surname", surname);
-        args.putString("imageUrl", imageUrl);
-        fragment.setArguments(args);
+        fragment.setArguments(inBundle);
         return fragment;
     }
 

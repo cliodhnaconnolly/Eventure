@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
         FacebookSdk.sdkInitialize(getApplicationContext());
 
-        Bundle inBundle = getIntent().getExtras();
+        final Bundle inBundle = getIntent().getExtras();
         final String name = inBundle.get("name").toString();
         final String surname = inBundle.get("surname").toString();
         final String imageUrl = inBundle.get("imageUrl").toString();
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                     pretendingToCreateAnEvent();
                                     break;
                                 case R.id.my_account:
-                                    accountFragment = MyAccountFragment.newInstance(name, surname, imageUrl);
+                                    accountFragment = MyAccountFragment.newInstance(inBundle);
                                     transaction.replace(R.id.my_frame, accountFragment);
                                     transaction.commit();
                                     break;
