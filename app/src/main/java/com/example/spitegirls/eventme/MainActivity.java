@@ -147,7 +147,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                 case R.id.create_event:
                                     transaction.replace(R.id.my_frame, new CreateEventFragment());
                                     transaction.commit();
-                                    pretendingToCreateAnEvent();
+                                    // Disabling for the moment because we're spazzin the db
+                                    //pretendingToCreateAnEvent();
                                     break;
                                 case R.id.my_account:
                                     accountFragment = MyAccountFragment.newInstance(inBundle);
@@ -217,6 +218,12 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         };
         mIdReference.addValueEventListener(idListener);
 
+        // Trying to figure out why there is duplication sometimes
+        if(parsedEventsList != null)
+            Log.d("ParsedEventsList was", "size " + parsedEventsList.size());
+        else
+            Log.d("ParsedEventsList was", " null" );
+
         // There should be a way of retrieving an event object once I figure out how
         // to set it to events root
         mEventReference.addValueEventListener(new ValueEventListener() {
@@ -250,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
                     }
                 }
-                JSONObject result;
+                Log.d("ParsedEventsList is", "size" + parsedEventsList.size());
 
             }
 
@@ -309,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                 Log.d("FINISHED", "getExtraEventDetails");
                             }
                             // Call method to set up new fragment
-                            setUpMyEventsFragmentWithData();
+                            //setUpMyEventsFragmentWithData();
                         }
                     }
             ).executeAsync();
