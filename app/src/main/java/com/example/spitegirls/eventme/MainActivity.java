@@ -355,7 +355,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         gotFBdata = true;
 
         setUpMyEventsFragmentWithData();
-        Log.d("BEFORE", "setIpEventsNearMeFragmentWithData In SetParsedEventsList");
+        Log.d("BEFORE", "setUpEventsNearMeFragmentWithData In SetParsedEventsList");
         setUpEventsNearMeFragmentWithData();
 
         // Currently doesn't work so we're going to stop going down the rabbit hole at this stage
