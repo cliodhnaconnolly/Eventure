@@ -31,6 +31,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
 
 public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -38,6 +40,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     private GoogleApiClient mGoogleApiClient;
     private MapView mapView;
     private Context mContext;
+    private ArrayList<Event> eventList;
 
     public static EventsNearMeFragment newInstance(Bundle bundle) {
         EventsNearMeFragment fragment = new EventsNearMeFragment();
@@ -49,18 +52,58 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         }
         return fragment;
     }
+//    @Override
+//    public void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//        eventList = new ArrayList<Event>();
+//    }
+//
 
-
-    @Override
+//    @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMinZoomPreference(12);
+        Bundle bundle = this.getArguments();
+        if(bundle.getSerializable("arraylist") != null) {
+            eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
+        }
+        for(int i = 0; i < eventList.size(); i++){
+            Event currEvent = getEvent(i);
+            if(eventCheck(currEvent) == true){
+                Log.d("STARTING TO ADD MARKER", currEvent.name);
+                LatLng FirstEvent = new LatLng(Double.parseDouble(currEvent.latitude), Double.parseDouble(currEvent.longitude));
+                mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet(currEvent.startTime));
+                Log.d("ADDED MARKER", currEvent.name);
+            }
+            else {
+                Log.d("NO MARKER, YEAR IS:", currEvent.startTime.substring(0,4));
+            }
+
+        }
+
+        mMap.setMinZoomPreference(10);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), 17));
 
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         mMap.setMyLocationEnabled(true);
+    }
+
+    private boolean eventCheck(Event currEvent){
+        String year = currEvent.startTime.substring(0, 4);
+        Log.d("YEAR", year);
+        int currYear = 2016;
+        if(Integer.parseInt(year) != currYear){
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    private Event getEvent(int i){
+        Event currEvent = eventList.get(i);
+        return currEvent;
     }
 
     private LatLng getCoords() {

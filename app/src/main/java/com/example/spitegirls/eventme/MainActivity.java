@@ -362,8 +362,10 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         gotFBdata = true;
 
         setUpMyEventsFragmentWithData();
-        Log.d("BEFORE", "setUpEventsNearMeFragmentWithData In SetParsedEventsList");
-        setUpEventsNearMeFragmentWithData();
+
+        //Pretty Sure the following isnt needed. Map populates without it. Dont want to fully Delete yet, Brian
+        //Log.d("BEFORE", "setUpEventsNearMeFragmentWithData In SetParsedEventsList");
+        //setUpEventsNearMeFragmentWithData();
 
         // Currently doesn't work so we're going to stop going down the rabbit hole at this stage
         // Make call to getExtraDetails
