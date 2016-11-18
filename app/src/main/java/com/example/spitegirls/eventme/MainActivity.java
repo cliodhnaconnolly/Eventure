@@ -41,6 +41,12 @@ import static com.facebook.GraphRequest.TAG;
 // How to branch and merge
 // https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
 
+// Link to view database possibly you may need to login or something
+// https://console.firebase.google.com/project/eventure-36efb/database/data/
+
+// How to read and write from database
+// https://firebase.google.com/docs/database/android/read-and-write
+
 public class MainActivity extends AppCompatActivity implements MyAccountFragment.OnItemSelectedListener {
 
     MyAccountFragment accountFragment;
