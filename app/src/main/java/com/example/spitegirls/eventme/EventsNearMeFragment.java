@@ -42,16 +42,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        // Add a marker in UCD and move the camera
-        LatLng UCD = new LatLng(53.3053, -6.2207);
-        LatLng UCDLibrary = new LatLng(53.3068, -6.2230);
-        String snippet = "Event at 2pm, Law Soc Debate";
-        Marker UCDLibraryMarker = mMap.addMarker(new MarkerOptions().position(UCDLibrary).title("UCD Library").snippet(snippet));
-        mMap.addMarker(new MarkerOptions().position(UCD).title("Marker in UCD"));
         mMap.setMinZoomPreference(12);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), 17));
-        //mMap.animateCamera(CameraUpdateFactory.zoomBy(10));
 
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -66,8 +58,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
             return coords;
         }
         Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        String longitude = Double.toString(location.getLongitude());
-        String latitude = Double.toString(location.getLatitude());
         coords = new LatLng(location.getLatitude(), location.getLongitude());
         return coords;
     }
