@@ -2,6 +2,10 @@ package com.example.spitegirls.eventme;
 
 // Class used to store event objects
 public class Event implements java.io.Serializable{
+
+    public Event(){
+        // Used by Firebase
+    }
     public Event(String description, String name, String id, String country, String city, String startTime, String latitude, String longitude) {
         this.description = description;
         this.name = name;

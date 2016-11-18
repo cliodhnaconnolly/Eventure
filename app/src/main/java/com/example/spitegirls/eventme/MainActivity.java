@@ -19,12 +19,19 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.facebook.GraphRequest.TAG;
 
@@ -42,14 +49,45 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     public JSONObject unparsedEventsData;
     public ArrayList<Event> parsedEventsList;
 
+    private DatabaseReference mEventReference;
+    private DatabaseReference mIdReference;
+
+    private boolean gotFBdata = false;
+
+    private int currentId;
+
+    private Long getFreshId(){
+        Long newFreshId = Long.valueOf(currentId + 1);
+        // Current ID should update once the following call is made
+        mEventReference.child("id").setValue(newFreshId);
+        return newFreshId;
+    }
+
+    private void writeNewEvent(Event event) {
+        mEventReference.child("events").child(getFreshId().toString()).setValue(event);
+    }
+
+    private void writeNewEvent(String description, String name, String id, String country, String city, String startTime, String latitude, String longitude) {
+        Event event = new Event(description, name, id, country, city, startTime, latitude, longitude);
+        mEventReference.child("events").child(getFreshId().toString()).setValue(event);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+//        FirebaseDatabase database = FirebaseDatabase.getInstance();
+//        DatabaseReference myREf = database.getReference("message");
+//
+//        myREf.setValue("hello world");
 
-        Log.d("IN ONCREAT", "WORK CHrIST");
+        mEventReference = FirebaseDatabase.getInstance().getReference();
+        mIdReference = FirebaseDatabase.getInstance().getReference();
+
+        // Initialised id with this
+//        mDatabase.child("id").setValue(0);
+
 
         FacebookSdk.sdkInitialize(getApplicationContext());
 
@@ -74,10 +112,13 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                             switch (item.getItemId()) {
                                 case R.id.my_events:
                                     // Checks if data to display is ready
-                                    if(parsedEventsList == null) {
+                                    if(!gotFBdata && parsedEventsList == null) {
                                         transaction.replace(R.id.my_frame, new MyEventsFragment());
                                         transaction.commit();
                                         getEventDetails();
+                                    } else if(!gotFBdata){
+                                        getEventDetails();
+                                        setUpMyEventsFragmentWithData();
                                     } else {
                                         setUpMyEventsFragmentWithData();
                                     }
@@ -90,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                 case R.id.create_event:
                                     transaction.replace(R.id.my_frame, new CreateEventFragment());
                                     transaction.commit();
+                                    pretendingToCreateAnEvent();
                                     break;
                                 case R.id.my_account:
                                     accountFragment = MyAccountFragment.newInstance(name, surname, imageUrl);
@@ -105,6 +147,104 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                     }
                 }
         );
+    }
+
+    // Just for testing database
+    private void pretendingToCreateAnEvent() {
+        String description = "Going to have a big bash to celebrate the birth of the database";
+        String name = "BIG DB BASH!!!";
+        // Currently calling this twice so stahp when for realsies
+        String id = getFreshId().toString();
+        String country = "Ireland";
+        String city = "Dublin";
+        String startTime = "2016-10-15T21:00:00+0100";
+        String latitude = "53.28718458562";
+        String longitude = "-6.2418192273656";
+
+        writeNewEvent(description, name, id, country, city, startTime, latitude, longitude);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // Currently these event listeners are grabbing too much data, want to change this
+        ValueEventListener idListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Get id and update values
+                // dataSnapshot returns a hashmap, eg. {id=0}
+                Log.d("RESULT GOT IS", dataSnapshot.getValue().toString());
+                HashMap idResult  = (HashMap) dataSnapshot.getValue();
+
+                // Why it swaps I do not know
+                Log.d("Result type", idResult.get("id").getClass().toString());
+
+                // Someday I will fix why this fluctuates between Long and String, today is not that day
+                if(idResult.get("id").getClass() == Long.class ){
+                    Long id = (Long) idResult.get("id");
+                    currentId = id.intValue();
+                } else if (idResult.get("id").getClass() == String.class){
+                    int id = Integer.parseInt((String) idResult.get("id"));
+                    currentId = id;
+                } else {
+                    Log.d("ERROR", "failed to figure life out");
+                }
+                Log.d("Current id", "is " + currentId);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting ID failed, log a message
+                Log.w(TAG, "loadID:onCancelled", databaseError.toException());
+            }
+        };
+        mIdReference.addValueEventListener(idListener);
+
+        // There should be a way of retrieving an event object once I figure out how
+        // to set it to events root
+        mEventReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("RESULT EVENT", dataSnapshot.getValue().toString());
+                Log.d("RESULT TYPE", dataSnapshot.getValue().getClass().toString());
+                HashMap results = (HashMap) dataSnapshot.getValue();
+                Log.d("EVENTS TYPE", results.get("events").getClass().toString());
+                // Why there is some null things I have no idea
+                ArrayList events = (ArrayList) results.get("events");
+                Log.d("Events arraylist", events.get(3).getClass().toString());
+                Log.d("Events size", "number" + events.size());
+                for(int i=0; i<events.size(); i++){
+                    if(events.get(i) != null){
+                        HashMap map = (HashMap) events.get(i);
+                        Log.d("map", map.entrySet().toString());
+                        Event event = new Event((String) map.get("description"), (String) map.get("name"),
+                                (String) map.get("id"), (String) map.get("country"), (String) map.get("city"),
+                                (String) map.get("startTime"), (String) map.get("latitude"), (String) map.get("longitude"));
+                        Log.d("NAME IS", event.toString());
+
+                        // Sometimes adds a hideous amount of events
+                        // Will figure out why later
+                        if(parsedEventsList != null) {
+                            parsedEventsList.add(event);
+                        } else {
+                            parsedEventsList = new ArrayList<Event>();
+                            parsedEventsList.add(event);
+                        }
+
+                    }
+                }
+                JSONObject result;
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Getting Event failed, log a message
+                Log.w(TAG, "loadEvent:onCancelled", databaseError.toException());
+            }
+        });
+
     }
 
     public void getEventDetails() {
@@ -179,14 +319,22 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     }
 
     public void setParsedEventsList(ArrayList<Event> eventsList) {
-        parsedEventsList = eventsList;
+        //parsedEventsList = eventsList;
+        if(parsedEventsList != null){
+            parsedEventsList.addAll(eventsList);
+        } else {
+            parsedEventsList = eventsList;
+        }
         Log.d("IN", "SETPARSEDEVENTS LIST");
+        gotFBdata = true;
+
         setUpMyEventsFragmentWithData();
 
         // Currently doesn't work so we're going to stop going down the rabbit hole at this stage
         // Make call to getExtraDetails
         // getExtraEventDetails();
     }
+
 
     @Override
     public void onLogoutItemSelected(String info){
