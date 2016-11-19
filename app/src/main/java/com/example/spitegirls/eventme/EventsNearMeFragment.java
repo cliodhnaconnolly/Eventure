@@ -144,21 +144,25 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     }
 
     private LatLng getCoords() {
-        LatLng coords = null;
-        LocationManager lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
-        if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return coords;
+        LatLng coords = new LatLng(53.3053, -6.2207); //Set default to UCD so the camera has somewhere to go
+        try {
+            LocationManager lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            coords = new LatLng(location.getLatitude(), location.getLongitude());
+
+        }catch (NullPointerException e){
+            Toast.makeText(mContext, "Can't find you :(", Toast.LENGTH_LONG).show();
+        }catch(SecurityException s){
+            Toast.makeText(mContext, "Error with permissions", Toast.LENGTH_LONG).show();
         }
-        Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        coords = new LatLng(location.getLatitude(), location.getLongitude());
         return coords;
     }
 
-    // Not meant to be using this method, deprecated = --marks
+    // LOOK CLIP
     @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
-        mContext = activity;
+    public void onAttach(final Context context) {
+        super.onAttach(context);
+        mContext = context;
     }
 
     @Override
@@ -219,8 +223,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         mLocationRequest.setInterval(20000);
         mLocationRequest.setFastestInterval(10000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-
-       // Toast.makeText(getApplicationContext(), "Connected", Toast.LENGTH_LONG).show();
     }
 
     @Override
