@@ -5,90 +5,115 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:text="TextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="27dp"
-        android:id="@+id/title"
-        android:textSize="24sp"
-        android:layout_margin="16dp" />
-
-    <TextView
-        android:text="TextView"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="31dp"
-        android:id="@+id/description"
-        android:textSize="14sp"
-        android:layout_below="@+id/title"
-        android:layout_alignParentStart="true"
-        android:layout_margin="16dp" />
+        android:id="@+id/relativeLayout">
 
-    <LinearLayout
+        <TextView
+            android:text="TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="27dp"
+            android:id="@+id/title"
+            android:textSize="24sp"
+            android:layout_margin="16dp" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:id="@+id/viewLine"
+        android:layout_margin="8dp"
+        android:layout_below="@+id/relativeLayout"
+        android:background="#ffc5c5c5"/>
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="68dp"
-        android:layout_below="@+id/description"
-        android:layout_centerHorizontal="true"
-        android:orientation="vertical"
-        android:layout_margin="16dp">
+        android:layout_below="@+id/viewLine">
 
-        <TextView
-            android:text="TextView"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/start_time_details"
-            android:visibility="visible"
-            tools:text="Hello" />
+            android:orientation="vertical" >
 
-        <TextView
-            android:text="TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/city_details"
-            android:visibility="visible"
-            tools:text="How" />
+            <TextView
+                android:text="TextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="31dp"
+                android:id="@+id/description"
+                android:textSize="14sp"
+                android:layout_below="@+id/title"
+                android:layout_alignParentStart="true"
+                android:layout_margin="16dp" />
 
-        <TextView
-            android:text="TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/country_details"
-            android:visibility="visible"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="68dp"
+                android:layout_below="@+id/description"
+                android:layout_centerHorizontal="true"
+                android:orientation="vertical"
+                android:layout_margin="16dp">
 
-        <TextView
-            android:text="TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/latitude_details"
-            android:visibility="visible"/>
+                <TextView
+                    android:text="TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/start_time_details"
+                    android:visibility="visible"/>
 
-        <TextView
-            android:text="TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/longitude_details"
-            android:visibility="visible"/>
+                <TextView
+                    android:text="TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/city_details"
+                    android:visibility="visible" />
 
-        <TextView
-            android:text="TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/source_details"
-            android:visibility="visible"/>
+                <TextView
+                    android:text="TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/country_details"
+                    android:visibility="visible"/>
 
-        <ImageView
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:id="@+id/coverPhoto"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_gravity="center_horizontal"
-            android:visibility="visible"/>
+                <TextView
+                    android:text="TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/latitude_details"
+                    android:visibility="visible"/>
 
-    </LinearLayout>
+                <TextView
+                    android:text="TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/longitude_details"
+                    android:visibility="visible"/>
+
+                <TextView
+                    android:text="TextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/source_details"
+                    android:visibility="visible"/>
+
+                <ImageView
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:id="@+id/coverPhoto"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="visible"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
 
 </RelativeLayout>

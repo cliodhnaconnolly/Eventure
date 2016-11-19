@@ -26,6 +26,10 @@
     <string name="error_name">Invalid Event Name</string>
     <string name="error_date_time">Please input a date / time in the future</string>
 
+    <!--My Account Strings-->
+    <string name="text_hello">Hello:</string>
+    <string name="text_log_out">Log Out</string>
+
 
     <string name="no_internet">No connections available</string>
 
