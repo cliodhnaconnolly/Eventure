@@ -24,7 +24,8 @@
             android:value="AIzaSyARE3MaJovIQSAjhFcqvYgktKcDtZKdIE8" />
 
         <activity android:name=".MainActivity"
-            android:label="It's an Eventure, man!"/>
+            android:label="It's an Eventure, man!"
+            android:windowSoftInputMode="adjustNothing"/>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"/>

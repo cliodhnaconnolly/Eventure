@@ -10,11 +10,23 @@
     <string name="title_activity_my_account">MyAccount</string>
 
     <string name="text_welcome">Welcome to EventMe</string>
+
+    <!--Create Event Strings-->
     <string name="text_create_your_event">Create your event...</string>
-    <string name="text_event_name">Event Name</string>
-    <string name="text_location">Location</string>
-    <string name="text_date_time">Date/Time</string>
-    <string name="text_description">Description</string>
+    <string name="text_event_name">Name your event...</string>
+    <string name="text_location">Give it a location...</string>
+    <string name="text_date">Pick a Date</string>
+    <string name="text_time">Pick a Time</string>
+    <string name="text_description">Tell us about your event...</string>
+
+    <string name="text_submit">Submit Event</string>
+    <string name="text_please_note">Please note any event you submit here will be public and viewable by all users of Eventure</string>
+    <string name="error_date">Please input a date</string>
+    <string name="error_time">Please input a time</string>
+    <string name="error_name">Invalid Event Name</string>
+    <string name="error_date_time">Please input a date / time in the future</string>
+
+
     <string name="no_internet">No connections available</string>
 
     <!-- TODO: Remove or change this placeholder text -->

@@ -132,8 +132,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         int currYear = 2016;
         if(Integer.parseInt(year) != currYear){
             return false;
-        }
-        else {
+        } else {
             return true;
         }
     }

@@ -8,10 +8,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -63,14 +65,14 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     private int currentId;
 
-    private Long getFreshId(){
+    public Long getFreshId(){
         Long newFreshId = Long.valueOf(currentId + 1);
         // Current ID should update once the following call is made
         mEventReference.child("id").setValue(newFreshId);
         return newFreshId;
     }
 
-    private void writeNewEvent(Event event) {
+    public void writeNewEvent(Event event) {
         mEventReference.child("events").child(getFreshId().toString()).setValue(event);
     }
 
@@ -268,6 +270,17 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
             }
         });
 
+    }
+
+    // Don't really know why this has to go in here but there ya go
+    public void showDatePickerDialog(View view) {
+        DialogFragment dateFrag = new CreateEventFragment.DatePickerFragment();
+        dateFrag.show(this.getSupportFragmentManager(), "datePicker");
+    }
+
+    public void showTimePickerDialog(View view) {
+        DialogFragment timeFrag = new CreateEventFragment.TimePickerFragment();
+        timeFrag.show(this.getSupportFragmentManager(), "timePicker");
     }
 
     public void getEventDetails() {

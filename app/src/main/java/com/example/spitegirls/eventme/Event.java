@@ -6,7 +6,8 @@ public class Event implements java.io.Serializable{
     public Event(){
         // Used by Firebase
     }
-    public Event(String description, String name, String id, String country, String city, String startTime, String latitude, String longitude) {
+    public Event(String description, String name, String id, String country, String city,
+                 String startTime, String latitude, String longitude) {
         this.description = description;
         this.name = name;
         this.id = id;
