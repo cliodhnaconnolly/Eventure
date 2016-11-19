@@ -35,7 +35,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 
 
-public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        GoogleMap.OnInfoWindowClickListener {
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -53,6 +55,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         }
         return fragment;
     }
+
 //    @Override
 //    public void onCreate(Bundle savedInstanceState) {
 //        super.onCreate(savedInstanceState);
@@ -67,18 +70,23 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         if(bundle.getSerializable("arraylist") != null) {
             eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
         }
+
+        // Add info to marker
+        // https://developers.google.com/maps/documentation/android-api/marker
+        // Info on infoWindowClickListener also on that page
         for(int i = 0; i < eventList.size(); i++){
             Event currEvent = getEvent(i);
-            if(eventCheck(currEvent) == true){
+            if(eventCheck(currEvent)){
                 Log.d("STARTING TO ADD MARKER", currEvent.name);
                 try {
                     Double latitude = Double.parseDouble(currEvent.latitude);
                     Double longitude = Double.parseDouble(currEvent.longitude);
                     LatLng FirstEvent = new LatLng(latitude, longitude);
-                    mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet(currEvent.startTime));
+                    Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet(currEvent.startTime));
+                    marker.setTag(currEvent);
                     Log.d("ADDED MARKER", currEvent.name);
                 }catch(NumberFormatException e){
-
+                    e.printStackTrace();
                 }
             }
             else {
@@ -86,36 +94,36 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
             }
         }
 
-        // The Following Code is the part where I hope to call the Event Fragment.
-        // Currently the bundle being passed contains all the Events.
-        // I need to figure out how to pass a bundle containing only one event.
-        // I tried doing some sort of loop methodology With it earlier but that just broke the code.
-        // Any help is appreciated on it and if any info is needed ask me(Brian)
-
-//            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-//                @Override
-//                public boolean onMarkerClick(Marker arg0) {
-//                    EventDetailsFragment eventFrag = new EventDetailsFragment();
-//                    eventFrag.setArguments(bundle);
-//                    if (arg0.isVisible()) { // if marker source is visible (i.e. marker created)
-//                        Log.d("ENTERED IF STATEMENT", "Clickable Marker");
-//                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-//                        transaction.replace(R.id.my_frame, eventFrag);
-//                        transaction.addToBackStack(null);
-//                        transaction.commit();
-//                        return true;
-//                    }
-//                    Log.d("FAILED IF STATEMENT", "No listener created");
-//                    return false;
-//                }
-//            });
+        mMap.setOnInfoWindowClickListener(this);
         mMap.setMinZoomPreference(10);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), 17));
 
-        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         mMap.setMyLocationEnabled(true);
+    }
+
+    // Called when user clicks a marker info window
+    @Override
+    public void onInfoWindowClick(final Marker marker) {
+        Bundle detailsBundle = new Bundle();
+        detailsBundle.putSerializable("event", (Event) marker.getTag());
+        EventDetailsFragment eventFrag = EventDetailsFragment.newInstance(detailsBundle);
+        if(marker.isVisible()) {    // if marker source is visible (i.e. marker created)
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.my_frame, eventFrag);
+
+            //transaction.addToBackStack(null);   // Since we're in a tab we want to be able to go back internally
+            // BUG ALERT
+            // Ideally we want the user to be able to back to the map but Google has a bug where it counts
+            // this as having multiple map fragments. Below is an article detailing workarounds
+            // I've not implemented them yet but if anyone else wants to try go ahead
+            // http://www.aphex.cx/the_google_maps_api_is_broken_on_android_5_here_s_a_workaround_for_multiple_map_fragments/
+
+            transaction.commit();
+        }
     }
 
     private boolean eventCheck(Event currEvent){
