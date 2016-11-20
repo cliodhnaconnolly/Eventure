@@ -1,9 +1,15 @@
 package com.example.spitegirls.eventme;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.LabeledIntent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +17,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ShareActionProvider;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EventDetailsFragment extends Fragment{
 
@@ -97,8 +106,8 @@ public class EventDetailsFragment extends Fragment{
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-                sharingIntent.setType("text/plain");
+                Resources resources = getResources();
+
                 String shareBody = "I think you might be interested in this event!" +
                         "\n\nEvent Name: " + title.getText().toString() + "\n\nDescription: "
                         + description.getText().toString() + "\nStart Time: "
@@ -106,9 +115,46 @@ public class EventDetailsFragment extends Fragment{
                         latitude.getText().toString() + "\nLongitude: "
                         + longitude.getText().toString() + "\n\n"
                         + "Go to Eventure to find out more!";
-                sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Event you might like!");
-                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
-                startActivity(Intent.createChooser(sharingIntent, "Share via"));
+
+                String shareSubject = "Event you might be interested in! - Eventure";
+
+
+                PackageManager pm = getActivity().getPackageManager();
+                Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                sendIntent.setType("text/plain");
+
+                Intent blankIntent = new Intent();
+                blankIntent.setAction(Intent.ACTION_SEND);
+                Intent openInChooser = Intent.createChooser(blankIntent, "Share via..");
+
+                List<ResolveInfo> resInfo = pm.queryIntentActivities(sendIntent, 0);
+                List<LabeledIntent> intentList = new ArrayList<LabeledIntent>();
+                for (int i = 0; i < resInfo.size(); i++) {
+                    // Making sure only what we want shows up
+                    ResolveInfo resolveInfo = resInfo.get(i);
+                    String packageName = resolveInfo.activityInfo.packageName;
+                    // If you wish to add more options add them below to the if statement if I'm missing any
+                    if(packageName.contains("twitter") || packageName.contains("sms") || packageName.contains("android.gm")
+                            || packageName.contains("email") || packageName.contains("snapchat") || packageName.contains("android")
+                            || packageName.contains("whatsapp") || packageName.contains("viber") || packageName.contains("skype")
+                            || packageName.contains("outlook")) {
+                        Intent intent = new Intent();
+                        intent.setComponent(new ComponentName(packageName, resolveInfo.activityInfo.name));
+                        intent.setAction(Intent.ACTION_SEND);
+                        intent.setType("text/plain");
+                        intent.putExtra(Intent.EXTRA_SUBJECT, shareSubject);
+                        intent.putExtra(Intent.EXTRA_TEXT, shareBody);
+
+                        intentList.add(new LabeledIntent(intent, packageName, resolveInfo.loadLabel(pm), resolveInfo.icon));
+                    }
+                }
+
+                // Converts list with intents to array
+                LabeledIntent[] extraIntents = intentList.toArray( new LabeledIntent[ intentList.size() ]);
+
+                openInChooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, extraIntents);
+                startActivity(openInChooser);
+
             }
         });
     }
