@@ -10,6 +10,18 @@
         android:layout_height="wrap_content"
         android:id="@+id/relativeLayout">
 
+        <!--Bit ugly but we can change later-->
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            app:fabSize="auto"
+            app:srcCompat="@android:drawable/ic_menu_share"
+            android:id="@+id/floatingActionButton"
+            android:layout_alignParentRight="true"
+            android:layout_margin="10dp"
+            app:elevation="4dp" />
+
         <TextView
             android:text="TextView"
             android:layout_width="wrap_content"

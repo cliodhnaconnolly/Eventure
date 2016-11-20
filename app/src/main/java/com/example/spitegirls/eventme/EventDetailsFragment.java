@@ -1,6 +1,8 @@
 package com.example.spitegirls.eventme;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,10 +10,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ShareActionProvider;
 
 public class EventDetailsFragment extends Fragment{
 
     private Event details;
+    private TextView title;
+    private TextView description;
+    private TextView startTime;
+    private TextView latitude;
+    private TextView longitude;
     String source;
 
     public static EventDetailsFragment newInstance(Bundle details) {
@@ -39,12 +47,12 @@ public class EventDetailsFragment extends Fragment{
                 details = (Event) bundle.getSerializable("event");
 
                 // Set up info
-                TextView title = (TextView) view.findViewById(R.id.title);
+                title = (TextView) view.findViewById(R.id.title);
                 title.setText(details.name);
-                TextView description = (TextView) view.findViewById(R.id.description);
+                description = (TextView) view.findViewById(R.id.description);
                 description.setText(details.description);
 
-                TextView startTime = (TextView) view.findViewById(R.id.start_time_details);
+                startTime = (TextView) view.findViewById(R.id.start_time_details);
                 startTime.setText(details.startTime);
 
                 TextView city = (TextView) view.findViewById(R.id.city_details);
@@ -57,12 +65,12 @@ public class EventDetailsFragment extends Fragment{
                     country.setText(details.country);
                 } else { country.setVisibility(View.GONE); }
 
-                TextView latitude = (TextView) view.findViewById(R.id.latitude_details);
+                latitude = (TextView) view.findViewById(R.id.latitude_details);
                 if(!details.latitude.isEmpty()){
                     latitude.setText(details.latitude);
                 } else { latitude.setVisibility(View.GONE); }
 
-                TextView longitude = (TextView) view.findViewById(R.id.longitude_details);
+                longitude = (TextView) view.findViewById(R.id.longitude_details);
                 if(!details.longitude.isEmpty()){
                     longitude.setText(details.longitude);
                 } else { longitude.setVisibility(View.GONE); }
@@ -83,6 +91,26 @@ public class EventDetailsFragment extends Fragment{
                     view.findViewById(R.id.coverPhoto).setVisibility(View.GONE); }
             }
         }
+
+        // FB doesn't work because they're assholes
+        FloatingActionButton button = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                String shareBody = "I think you might be interested in this event!" +
+                        "\n\nEvent Name: " + title.getText().toString() + "\n\nDescription: "
+                        + description.getText().toString() + "\nStart Time: "
+                        + startTime.getText().toString() + "\nLatitude: " +
+                        latitude.getText().toString() + "\nLongitude: "
+                        + longitude.getText().toString() + "\n\n"
+                        + "Go to Eventure to find out more!";
+                sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Event you might like!");
+                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+                startActivity(Intent.createChooser(sharingIntent, "Share via"));
+            }
+        });
     }
 
     @Override
