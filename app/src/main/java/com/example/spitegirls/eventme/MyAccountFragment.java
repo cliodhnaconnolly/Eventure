@@ -1,14 +1,20 @@
 package com.example.spitegirls.eventme;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MyAccountFragment extends Fragment {
 
@@ -79,4 +85,21 @@ public class MyAccountFragment extends Fragment {
         new DownloadImage((ImageView) view.findViewById(R.id.profileImage)).execute(imageUrl);
     }
 
+    // When orientation changes we want to maintain the item in bottom nav
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        BottomNavigationView bottomNavigationView;
+
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
+            bottomNavigationView.getMenu().getItem(3).setChecked(true);
+            Log.d("ORIENTATION LANDSCAPE", "tried");
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
+            bottomNavigationView.getMenu().getItem(3).setChecked(true);
+        }
+    }
 }

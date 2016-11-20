@@ -5,8 +5,10 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.IntegerRes;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.DialogFragment;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -308,6 +310,23 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             } else {
                 timeButton.setText("0" + hourOfDay + ":0" + minute);
             }
+        }
+    }
+
+    // When orientation changes we want to maintain the item in bottom nav
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        BottomNavigationView bottomNavigationView;
+
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
+            bottomNavigationView.getMenu().getItem(2).setChecked(true);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
+            bottomNavigationView.getMenu().getItem(2).setChecked(true);
         }
     }
 }

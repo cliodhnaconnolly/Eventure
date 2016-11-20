@@ -1,6 +1,8 @@
 package com.example.spitegirls.eventme;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -91,6 +93,24 @@ public class MyEventsFragment extends Fragment {
             Log.d("INSTEAD", "IS NULL");
         }
 
+    }
+
+    // When orientation changes we want to maintain the item in bottom nav
+    // Don't really need this cause 0 is default anyways
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        BottomNavigationView bottomNavigationView;
+
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
+            bottomNavigationView.getMenu().getItem(0).setChecked(true);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
+            bottomNavigationView.getMenu().getItem(0).setChecked(true);
+        }
     }
 
 }

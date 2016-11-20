@@ -6,10 +6,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -67,6 +69,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         Bundle bundle = this.getArguments();
+        // Got a null pointer exception here when I went straight to here from my account (no my events)
         if(bundle.getSerializable("arraylist") != null) {
             eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
         }
@@ -247,5 +250,21 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         mapView.onDestroy();
     }
 
+    // When orientation changes we want to maintain the item in bottom nav
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        BottomNavigationView bottomNavigationView;
+
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
+            bottomNavigationView.getMenu().getItem(1).setChecked(true);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
+            bottomNavigationView.getMenu().getItem(1).setChecked(true);
+        }
+    }
 
 }
