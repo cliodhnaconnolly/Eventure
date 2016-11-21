@@ -37,6 +37,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 
 public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback,
@@ -48,6 +49,9 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     private MapView mapView;
     private Context mContext;
     private ArrayList<Event> eventList;
+
+    private static final int LOCATION_IS_NOT_ON = 1;
+    private static final int NO_LOCATION_PERMISSION = 2;
 
     public static EventsNearMeFragment newInstance(Bundle bundle) {
         EventsNearMeFragment fragment = new EventsNearMeFragment();
@@ -101,6 +105,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
         mMap.setOnInfoWindowClickListener(this);
         mMap.setMinZoomPreference(10);
+        // What is this 17 number, please replace with constant
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), 17));
 
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -134,7 +139,10 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     private boolean eventCheck(Event currEvent){
         String year = currEvent.startTime.substring(0, 4);
         Log.d("YEAR", year);
-        int currYear = 2016;
+
+        Calendar myCal = Calendar.getInstance();
+        int currYear = myCal.get(Calendar.YEAR);
+
         if(Integer.parseInt(year) != currYear){
             return false;
         } else {
@@ -155,15 +163,14 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
             coords = new LatLng(location.getLatitude(), location.getLongitude());
 
         }catch (NullPointerException e){
-            checkGPS(1);
+            checkGPS(LOCATION_IS_NOT_ON);
         }catch(SecurityException s){
-            checkGPS(2);
+            checkGPS(NO_LOCATION_PERMISSION);
         }
 
         return coords;
     }
 
-    // LOOK CLIP
     @Override
     public void onAttach(final Context context) {
         super.onAttach(context);
@@ -179,7 +186,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        checkGPS(1);
+        checkGPS(LOCATION_IS_NOT_ON);
 
         View view = inflater.inflate(R.layout.fragment_events_near_me, container, false);
 
@@ -201,7 +208,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     private void checkGPS(int check) {
         LocationManager manager = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
-        if (check == 1){
+        if (check == LOCATION_IS_NOT_ON){
             if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 final AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
                 alertDialog.setMessage("GPS doesn't seem to be on. You can still view the map but your location will not be detected")
@@ -224,7 +231,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
             }
         }
 
-        else if( check ==2){
+        else if( check == NO_LOCATION_PERMISSION){
             final AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
             alertDialog.setMessage("App needs permission before displaying Events Nearby")
                     .setCancelable(false)
