@@ -99,7 +99,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
         mMap.setOnInfoWindowClickListener(this);
         mMap.setMinZoomPreference(10);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), 17));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), 17));
 
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
