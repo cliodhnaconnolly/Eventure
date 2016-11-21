@@ -4,10 +4,13 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -49,9 +52,18 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         checkInternetConnection();
+        Log.d("IN LOG ACTIVITY", "show meh");
 
         FacebookSdk.sdkInitialize(getApplicationContext());
         super.onCreate(savedInstanceState);
+
+        // Check if user has previously selected an alternate theme
+        if(checkThemePref()){
+            setTheme(R.style.OriginalAppTheme);
+        } else {
+            setTheme(R.style.AppTheme);
+        }
+
         setContentView(R.layout.activity_login);
 
         callbackManager = CallbackManager.Factory.create();
@@ -103,7 +115,6 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-
         super.onPause();
     }
 
@@ -120,6 +131,13 @@ public class LoginActivity extends AppCompatActivity {
         //Facebook login
         callbackManager.onActivityResult(requestCode, responseCode, intent);
 
+    }
+
+    // Checks locally stored preferences for decision about themes
+    private boolean checkThemePref(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        boolean pref = sharedPreferences.getBoolean("alternateTheme", false);
+        return pref;
     }
 
     private void nextActivity(Profile profile){

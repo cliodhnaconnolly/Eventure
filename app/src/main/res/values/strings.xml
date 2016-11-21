@@ -29,6 +29,7 @@
     <!--My Account Strings-->
     <string name="text_hello">Hello:</string>
     <string name="text_log_out">Log Out</string>
+    <string name="text_switch">Change Theme Color</string>
 
 
     <string name="no_internet">No connections available</string>

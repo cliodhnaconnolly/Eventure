@@ -2,10 +2,12 @@ package com.example.spitegirls.eventme;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.DialogFragment;
@@ -32,6 +34,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,26 +68,19 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     private int currentId;
 
-    public Long getFreshId(){
-        Long newFreshId = Long.valueOf(currentId + 1);
-        // Current ID should update once the following call is made
-        mEventReference.child("id").setValue(newFreshId);
-        return newFreshId;
-    }
-
-    public void writeNewEvent(Event event) {
-        mEventReference.child("events").child(getFreshId().toString()).setValue(event);
-    }
-
-    private void writeNewEvent(String description, String name, String id, String country, String city, String startTime, String latitude, String longitude) {
-        Event event = new Event(description, name, id, country, city, startTime, latitude, longitude);
-        mEventReference.child("events").child(getFreshId().toString()).setValue(event);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Check if user has previously selected an alternate theme
+        if(checkThemePref()){
+            setTheme(R.style.OriginalAppTheme);
+        } else {
+            setTheme(R.style.AppTheme);
+        }
+
         setContentView(R.layout.activity_main);
+
 
 //        FirebaseDatabase database = FirebaseDatabase.getInstance();
 //        DatabaseReference myREf = database.getReference("message");
@@ -166,21 +162,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                     }
                 }
         );
-    }
-
-    // Just for testing database
-    private void pretendingToCreateAnEvent() {
-        String description = "Going to have a big bash to celebrate the birth of the database";
-        String name = "BIG DB BASH!!!";
-        // Currently calling this twice so stahp when for realsies
-        String id = getFreshId().toString();
-        String country = "Ireland";
-        String city = "Dublin";
-        String startTime = "2016-10-15T21:00:00+0100";
-        String latitude = "53.28718458562";
-        String longitude = "-6.2418192273656";
-
-        writeNewEvent(description, name, id, country, city, startTime, latitude, longitude);
     }
 
     @Override
@@ -270,6 +251,44 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
             }
         });
 
+    }
+
+    public Long getFreshId(){
+        Long newFreshId = Long.valueOf(currentId + 1);
+        // Current ID should update once the following call is made
+        mEventReference.child("id").setValue(newFreshId);
+        return newFreshId;
+    }
+
+    public void writeNewEvent(Event event) {
+        mEventReference.child("events").child(getFreshId().toString()).setValue(event);
+    }
+
+    private void writeNewEvent(String description, String name, String id, String country, String city, String startTime, String latitude, String longitude) {
+        Event event = new Event(description, name, id, country, city, startTime, latitude, longitude);
+        mEventReference.child("events").child(getFreshId().toString()).setValue(event);
+    }
+
+    // Checks locally stored preferences for decision about themes
+    private boolean checkThemePref(){
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        boolean pref = sharedPreferences.getBoolean("alternateTheme", false);
+        return pref;
+    }
+
+    // Just for testing database
+    private void pretendingToCreateAnEvent() {
+        String description = "Going to have a big bash to celebrate the birth of the database";
+        String name = "BIG DB BASH!!!";
+        // Currently calling this twice so stahp when for realsies
+        String id = getFreshId().toString();
+        String country = "Ireland";
+        String city = "Dublin";
+        String startTime = "2016-10-15T21:00:00+0100";
+        String latitude = "53.28718458562";
+        String longitude = "-6.2418192273656";
+
+        writeNewEvent(description, name, id, country, city, startTime, latitude, longitude);
     }
 
     // Don't really know why this has to go in here but there ya go

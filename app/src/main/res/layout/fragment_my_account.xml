@@ -52,6 +52,16 @@
                 android:layout_centerHorizontal="true"
                 android:elevation="0dp"
                 android:paddingBottom="10dp"/>
+
+            <Switch
+                android:text="@string/text_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/switch1"
+                android:layout_below="@+id/logout_button"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="8dp"/>
+
         </RelativeLayout>
     </ScrollView>
 
