@@ -9,7 +9,9 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -146,17 +148,18 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     }
 
     private LatLng getCoords() {
-        LatLng coords = new LatLng(53.3053, -6.2207); //Set default to UCD so the camera has somewhere to go
+        LatLng coords = new LatLng(53.3053, -6.2207); //Set default to UCD so the camera has somewhere to go/
         try {
             LocationManager lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
             Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             coords = new LatLng(location.getLatitude(), location.getLongitude());
 
         }catch (NullPointerException e){
-            Toast.makeText(mContext, "Can't find you :(", Toast.LENGTH_LONG).show();
+            checkGPS(1);
         }catch(SecurityException s){
-            Toast.makeText(mContext, "Error with permissions", Toast.LENGTH_LONG).show();
+            checkGPS(2);
         }
+
         return coords;
     }
 
@@ -176,7 +179,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        checkGPS();
+        checkGPS(1);
 
         View view = inflater.inflate(R.layout.fragment_events_near_me, container, false);
 
@@ -196,26 +199,57 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         return view;
     }
 
-    private void checkGPS(){
+    private void checkGPS(int check) {
         LocationManager manager = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
-        if ( !manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+        if (check == 1){
+            if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+                alertDialog.setMessage("GPS doesn't seem to be on. You can still view the map but your location will not be detected")
+                        .setCancelable(false)
+                        .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+                            public void onClick(final DialogInterface dialog, final int id) {
+                                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                                dialog.cancel();
+                                return;
+                            }
+                        })
+                        .setNegativeButton("Continue", new DialogInterface.OnClickListener() {
+                            public void onClick(final DialogInterface dialog, final int id) {
+                                dialog.cancel();
+                                return;
+                            }
+                        });
+                final AlertDialog alertMessage = alertDialog.create();
+                alertMessage.show();
+            }
+        }
+
+        else if( check ==2){
             final AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-            alertDialog.setMessage("GPS doesn't seem to be on. You can still view the map but your location will not be detected")
+            alertDialog.setMessage("App needs permission before displaying Events Nearby")
                     .setCancelable(false)
-                    .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
                         public void onClick(final DialogInterface dialog, final int id) {
-                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                            return; //Dialog box will disappear after user comes back for settings
-                        }
-                    })
-                    .setNegativeButton("Continue", new DialogInterface.OnClickListener() {
-                        public void onClick(final DialogInterface dialog, final int id) {
+                            if (mContext == null) {
+                                return;
+                            }
+                            final Intent intent = new Intent();
+                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            intent.addCategory(Intent.CATEGORY_DEFAULT);
+                            intent.setData(Uri.parse("package:" + mContext.getPackageName()));
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                            mContext.startActivity(intent);
+
                             dialog.cancel();
                         }
                     });
+
             final AlertDialog alertMessage = alertDialog.create();
             alertMessage.show();
         }
+
     }
 
     @Override
