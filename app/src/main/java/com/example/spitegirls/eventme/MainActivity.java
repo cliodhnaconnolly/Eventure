@@ -34,12 +34,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Map;
 
 import static com.facebook.GraphRequest.TAG;
-import static com.google.android.gms.analytics.internal.zzy.co;
 
 // This is the most useful thing I've found RE:fragments
 // https://guides.codepath.com/android/Creating-and-Using-Fragments#fragment-lifecycle
@@ -103,17 +100,26 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         // Load My Events Screen from the get-go
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        if(combinedEvents == null) {
-            transaction.replace(R.id.my_frame, new MyEventsFragment());
-            transaction.commit();
-            Log.d("Call from if main", "ture");
-            getEventDetails();
-            MY_EVENTS_REQUESTED = true;
-            NEARBY_EVENTS_REQUESTED = false;
-            // This won't be called with data due to Async tasks
-            //setUpMyEventsFragmentWithData();
+        // Problem with this is that it's not gonna undo once internet is on.
+        if(isNetworkAvailable()) {
+            if (combinedEvents == null) {
+                transaction.replace(R.id.my_frame, new MyEventsFragment());
+                transaction.commit();
+                Log.d("Call from if main", "ture");
+                getEventDetails();
+                MY_EVENTS_REQUESTED = true;
+                NEARBY_EVENTS_REQUESTED = false;
+                // This won't be called with data due to Async tasks
+                //setUpMyEventsFragmentWithData();
+            } else {
+                setUpMyEventsFragmentWithData();
+            }
         } else {
-            setUpMyEventsFragmentWithData();
+            Bundle bundle = new Bundle();
+            bundle.putInt("appearance", ErrorFragment.NO_INTERNET_APPEARANCE);
+            ErrorFragment fragment = ErrorFragment.newInstance(bundle);
+            transaction.replace(R.id.my_frame, fragment);
+            transaction.commit();
         }
 
         bottomBar.setOnNavigationItemSelectedListener(
@@ -162,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                     break;
                             }
                         } else {
-                            transaction.replace(R.id.my_frame, new NoInternetFragment());
+                            transaction.replace(R.id.my_frame, new ErrorFragment());
                             transaction.commit();
                         }
                         return false;
