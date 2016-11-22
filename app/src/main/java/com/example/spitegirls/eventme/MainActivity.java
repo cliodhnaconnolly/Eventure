@@ -536,6 +536,12 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                     longitude = "";
                                 }
                             }
+                            else {
+                                country = "";
+                                city = "";
+                                latitude = "";
+                                longitude = "";
+                            }
                         }
 
                         eventsList.add(new Event(description, name, id, country, city, startTime, latitude, longitude));

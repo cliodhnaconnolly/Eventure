@@ -77,7 +77,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         // https://developers.google.com/maps/documentation/android-api/marker
         // Info on infoWindowClickListener also on that page
         for(int i = 0; i < eventList.size(); i++){
-            Event currEvent = getEvent(i);
+            Event currEvent = eventList.get(i);
             if(eventCheck(currEvent)){
                 Log.d("STARTING TO ADD MARKER", currEvent.name);
                 try {
@@ -97,9 +97,10 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         }
 
         mMap.setOnInfoWindowClickListener(this);
-        mMap.setMinZoomPreference(10);
-        // What is this 17 number, please replace with constant
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), 17));
+        int minZoomAtCityLevel = 10;
+        int zoomToStreetLevel = 17;
+        mMap.setMinZoomPreference(minZoomAtCityLevel);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), zoomToStreetLevel));
 
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -144,11 +145,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         }
     }
 
-    // Can we get event from inside loop instead?
-    private Event getEvent(int i){
-        Event currEvent = eventList.get(i);
-        return currEvent;
-    }
 
     private LatLng getCoords() {
         LatLng coords = new LatLng(53.3053, -6.2207); //Set default to UCD so the camera has somewhere to go/
