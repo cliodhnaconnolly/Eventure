@@ -6,6 +6,8 @@ import android.app.Fragment;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.IntegerRes;
 import android.support.design.widget.BottomNavigationView;
@@ -29,10 +31,14 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.model.LatLng;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class CreateEventFragment extends android.support.v4.app.Fragment {
@@ -62,6 +68,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     private EditText name;
     private EditText description;
     private EditText location;
+    private Place place;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -111,16 +118,15 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)getActivity().
                 getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener(){
             @Override
-            public void onPlaceSelected(Place place) {
-                // TODO: Get info about the selected place.
+            public void onPlaceSelected(Place selectedPlace) {
+                place = selectedPlace;
                 Log.i("TAG", "Place: " + place.getName());
             }
-
             @Override
             public void onError(Status status) {
-                // TODO: Handle the error.
+                place = null;
                 Log.i("TAG", "An error occurred: " + status);
             }
         });
@@ -167,13 +173,13 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
                 if(isValidName(eventName) && isValidDate(date) && isValidTime(time) &&
                         isInFuture(date, time)) {
-                    Event event = createEvent(eventName, location.getText().toString(), description.getText().toString(),
+                    Event event = createEvent(eventName, place, description.getText().toString(),
                             parseDateTime(date, time));
                     ((MainActivity) getActivity()).writeNewEvent(event);
 
-                    // Resets fields
-                    name.setText(getString(R.string.text_event_name));
-                    location.setText(getString(R.string.text_location));
+                    // Resets fields I (Brian) broke this somehow. Only resets when you reopen fragment now.
+                    //name.setText(getString(R.string.text_event_name));
+                    //location.setText(getString(R.string.text_location));
                     dateButton.setText(getString(R.string.text_date));
                     timeButton.setText(getString(R.string.text_time));
                     description.setText(getString(R.string.text_description));
@@ -183,12 +189,36 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         });
     }
 
-    private Event createEvent(String name, String location, String description, Calendar date){
-        // Must deal with Location later but for now setting it to be UCD Library
-        String country = "Ireland";
-        String city = "Dublin";
-        String latitude = "53.307040";
-        String longitude = "-6.223026";
+    private Event createEvent(String name, Place place, String description, Calendar date){
+        String country = "";
+        String city = "";
+        String latitude = "";
+        String longitude = "";
+        if (place != null) {
+            //CharSequence placeName = place.getName(); This can be used for the name when Event is sorted to have name
+            //placeName.toString();
+            LatLng eventLatLng = place.getLatLng();
+            latitude = Double.toString(eventLatLng.latitude);
+            longitude = Double.toString(eventLatLng.longitude);
+            Geocoder geocoder;
+            List<Address> addresses;
+            geocoder = new Geocoder(getContext(), Locale.getDefault());
+            try {
+                addresses = geocoder.getFromLocation(eventLatLng.latitude, eventLatLng.longitude, 1);
+            } catch (IOException e) {
+                addresses = null;
+                e.printStackTrace();
+            }
+
+            if(addresses != null) {
+                city = addresses.get(0).getLocality();
+                country = addresses.get(0).getCountryName();
+            }
+            else {
+                city = "";
+                country = "";
+            }
+        }
 
         // Making the calendar format look more familiar
         SimpleDateFormat simpleDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");

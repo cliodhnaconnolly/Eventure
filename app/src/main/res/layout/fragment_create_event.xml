@@ -44,7 +44,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:text="@string/text_location"
+                android:hint="@string/text_location"
                 android:layout_below="@+id/editTextEventName"
                 android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
                 tools:layout="@layout/place_autocomplete_fragment" />
