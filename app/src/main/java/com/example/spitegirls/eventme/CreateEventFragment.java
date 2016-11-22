@@ -25,6 +25,11 @@ import android.widget.RelativeLayout;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -72,7 +77,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         outerLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
-                Log.d("Relative Layouut", "IVE BEEN TOUCHED");
+                Log.d("Relative Layouut 1", "IVE BEEN TOUCHED");
                 hideSoftKeyboard(view);
                 return false;
             }
@@ -82,7 +87,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         innerLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
-                Log.d("Relative Layouut", "IVE BEEN TOUCHED");
+                Log.d("Relative Layouut 2", "IVE BEEN TOUCHED");
                 hideSoftKeyboard(view);
                 return false;
             }
@@ -103,7 +108,24 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         timeButton = (Button) view.findViewById(R.id.buttonTime);
         name = (EditText) view.findViewById(R.id.editTextEventName);
         description = (EditText) view.findViewById(R.id.editTextDescription);
-        location = (EditText) view.findViewById(R.id.editTextLocation);
+
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)getActivity().
+                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                // TODO: Get info about the selected place.
+                Log.i("TAG", "Place: " + place.getName());
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i("TAG", "An error occurred: " + status);
+            }
+        });
+
+//        location = (EditText) view.findViewById(R.id.editTextLocation);
 
         view.findViewById(R.id.buttonSubmit).setOnClickListener(new View.OnClickListener() {
             @Override
