@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.facebook.GraphRequest.TAG;
+import static com.google.android.gms.analytics.internal.zzy.co;
 
 // This is the most useful thing I've found RE:fragments
 // https://guides.codepath.com/android/Creating-and-Using-Fragments#fragment-lifecycle
@@ -61,12 +62,16 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     public JSONObject unparsedEventsData;
     public ArrayList<Event> parsedEventsList;
 
+    private ArrayList<Event> databaseEvents;
+    private ArrayList<Event> combinedEvents;
+
     private DatabaseReference mEventReference;
     private DatabaseReference mIdReference;
 
-    private boolean gotFBdata = false;
-
     private int currentId;
+
+    private static boolean MY_EVENTS_REQUESTED = false;
+    private static boolean NEARBY_EVENTS_REQUESTED = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,31 +86,35 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
         setContentView(R.layout.activity_main);
 
-
-//        FirebaseDatabase database = FirebaseDatabase.getInstance();
-//        DatabaseReference myREf = database.getReference("message");
-//
-//        myREf.setValue("hello world");
-
+        // Sets up database references
         mEventReference = FirebaseDatabase.getInstance().getReference();
         mIdReference = FirebaseDatabase.getInstance().getReference();
-
-        // Initialised id with this
-//        mDatabase.child("id").setValue(0);
-
 
         FacebookSdk.sdkInitialize(getApplicationContext());
 
         final Bundle inBundle = getIntent().getExtras();
-        final String name = inBundle.get("name").toString();
-        final String surname = inBundle.get("surname").toString();
-        final String imageUrl = inBundle.get("imageUrl").toString();
 
         // Behaviour should match official Google guidelines
         // https://material.google.com/components/bottom-navigation.html#bottom-navigation-behavior
 
         BottomNavigationView bottomBar = (BottomNavigationView)
                 findViewById(R.id.bottom_navigation);
+
+        // Load My Events Screen from the get-go
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        if(combinedEvents == null) {
+            transaction.replace(R.id.my_frame, new MyEventsFragment());
+            transaction.commit();
+            Log.d("Call from if main", "ture");
+            getEventDetails();
+            MY_EVENTS_REQUESTED = true;
+            NEARBY_EVENTS_REQUESTED = false;
+            // This won't be called with data due to Async tasks
+            //setUpMyEventsFragmentWithData();
+        } else {
+            setUpMyEventsFragmentWithData();
+        }
 
         bottomBar.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -117,13 +126,13 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                             switch (item.getItemId()) {
                                 case R.id.my_events:
                                     // Checks if data to display is ready
-                                    if(!gotFBdata && parsedEventsList == null) {
+                                    if(combinedEvents == null) {
                                         transaction.replace(R.id.my_frame, new MyEventsFragment());
                                         transaction.commit();
                                         getEventDetails();
-                                    } else if(!gotFBdata){
-                                        getEventDetails();
-                                        setUpMyEventsFragmentWithData();
+                                        MY_EVENTS_REQUESTED = true;
+                                        NEARBY_EVENTS_REQUESTED = false;
+//                                        setUpMyEventsFragmentWithData();
                                     } else {
                                         setUpMyEventsFragmentWithData();
                                     }
@@ -131,13 +140,13 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                     break;
                                 case R.id.events_near_me:
                                     //Makes sure data is pulled in case they go to map first. Sets up events for events near me fragment.
-                                    if(!gotFBdata && parsedEventsList == null) {
+                                    if(combinedEvents == null) {
                                         transaction.replace(R.id.my_frame, new EventsNearMeFragment());
                                         transaction.commit();
                                         getEventDetails();
-                                    } else if(!gotFBdata){
-                                        getEventDetails();
-                                        setUpEventsNearMeFragmentWithData();
+                                        NEARBY_EVENTS_REQUESTED = true;
+                                        MY_EVENTS_REQUESTED = false;
+//                                        setUpEventsNearMeFragmentWithData();
                                     } else {
                                         setUpEventsNearMeFragmentWithData();
                                     }
@@ -145,8 +154,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                 case R.id.create_event:
                                     transaction.replace(R.id.my_frame, new CreateEventFragment());
                                     transaction.commit();
-                                    // Disabling for the moment because we're spazzin the db
-                                    //pretendingToCreateAnEvent();
                                     break;
                                 case R.id.my_account:
                                     accountFragment = MyAccountFragment.newInstance(inBundle);
@@ -169,6 +176,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         super.onStart();
 
         // Currently these event listeners are grabbing too much data, want to change this
+
+        // Gets current id value from DB
         ValueEventListener idListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -201,46 +210,41 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         };
         mIdReference.addValueEventListener(idListener);
 
-        // Trying to figure out why there is duplication sometimes
-        if(parsedEventsList != null)
-            Log.d("ParsedEventsList was", "size " + parsedEventsList.size());
-        else
-            Log.d("ParsedEventsList was", " null" );
-
-        // There should be a way of retrieving an event object once I figure out how
-        // to set it to events root
+        // Gets current events from DB
         mEventReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("RESULT EVENT", dataSnapshot.getValue().toString());
-                Log.d("RESULT TYPE", dataSnapshot.getValue().getClass().toString());
+//                Log.d("RESULT EVENT", dataSnapshot.getValue().toString());
+//                Log.d("RESULT TYPE", dataSnapshot.getValue().getClass().toString());
                 HashMap results = (HashMap) dataSnapshot.getValue();
-                Log.d("EVENTS TYPE", results.get("events").getClass().toString());
+//                Log.d("EVENTS TYPE", results.get("events").getClass().toString());
+
                 // Why there is some null things I have no idea
                 ArrayList events = (ArrayList) results.get("events");
-                Log.d("Events arraylist", events.get(3).getClass().toString());
-                Log.d("Events size", "number" + events.size());
+//                Log.d("Events arraylist", events.get(3).getClass().toString());
+//                Log.d("Events size", "number" + events.size());
                 for(int i=0; i<events.size(); i++){
                     if(events.get(i) != null){
                         HashMap map = (HashMap) events.get(i);
-                        Log.d("map", map.entrySet().toString());
+//                        Log.d("map", map.entrySet().toString());
                         Event event = new Event((String) map.get("description"), (String) map.get("name"),
                                 (String) map.get("id"), (String) map.get("country"), (String) map.get("city"),
                                 (String) map.get("startTime"), (String) map.get("latitude"), (String) map.get("longitude"));
-                        Log.d("NAME IS", event.toString());
+//                        Log.d("NAME IS", event.toString());
 
-                        // Sometimes adds a hideous amount of events
-                        // Will figure out why later
-                        if(parsedEventsList != null) {
-                            parsedEventsList.add(event);
-                        } else {
-                            parsedEventsList = new ArrayList<Event>();
-                            parsedEventsList.add(event);
+                        // Check to try reduce duplications
+                        if(databaseEvents == null || databaseEvents.size() == events.size()){
+                            databaseEvents = new ArrayList<Event>();
                         }
+                        databaseEvents.add(event);
 
                     }
                 }
-                Log.d("ParsedEventsList is", "size" + parsedEventsList.size());
+                Log.d("FINISHED", "retrieving db events");
+                Log.d("DatabaseEvents is", "size" + databaseEvents.size());
+
+                // Because it usually takes the db longer they now get the power
+                setCombinedEvents();
 
             }
 
@@ -276,22 +280,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         return pref;
     }
 
-    // Just for testing database
-    private void pretendingToCreateAnEvent() {
-        String description = "Going to have a big bash to celebrate the birth of the database";
-        String name = "BIG DB BASH!!!";
-        // Currently calling this twice so stahp when for realsies
-        String id = getFreshId().toString();
-        String country = "Ireland";
-        String city = "Dublin";
-        String startTime = "2016-10-15T21:00:00+0100";
-        String latitude = "53.28718458562";
-        String longitude = "-6.2418192273656";
-
-        writeNewEvent(description, name, id, country, city, startTime, latitude, longitude);
-    }
-
-    // Don't really know why this has to go in here but there ya go
     public void showDatePickerDialog(View view) {
         DialogFragment dateFrag = new CreateEventFragment.DatePickerFragment();
         dateFrag.show(this.getSupportFragmentManager(), "datePicker");
@@ -302,6 +290,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         timeFrag.show(this.getSupportFragmentManager(), "timePicker");
     }
 
+    // Gets generic events details from Facebook
     public void getEventDetails() {
         // May need to make this wait for a bit
         GraphRequest request = GraphRequest.newMeRequest(
@@ -322,6 +311,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     }
 
+    // Gets details like Cover Photo from Events from Facebook
     private void getExtraEventDetails() {
         Bundle bundle = new Bundle();
         // Add extra fields to this bundle of shit you want to receive
@@ -357,18 +347,19 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     }
 
     private void setUpMyEventsFragmentWithData() {
+        Log.d("SETUPMYEVENTS", "Started");
         Bundle args = new Bundle();
-        args.putSerializable("arraylist", parsedEventsList);
+        args.putSerializable("arraylist", combinedEvents);
         eventsFragment = MyEventsFragment.newInstance(args);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.my_frame, eventsFragment);
         transaction.commit();
-        Log.d("FINISHED", "setUpMyEventsFragmetnWithData");
+        Log.d("FINISHED", "setUpMyEventsFragmentWithData");
     }
 
     private void setUpEventsNearMeFragmentWithData(){
         Bundle args = new Bundle();
-        args.putSerializable("arraylist", parsedEventsList);
+        args.putSerializable("arraylist", combinedEvents);
         eventsNearFragment = EventsNearMeFragment.newInstance(args);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.my_frame, eventsNearFragment);
@@ -391,9 +382,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
             parsedEventsList = eventsList;
         }
         Log.d("IN", "SETPARSEDEVENTS LIST");
-        gotFBdata = true;
 
-        setUpMyEventsFragmentWithData();
+//        setUpMyEventsFragmentWithData();
 
         //Pretty Sure the following isnt needed. Map populates without it. Dont want to fully Delete yet, Brian
         //Log.d("BEFORE", "setUpEventsNearMeFragmentWithData In SetParsedEventsList");
@@ -404,6 +394,34 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         // getExtraEventDetails();
     }
 
+    private void setCombinedEvents(){
+        Log.d("IN COMBINED", "start");
+        // Replacing entirity of this each time this is called
+        // Updating events with current knowledge
+        // Would be nicer to append probably but not right now
+        combinedEvents = new ArrayList<Event>();
+
+        if(databaseEvents != null) {
+            combinedEvents.addAll(databaseEvents);
+        }
+
+        if(parsedEventsList != null) {
+            combinedEvents.addAll(parsedEventsList);
+        }
+
+        // Sort events here by time or something
+
+        // Because we're only sure we have events now I get to use my icky global variables
+        // Possibly set up listners or something?
+        if(MY_EVENTS_REQUESTED){
+            setUpMyEventsFragmentWithData();
+            MY_EVENTS_REQUESTED = false;
+        } else if(NEARBY_EVENTS_REQUESTED){
+            setUpEventsNearMeFragmentWithData();
+            NEARBY_EVENTS_REQUESTED = false;
+        }
+
+    }
 
     @Override
     public void onLogoutItemSelected(String info){

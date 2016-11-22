@@ -20,7 +20,6 @@ import java.util.ArrayList;
 public class MyEventsFragment extends Fragment {
 
     private ListView listView;
-    private TextView test;
     public ProgressBar spinner;
     private ArrayList<Event> eventList;
 
@@ -50,7 +49,6 @@ public class MyEventsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_events, container, false);
         listView = (ListView) view.findViewById(R.id.list);
-        test = (TextView) view.findViewById(R.id.test_my_events);
         spinner = (ProgressBar) view.findViewById(R.id.spinner);
         return view;
     }
@@ -65,7 +63,6 @@ public class MyEventsFragment extends Fragment {
 
                 CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, eventList);
                 listView.setAdapter(adapter);
-                test.setVisibility(TextView.INVISIBLE);
                 spinner.setVisibility(View.INVISIBLE);
 
                 // Adding functionality for user clicks
