@@ -65,13 +65,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     }
 
 //    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        eventList = new ArrayList<Event>();
-//    }
-//
-
-//    @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         Bundle bundle = this.getArguments();
@@ -136,6 +129,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         }
     }
 
+    // Checks year of event to see should it show up on map
     private boolean eventCheck(Event currEvent){
         String year = currEvent.startTime.substring(0, 4);
         Log.d("YEAR", year);
@@ -150,6 +144,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         }
     }
 
+    // Can we get event from inside loop instead?
     private Event getEvent(int i){
         Event currEvent = eventList.get(i);
         return currEvent;
@@ -259,6 +254,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     }
 
+    // Do the following methods need to call super? No?
     @Override
     public void onConnected(Bundle connectionHint) {
 
@@ -284,11 +280,24 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         super.onResume();
     }
 
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         mapView.onDestroy();
+    }
+
+    // Trying to get rid of null array exception
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    // Trying to get rid of null array exception
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
     }
 
     // When orientation changes we want to maintain the item in bottom nav
