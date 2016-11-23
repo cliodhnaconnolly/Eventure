@@ -52,6 +52,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     private static final int LOCATION_IS_NOT_ON = 1;
     private static final int NO_LOCATION_PERMISSION = 2;
+    private static final int MIN_ZOOM_AT_CITY_LEVEL = 10;
+    private static final int ZOOM_TO_STREET_LEVEL = 17;
 
     public static EventsNearMeFragment newInstance(Bundle bundle) {
         EventsNearMeFragment fragment = new EventsNearMeFragment();
@@ -112,10 +114,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         }
 
         mMap.setOnInfoWindowClickListener(this);
-        int minZoomAtCityLevel = 10;
-        int zoomToStreetLevel = 17;
-        mMap.setMinZoomPreference(minZoomAtCityLevel);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), zoomToStreetLevel));
+        mMap.setMinZoomPreference(MIN_ZOOM_AT_CITY_LEVEL);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), ZOOM_TO_STREET_LEVEL));
 
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
