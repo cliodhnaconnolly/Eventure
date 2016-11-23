@@ -51,9 +51,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
     }
 
-//    private Integer year;
-//    private Integer month;
-//    private Integer day;
     public Calendar date;
     public Calendar dateAndTime;
     public static Button dateButton;
@@ -67,7 +64,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
     private EditText name;
     private EditText description;
-    private EditText location;
+    private PlaceAutocompleteFragment autocompleteFragment;
     private Place place;
 
     @Override
@@ -80,11 +77,11 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        // We want to hide the keyboard when the user selects somewhere else on the screen
         outerLayout = (RelativeLayout) view.findViewById(R.id.outerRelative);
         outerLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
-                Log.d("Relative Layouut 1", "IVE BEEN TOUCHED");
                 hideSoftKeyboard(view);
                 return false;
             }
@@ -94,7 +91,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         innerLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
-                Log.d("Relative Layouut 2", "IVE BEEN TOUCHED");
                 hideSoftKeyboard(view);
                 return false;
             }
@@ -105,7 +101,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
             @Override
             public boolean onTouch(View view, MotionEvent event) {
-                Log.d("ButtonLayout", "IVE BEEN TOUCHED");
                 hideSoftKeyboard(view);
                 return false;
             }
@@ -116,8 +111,12 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         name = (EditText) view.findViewById(R.id.editTextEventName);
         description = (EditText) view.findViewById(R.id.editTextDescription);
 
-        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)getActivity().
+        autocompleteFragment = (PlaceAutocompleteFragment) getActivity().
                 getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+
+        autocompleteFragment.setText("");
+        autocompleteFragment.setHint(getString(R.string.text_location));
+
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener(){
             @Override
             public void onPlaceSelected(Place selectedPlace) {
@@ -131,7 +130,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             }
         });
 
-//        location = (EditText) view.findViewById(R.id.editTextLocation);
 
         view.findViewById(R.id.buttonSubmit).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,12 +138,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                 if(!isValidName(eventName)) {
                     name.setError(getString(R.string.error_name));
                 }
-
-                // Can't think of any validators for description
-//                final String eventDescription = description.getText().toString();
-//                if(!isValidDescription(eventDescription)) {
-//                    description.setError("Invalid Description");
-//                }
 
                 final String date = dateButton.getText().toString();
                 if(!isValidDate(date)) {
@@ -171,18 +163,24 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                             Toast.LENGTH_LONG).show();
                 }
 
+                // If the data given is good continue with creation of event
                 if(isValidName(eventName) && isValidDate(date) && isValidTime(time) &&
                         isInFuture(date, time)) {
                     Event event = createEvent(eventName, place, description.getText().toString(),
                             parseDateTime(date, time));
                     ((MainActivity) getActivity()).writeNewEvent(event);
 
-                    // Resets fields I (Brian) broke this somehow. Only resets when you reopen fragment now.
-                    //name.setText(getString(R.string.text_event_name));
-                    //location.setText(getString(R.string.text_location));
-                    dateButton.setText(getString(R.string.text_date));
-                    timeButton.setText(getString(R.string.text_time));
-                    description.setText(getString(R.string.text_description));
+                    // Resets fields
+                    name.setText("");
+                    name.setHint(getString(R.string.text_event_name));
+                    autocompleteFragment.setText("");
+                    autocompleteFragment.setHint(getString(R.string.text_location));
+                    dateButton.setText("");
+                    dateButton.setHint(getString(R.string.text_date));
+                    timeButton.setText("");
+                    timeButton.setHint(getString(R.string.text_time));
+                    description.setText("");
+                    description.setHint(getString(R.string.text_description));
 
                 }
             }
@@ -195,7 +193,8 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         String latitude = "";
         String longitude = "";
         if (place != null) {
-            //CharSequence placeName = place.getName(); This can be used for the name when Event is sorted to have name
+            // This can be used for the name when Event is sorted to have name
+            //CharSequence placeName = place.getName();
             //placeName.toString();
             LatLng eventLatLng = place.getLatLng();
             latitude = Double.toString(eventLatLng.latitude);
@@ -279,8 +278,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
         input = parseDateTime(date, time);
 
-
-
         if(today.after(input)) {
             return false;
         } else {
@@ -307,10 +304,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
         return input;
     }
-
-
-    // Will use this later to get location
-    // https://developers.google.com/places/android-api/autocomplete
 
     // Pickers used for Date and Time
     // https://developer.android.com/guide/topics/ui/controls/pickers.html
@@ -352,7 +345,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         }
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            //setTime(hourOfDay, minute);
+
             if(hourOfDay > 9 && minute > 9) {
                 timeButton.setText(hourOfDay + ":" + minute);
             } else if(hourOfDay > 9 && minute < 9) {
