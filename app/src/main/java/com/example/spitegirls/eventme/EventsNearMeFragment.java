@@ -22,6 +22,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -48,6 +50,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private MapView mapView;
+    private TextView loadingMessage;
+    private ProgressBar spinner;
     private Context mContext;
     private ArrayList<Event> eventList;
     private LatLng currentLocation;
@@ -57,6 +61,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     private static final int NO_LOCATION_PERMISSION = 2;
     private static final int MIN_ZOOM_AT_CITY_LEVEL = 10;
     private static final int ZOOM_TO_STREET_LEVEL = 17;
+
 
     public static EventsNearMeFragment newInstance(Bundle bundle) {
         EventsNearMeFragment fragment = new EventsNearMeFragment();
@@ -196,6 +201,9 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         //This "location" object is what will contain updated location data
         //when the listener fires with a location update
         setCurrentLocation(location.getLatitude(), location.getLongitude());
+        spinner.setVisibility(View.INVISIBLE);
+        mapView.setVisibility(View.VISIBLE);
+        loadingMessage.setVisibility(View.INVISIBLE);
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             lm.removeUpdates(this);
@@ -234,7 +242,11 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
         View view = inflater.inflate(R.layout.fragment_events_near_me, container, false);
 
+        spinner = (ProgressBar) view.findViewById(R.id.spinnerMap);
+        loadingMessage = (TextView) view.findViewById(R.id.loading_message);
+
         mapView = (MapView) view.findViewById(R.id.mapView);
+        mapView.setVisibility(View.INVISIBLE);
         mapView.onCreate(savedInstanceState);
 
         mapView.getMapAsync(this);

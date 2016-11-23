@@ -37,6 +37,9 @@
     <string name="no_location">No location available</string>
     <string name="tap_to_retry">Tap to Retry</string>
 
+    <!--Events Near Me Strings-->
+    <string name="loading_message">Finding your location...</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
