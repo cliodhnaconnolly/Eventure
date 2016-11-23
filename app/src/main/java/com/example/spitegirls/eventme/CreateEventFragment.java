@@ -330,6 +330,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
+            month = month + 1;
             dateButton.setText(day + "-" + month + "-" + year);
         }
 
