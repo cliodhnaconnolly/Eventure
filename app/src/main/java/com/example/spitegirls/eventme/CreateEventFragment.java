@@ -6,6 +6,8 @@ import android.app.Fragment;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.IntegerRes;
 import android.support.design.widget.BottomNavigationView;
@@ -25,9 +27,18 @@ import android.widget.RelativeLayout;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.model.LatLng;
+
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class CreateEventFragment extends android.support.v4.app.Fragment {
@@ -40,9 +51,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
     }
 
-//    private Integer year;
-//    private Integer month;
-//    private Integer day;
     public Calendar date;
     public Calendar dateAndTime;
     public static Button dateButton;
@@ -56,7 +64,8 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
     private EditText name;
     private EditText description;
-    private EditText location;
+    private PlaceAutocompleteFragment autocompleteFragment;
+    private Place place;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -68,11 +77,11 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        // We want to hide the keyboard when the user selects somewhere else on the screen
         outerLayout = (RelativeLayout) view.findViewById(R.id.outerRelative);
         outerLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
-                Log.d("Relative Layouut", "IVE BEEN TOUCHED");
                 hideSoftKeyboard(view);
                 return false;
             }
@@ -82,7 +91,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         innerLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
-                Log.d("Relative Layouut", "IVE BEEN TOUCHED");
                 hideSoftKeyboard(view);
                 return false;
             }
@@ -93,7 +101,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
             @Override
             public boolean onTouch(View view, MotionEvent event) {
-                Log.d("ButtonLayout", "IVE BEEN TOUCHED");
                 hideSoftKeyboard(view);
                 return false;
             }
@@ -103,7 +110,26 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         timeButton = (Button) view.findViewById(R.id.buttonTime);
         name = (EditText) view.findViewById(R.id.editTextEventName);
         description = (EditText) view.findViewById(R.id.editTextDescription);
-        location = (EditText) view.findViewById(R.id.editTextLocation);
+
+        autocompleteFragment = (PlaceAutocompleteFragment) getActivity().
+                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+
+        autocompleteFragment.setText("");
+        autocompleteFragment.setHint(getString(R.string.text_location));
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener(){
+            @Override
+            public void onPlaceSelected(Place selectedPlace) {
+                place = selectedPlace;
+                Log.i("TAG", "Place: " + place.getName());
+            }
+            @Override
+            public void onError(Status status) {
+                place = null;
+                Log.i("TAG", "An error occurred: " + status);
+            }
+        });
+
 
         view.findViewById(R.id.buttonSubmit).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,12 +138,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                 if(!isValidName(eventName)) {
                     name.setError(getString(R.string.error_name));
                 }
-
-                // Can't think of any validators for description
-//                final String eventDescription = description.getText().toString();
-//                if(!isValidDescription(eventDescription)) {
-//                    description.setError("Invalid Description");
-//                }
 
                 final String date = dateButton.getText().toString();
                 if(!isValidDate(date)) {
@@ -143,30 +163,61 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                             Toast.LENGTH_LONG).show();
                 }
 
+                // If the data given is good continue with creation of event
                 if(isValidName(eventName) && isValidDate(date) && isValidTime(time) &&
                         isInFuture(date, time)) {
-                    Event event = createEvent(eventName, location.getText().toString(), description.getText().toString(),
+                    Event event = createEvent(eventName, place, description.getText().toString(),
                             parseDateTime(date, time));
                     ((MainActivity) getActivity()).writeNewEvent(event);
 
                     // Resets fields
-                    name.setText(getString(R.string.text_event_name));
-                    location.setText(getString(R.string.text_location));
-                    dateButton.setText(getString(R.string.text_date));
-                    timeButton.setText(getString(R.string.text_time));
-                    description.setText(getString(R.string.text_description));
+                    name.setText("");
+                    name.setHint(getString(R.string.text_event_name));
+                    autocompleteFragment.setText("");
+                    autocompleteFragment.setHint(getString(R.string.text_location));
+                    dateButton.setText("");
+                    dateButton.setHint(getString(R.string.text_date));
+                    timeButton.setText("");
+                    timeButton.setHint(getString(R.string.text_time));
+                    description.setText("");
+                    description.setHint(getString(R.string.text_description));
 
                 }
             }
         });
     }
 
-    private Event createEvent(String name, String location, String description, Calendar date){
-        // Must deal with Location later but for now setting it to be UCD Library
-        String country = "Ireland";
-        String city = "Dublin";
-        String latitude = "53.307040";
-        String longitude = "-6.223026";
+    private Event createEvent(String name, Place place, String description, Calendar date){
+        String country = "";
+        String city = "";
+        String latitude = "";
+        String longitude = "";
+        if (place != null) {
+            // This can be used for the name when Event is sorted to have name
+            //CharSequence placeName = place.getName();
+            //placeName.toString();
+            LatLng eventLatLng = place.getLatLng();
+            latitude = Double.toString(eventLatLng.latitude);
+            longitude = Double.toString(eventLatLng.longitude);
+            Geocoder geocoder;
+            List<Address> addresses;
+            geocoder = new Geocoder(getContext(), Locale.getDefault());
+            try {
+                addresses = geocoder.getFromLocation(eventLatLng.latitude, eventLatLng.longitude, 1);
+            } catch (IOException e) {
+                addresses = null;
+                e.printStackTrace();
+            }
+
+            if(addresses != null) {
+                city = addresses.get(0).getLocality();
+                country = addresses.get(0).getCountryName();
+            }
+            else {
+                city = "";
+                country = "";
+            }
+        }
 
         // Making the calendar format look more familiar
         SimpleDateFormat simpleDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
@@ -227,8 +278,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
         input = parseDateTime(date, time);
 
-
-
         if(today.after(input)) {
             return false;
         } else {
@@ -255,10 +304,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
         return input;
     }
-
-
-    // Will use this later to get location
-    // https://developers.google.com/places/android-api/autocomplete
 
     // Pickers used for Date and Time
     // https://developer.android.com/guide/topics/ui/controls/pickers.html
@@ -300,7 +345,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         }
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            //setTime(hourOfDay, minute);
+
             if(hourOfDay > 9 && minute > 9) {
                 timeButton.setText(hourOfDay + ":" + minute);
             } else if(hourOfDay > 9 && minute < 9) {
