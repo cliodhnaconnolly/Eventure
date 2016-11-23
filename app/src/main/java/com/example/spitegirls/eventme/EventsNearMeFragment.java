@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -41,7 +42,7 @@ import java.util.Calendar;
 
 
 public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
         GoogleMap.OnInfoWindowClickListener {
 
     private GoogleMap mMap;
@@ -49,6 +50,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     private MapView mapView;
     private Context mContext;
     private ArrayList<Event> eventList;
+    private LatLng currentLocation;
+    private LocationManager lm;
 
     private static final int LOCATION_IS_NOT_ON = 1;
     private static final int NO_LOCATION_PERMISSION = 2;
@@ -164,7 +167,13 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     private LatLng getCoords() {
         LatLng coords = new LatLng(53.3053, -6.2207); //Set default to UCD so the camera has somewhere to go/
         try {
-            LocationManager lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+            lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+
+            Log.d("ENABLED", "GPS IS " + lm.isProviderEnabled(LocationManager.GPS_PROVIDER));
+            Log.d("ENABLED", "NETWORK IS " + lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
+
+            lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0.0f, this);
+
             Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             coords = new LatLng(location.getLatitude(), location.getLongitude());
 
@@ -175,6 +184,35 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         }
 
         return coords;
+    }
+
+    private void setCurrentLocation(Double latitude, Double longitude) {
+        currentLocation = new LatLng(latitude, longitude);
+        Log.d("CURRENT LOCATION", currentLocation.toString());
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, ZOOM_TO_STREET_LEVEL));
+    }
+
+    public void onLocationChanged(Location location) {
+        //This "location" object is what will contain updated location data
+        //when the listener fires with a location update
+        setCurrentLocation(location.getLatitude(), location.getLongitude());
+        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            lm.removeUpdates(this);
+        }
+        lm.removeUpdates(this);
+    }
+
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        //Required by LocationListener - you can do nothing here
+    }
+
+    public void onProviderEnabled(String provider) {
+        //Required by LocationListener - you can do nothing here
+    }
+
+    public void onProviderDisabled(String provider) {
+        //Required by LocationListener - you can do nothing here
     }
 
     @Override
