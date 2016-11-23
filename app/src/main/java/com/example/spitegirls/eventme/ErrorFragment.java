@@ -1,8 +1,13 @@
 package com.example.spitegirls.eventme;
 
+import android.content.Context;
+import android.content.Intent;
+import android.location.LocationManager;
 import android.media.Image;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.IntentCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +30,7 @@ public class ErrorFragment extends Fragment {
     private TextView noLocationText;
     private ImageView noLocationImage;
     private Button tapToRetry;
+    private Integer error = null;
 
     public static ErrorFragment newInstance(Bundle bundle) {
         ErrorFragment fragment =  new ErrorFragment();
@@ -58,7 +64,8 @@ public class ErrorFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         if(this.getArguments() != null){
             Bundle bundle = this.getArguments();
-            if(bundle.getInt("appearance") != NO_INTERNET_APPEARANCE){
+            error = bundle.getInt("appearance");
+            if(error != NO_INTERNET_APPEARANCE){
                 noInternetText.setVisibility(View.INVISIBLE);
                 noInternetImage.setVisibility(View.INVISIBLE);
             } else {    // Implies No Internet
@@ -72,14 +79,26 @@ public class ErrorFragment extends Fragment {
         tapToRetry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Do Stuff
+                if(error != null){
+                    LocationManager loc = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+                    ConnectivityManager con =
+                            (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
 
-                // Check internet / location again
-                    // If there is thing then restart activity
-                    // (or maybe something else but this would solve our opening problem)
+                    if(error == NO_LOCATION_APPEARANCE && loc.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                        getActivity().finish();
+                        final Intent intent = getActivity().getIntent();
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
+                        getActivity().startActivity(intent);
+                    }
 
-                    // if there is no change maintain screen
-                    // They can tap again
+                    else if(error == NO_INTERNET_APPEARANCE && (con.getActiveNetworkInfo() != null &&
+                            con.getActiveNetworkInfo().isConnectedOrConnecting())){
+                        getActivity().finish();
+                        final Intent intent = getActivity().getIntent();
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
+                        getActivity().startActivity(intent);
+                    }
+                }
             }
         });
     }

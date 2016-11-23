@@ -309,8 +309,14 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
                         })
                         .setNegativeButton("Continue", new DialogInterface.OnClickListener() {
                             public void onClick(final DialogInterface dialog, final int id) {
+                                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+
+                                Bundle bundle = new Bundle();
+                                bundle.putInt("appearance", ErrorFragment.NO_LOCATION_APPEARANCE);
+                                ErrorFragment fragment = ErrorFragment.newInstance(bundle);
+                                transaction.replace(R.id.my_frame, fragment);
+                                transaction.commit();
                                 dialog.cancel();
-                                return;
                             }
                         });
                 final AlertDialog alertMessage = alertDialog.create();
