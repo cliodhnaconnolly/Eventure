@@ -49,13 +49,15 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
+
     private MapView mapView;
     private TextView loadingMessage;
     private ProgressBar spinner;
+
     private Context mContext;
-    private ArrayList<Event> eventList;
-    private LatLng currentLocation;
     private LocationManager lm;
+
+    private ArrayList<Event> eventList;
 
     private static final int LOCATION_IS_NOT_ON = 1;
     private static final int NO_LOCATION_PERMISSION = 2;
@@ -67,11 +69,47 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         EventsNearMeFragment fragment = new EventsNearMeFragment();
         if(bundle != null){
             fragment.setArguments(bundle);
-//            Log.d("INPUT TO ", bundle.toString());
-//            Log.d("SET ARGS", fragment.getArguments().toString());
-
         }
         return fragment;
+    }
+
+    @Override
+    public void onAttach(final Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
+
+    @Override
+    public void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        checkGPS(LOCATION_IS_NOT_ON);
+
+        View view = inflater.inflate(R.layout.fragment_events_near_me, container, false);
+
+        spinner = (ProgressBar) view.findViewById(R.id.spinnerMap);
+        loadingMessage = (TextView) view.findViewById(R.id.loading_message);
+
+        mapView = (MapView) view.findViewById(R.id.mapView);
+        mapView.setVisibility(View.INVISIBLE);
+        mapView.onCreate(savedInstanceState);
+
+        mapView.getMapAsync(this);
+
+        mGoogleApiClient = new GoogleApiClient
+                .Builder(mContext )
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
+        return view;
     }
 
 //    @Override
@@ -123,7 +161,40 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
         mMap.setOnInfoWindowClickListener(this);
         mMap.setMinZoomPreference(MIN_ZOOM_AT_CITY_LEVEL);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), ZOOM_TO_STREET_LEVEL));
+
+        // Set up Location Manager
+        lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+
+        // IF LOCATION MANAGER IS NULL LoCATION IS NOT ON CHECK HERE
+        // IF LOCATION MANAGER THROWS SECURITY EXCEPTION SET CHECK HERE
+
+        // If GPS Provider has a last known location use this
+        if(lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null){
+            mapView.setVisibility(View.VISIBLE);
+            spinner.setVisibility(View.INVISIBLE);
+            loadingMessage.setVisibility(View.INVISIBLE);
+
+            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_TO_STREET_LEVEL));
+        }
+        // If Network Provider has a last known location use this
+        else if(lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null){
+            mapView.setVisibility(View.VISIBLE);
+            spinner.setVisibility(View.INVISIBLE);
+            loadingMessage.setVisibility(View.INVISIBLE);
+
+            Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_TO_STREET_LEVEL));
+        }
+        // If none of the above have a last known location go about it the slow way
+        else {
+            // Look for Updates on Location
+            lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0.0f, this);
+            Log.d("IN ELSE", "HELLO");
+        }
+
+
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), ZOOM_TO_STREET_LEVEL));
 
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -169,41 +240,40 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     }
 
 
-    private LatLng getCoords() {
-        LatLng coords = new LatLng(53.3053, -6.2207); //Set default to UCD so the camera has somewhere to go/
-        try {
-            lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+    // Commenting out so not sued but Niamh can see for how she previously did checks
+//    private LatLng getCoords() {
+//        LatLng coords = new LatLng(53.3053, -6.2207); //Set default to UCD so the camera has somewhere to go/
+//        try {
+//            lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+//
+//            Log.d("ENABLED", "GPS IS " + lm.isProviderEnabled(LocationManager.GPS_PROVIDER));
+//            Log.d("ENABLED", "NETWORK IS " + lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
+//
+//            lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0.0f, this);
+//
+//            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+//            coords = new LatLng(location.getLatitude(), location.getLongitude());
+//
+//        }catch (NullPointerException e){
+//            checkGPS(LOCATION_IS_NOT_ON);
+//        }catch(SecurityException s){
+//            checkGPS(NO_LOCATION_PERMISSION);
+//        }
+//
+//        return coords;
+//    }
 
-            Log.d("ENABLED", "GPS IS " + lm.isProviderEnabled(LocationManager.GPS_PROVIDER));
-            Log.d("ENABLED", "NETWORK IS " + lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
-
-            lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0.0f, this);
-
-            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            coords = new LatLng(location.getLatitude(), location.getLongitude());
-
-        }catch (NullPointerException e){
-            checkGPS(LOCATION_IS_NOT_ON);
-        }catch(SecurityException s){
-            checkGPS(NO_LOCATION_PERMISSION);
-        }
-
-        return coords;
-    }
-
-    private void setCurrentLocation(Double latitude, Double longitude) {
-        currentLocation = new LatLng(latitude, longitude);
-        Log.d("CURRENT LOCATION", currentLocation.toString());
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, ZOOM_TO_STREET_LEVEL));
-    }
-
+    // Location Listener Methods
     public void onLocationChanged(Location location) {
-        //This "location" object is what will contain updated location data
-        //when the listener fires with a location update
-        setCurrentLocation(location.getLatitude(), location.getLongitude());
+        // Set up map to have camera at user location
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_TO_STREET_LEVEL));
+
+        // Removing loading screen and have map viewable to user
         spinner.setVisibility(View.INVISIBLE);
         mapView.setVisibility(View.VISIBLE);
         loadingMessage.setVisibility(View.INVISIBLE);
+
+        // Remove burden of checking location as it is no longer needed
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             lm.removeUpdates(this);
@@ -211,57 +281,18 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         lm.removeUpdates(this);
     }
 
+    // Location Listener Methods
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        //Required by LocationListener - you can do nothing here
     }
 
+    // Location Listener Methods
     public void onProviderEnabled(String provider) {
-        //Required by LocationListener - you can do nothing here
     }
 
+    // Location Listener Methods
     public void onProviderDisabled(String provider) {
-        //Required by LocationListener - you can do nothing here
     }
-
-    @Override
-    public void onAttach(final Context context) {
-        super.onAttach(context);
-        mContext = context;
-    }
-
-    @Override
-    public void onStart() {
-        mGoogleApiClient.connect();
-        super.onStart();
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        checkGPS(LOCATION_IS_NOT_ON);
-
-        View view = inflater.inflate(R.layout.fragment_events_near_me, container, false);
-
-        spinner = (ProgressBar) view.findViewById(R.id.spinnerMap);
-        loadingMessage = (TextView) view.findViewById(R.id.loading_message);
-
-        mapView = (MapView) view.findViewById(R.id.mapView);
-        mapView.setVisibility(View.INVISIBLE);
-        mapView.onCreate(savedInstanceState);
-
-        mapView.getMapAsync(this);
-
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(mContext )
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-
-        return view;
-    }
-
+    
     private void checkGPS(int check) {
         LocationManager manager = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
         if (check == LOCATION_IS_NOT_ON){
@@ -315,10 +346,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     }
 
-    // Do the following methods need to call super? No?
     @Override
     public void onConnected(Bundle connectionHint) {
-
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(20000);
         mLocationRequest.setFastestInterval(10000);
@@ -327,12 +356,10 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     @Override
     public void onConnectionSuspended(int i) {
-
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 
     @Override
@@ -347,14 +374,12 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         mapView.onDestroy();
     }
 
-    // Trying to get rid of null array exception
     @Override
     public void onPause() {
         super.onPause();
         mapView.onPause();
     }
 
-    // Trying to get rid of null array exception
     @Override
     public void onLowMemory() {
         super.onLowMemory();
