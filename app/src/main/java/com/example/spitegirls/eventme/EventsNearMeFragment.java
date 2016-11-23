@@ -170,6 +170,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
         // If GPS Provider has a last known location use this
         if(lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null){
+            Log.d("IN IF", "YES");
             mapView.setVisibility(View.VISIBLE);
             spinner.setVisibility(View.INVISIBLE);
             loadingMessage.setVisibility(View.INVISIBLE);
@@ -179,6 +180,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         }
         // If Network Provider has a last known location use this
         else if(lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null){
+            Log.d("IN IF", "YEAH");
             mapView.setVisibility(View.VISIBLE);
             spinner.setVisibility(View.INVISIBLE);
             loadingMessage.setVisibility(View.INVISIBLE);
