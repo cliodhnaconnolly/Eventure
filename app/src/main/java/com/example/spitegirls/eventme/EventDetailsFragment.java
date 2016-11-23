@@ -65,22 +65,22 @@ public class EventDetailsFragment extends Fragment{
                 startTime.setText(details.startTime);
 
                 TextView city = (TextView) view.findViewById(R.id.city_details);
-                if(!details.city.isEmpty()){
+                if(!(details.city == null) && !details.city.isEmpty()){
                     city.setText(details.city);
                 } else { city.setVisibility(View.GONE); }
 
                 TextView country = (TextView) view.findViewById(R.id.country_details);
-                if(!details.country.isEmpty()){
+                if(!(details.country == null) && !details.country.isEmpty()){
                     country.setText(details.country);
                 } else { country.setVisibility(View.GONE); }
 
                 latitude = (TextView) view.findViewById(R.id.latitude_details);
-                if(!details.latitude.isEmpty()){
+                if(!(details.latitude == null) && !details.latitude.isEmpty()){
                     latitude.setText(details.latitude);
                 } else { latitude.setVisibility(View.GONE); }
 
                 longitude = (TextView) view.findViewById(R.id.longitude_details);
-                if(!details.longitude.isEmpty()){
+                if(!(details.longitude == null) && !details.longitude.isEmpty()){
                     longitude.setText(details.longitude);
                 } else { longitude.setVisibility(View.GONE); }
 
