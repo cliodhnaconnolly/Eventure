@@ -84,8 +84,23 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
                     Double latitude = Double.parseDouble(currEvent.latitude);
                     Double longitude = Double.parseDouble(currEvent.longitude);
                     LatLng FirstEvent = new LatLng(latitude, longitude);
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet(currEvent.startTime));
-                    marker.setTag(currEvent);
+                    if (currEvent.placeName != null && currEvent.startTime != null) {
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Place: " + currEvent.placeName + ". Time: " + currEvent.startTime));
+                        marker.setTag(currEvent);
+                    }
+                    else if(currEvent.placeName == null && currEvent.startTime != null) {
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Time: " + currEvent.startTime));
+                        marker.setTag(currEvent);
+                    }
+                    else if(currEvent.placeName != null && currEvent.startTime == null){
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Place: " + currEvent.placeName));
+                        marker.setTag(currEvent);
+                    }
+                    else {
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name));
+                        marker.setTag(currEvent);
+                    }
+
                     Log.d("ADDED MARKER", currEvent.name);
                 }catch(NumberFormatException e){
                     e.printStackTrace();

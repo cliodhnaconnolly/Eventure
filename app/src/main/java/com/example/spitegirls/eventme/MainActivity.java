@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                         HashMap map = (HashMap) events.get(i);
 //                        Log.d("map", map.entrySet().toString());
                         Event event = new Event((String) map.get("description"), (String) map.get("name"),
-                                (String) map.get("id"), (String) map.get("country"), (String) map.get("city"),
+                                (String) map.get("id"), (String) map.get("placeName"), (String) map.get("country"), (String) map.get("city"),
                                 (String) map.get("startTime"), (String) map.get("latitude"), (String) map.get("longitude"));
 //                        Log.d("NAME IS", event.toString());
 
@@ -274,8 +274,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         mEventReference.child("events").child(getFreshId().toString()).setValue(event);
     }
 
-    private void writeNewEvent(String description, String name, String id, String country, String city, String startTime, String latitude, String longitude) {
-        Event event = new Event(description, name, id, country, city, startTime, latitude, longitude);
+    private void writeNewEvent(String description, String name, String id, String placeName, String country, String city, String startTime, String latitude, String longitude) {
+        Event event = new Event(description, name, id, placeName, country, city, startTime, latitude, longitude);
         mEventReference.child("events").child(getFreshId().toString()).setValue(event);
     }
 
@@ -472,6 +472,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
             String name;
             String startTime;
             String id = "";
+            String placeName ="";
             String country = "";
             String city = "";
             String longitude = "";
@@ -513,6 +514,12 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
                         if (event.has("place")) {
                             JSONObject place = event.getJSONObject("place");
+                            if (place.has("name")){
+                                placeName = place.getString(("name"));
+                            }
+                            else{
+                                placeName = "";
+                            }
                             if (place.has("location")) {
                                 JSONObject location = place.getJSONObject("location");
                                 if (location.has("country")) {
@@ -544,7 +551,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                             }
                         }
 
-                        eventsList.add(new Event(description, name, id, country, city, startTime, latitude, longitude));
+                        eventsList.add(new Event(description, name, id, placeName, country, city, startTime, latitude, longitude));
                     }
                 } catch (final JSONException e) {
                     Log.e(TAG, "Json parsing error: " + e.getMessage());

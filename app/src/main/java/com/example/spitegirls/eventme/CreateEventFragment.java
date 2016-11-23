@@ -192,10 +192,16 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         String city = "";
         String latitude = "";
         String longitude = "";
+        String placeName = "";
         if (place != null) {
             // This can be used for the name when Event is sorted to have name
-            //CharSequence placeName = place.getName();
-            //placeName.toString();
+            if (place.getName() != null) {
+                CharSequence placeNameChar = place.getName();
+                placeName = placeNameChar.toString();
+            }
+            else{
+                placeName = "";
+            }
             LatLng eventLatLng = place.getLatLng();
             latitude = Double.toString(eventLatLng.latitude);
             longitude = Double.toString(eventLatLng.longitude);
@@ -223,7 +229,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         SimpleDateFormat simpleDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
         String startTime = simpleDate.format(date.getTime());
 
-        return new Event(description, name, ((MainActivity) getActivity()).getFreshId().toString(), country,
+        return new Event(description, name, ((MainActivity) getActivity()).getFreshId().toString(), placeName, country,
                 city, startTime, latitude, longitude);
     }
 
