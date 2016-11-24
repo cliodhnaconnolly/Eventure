@@ -62,7 +62,7 @@ public class MyEventsFragment extends Fragment {
         //https://www.bignerdranch.com/blog/implementing-swipe-to-refresh/
         //Didn't use that last one AS much
 
-        final SwipeRefreshLayout swipeView = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh);
+        final SwipeRefreshLayout swipeView = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefresh);
         //I don't like this being final but I'm going blank on how to get around that
 
         swipeView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -70,6 +70,7 @@ public class MyEventsFragment extends Fragment {
             public void onRefresh() {
                 swipeView.setRefreshing(true);
                 Log.d("NAVE", "lol");
+                ((MainActivity) getActivity()).refreshData();
             }
                 });
         return view;

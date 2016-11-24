@@ -21,7 +21,6 @@ import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,6 +34,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.facebook.GraphRequest.TAG;
 
@@ -56,19 +56,20 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     MyEventsFragment eventsFragment;
     EventsNearMeFragment eventsNearFragment;
 
-    public JSONObject unparsedEventsData;
-    public ArrayList<Event> parsedEventsList;
-
     private ArrayList<Event> databaseEvents;
     private ArrayList<Event> combinedEvents;
+    private ArrayList<Event> facebookEvents;
 
     private DatabaseReference mEventReference;
     private DatabaseReference mIdReference;
 
     private int currentId;
 
-    private static boolean MY_EVENTS_REQUESTED = false;
-    private static boolean NEARBY_EVENTS_REQUESTED = false;
+    private boolean MY_EVENTS_REQUESTED = false;
+    private boolean NEARBY_EVENTS_REQUESTED = false;
+    private static final int NUMBER_OF_TASKS = 2;
+
+    private AtomicInteger workCounter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         } else {
             setTheme(R.style.AppTheme);
         }
+
+        workCounter = new AtomicInteger(NUMBER_OF_TASKS);
 
         setContentView(R.layout.activity_main);
 
@@ -100,17 +103,12 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         // Load My Events Screen from the get-go
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        // Problem with this is that it's not gonna undo once internet is on.
         if(isNetworkAvailable()) {
             if (combinedEvents == null) {
                 transaction.replace(R.id.my_frame, new MyEventsFragment());
                 transaction.commit();
-                Log.d("Call from if main", "ture");
-                getEventDetails();
+                getData();
                 MY_EVENTS_REQUESTED = true;
-                NEARBY_EVENTS_REQUESTED = false;
-                // This won't be called with data due to Async tasks
-                //setUpMyEventsFragmentWithData();
             } else {
                 setUpMyEventsFragmentWithData();
             }
@@ -135,12 +133,11 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                     if(combinedEvents == null) {
                                         transaction.replace(R.id.my_frame, new MyEventsFragment());
                                         transaction.commit();
-                                        getEventDetails();
+                                        getData();
                                         MY_EVENTS_REQUESTED = true;
-                                        NEARBY_EVENTS_REQUESTED = false;
-//                                        setUpMyEventsFragmentWithData();
                                     } else {
                                         setUpMyEventsFragmentWithData();
+                                        // Wanna refresh data anyways for next time?
                                     }
 
                                     break;
@@ -149,10 +146,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                     if(combinedEvents == null) {
                                         transaction.replace(R.id.my_frame, new EventsNearMeFragment());
                                         transaction.commit();
-                                        getEventDetails();
+                                        getData();
                                         NEARBY_EVENTS_REQUESTED = true;
-                                        MY_EVENTS_REQUESTED = false;
-//                                        setUpEventsNearMeFragmentWithData();
                                     } else {
                                         setUpEventsNearMeFragmentWithData();
                                     }
@@ -178,6 +173,32 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                     }
                 }
         );
+    }
+
+    private void getData(){
+        // Database does its own thing
+        // Listener set up in onStart which gets initial data
+        // Updates itself anytime after that data has been changed
+
+        // Facebook however...
+        // May need to make this wait for a bit
+
+        // Get initial info from FB
+        GraphRequest request = GraphRequest.newMeRequest(
+                AccessToken.getCurrentAccessToken(),
+                new GraphRequest.GraphJSONObjectCallback() {
+                    @Override
+                    public void onCompleted( JSONObject object, GraphResponse response) {
+                        try {
+                            new GetEvents(workCounter, object.getJSONObject("events")).execute();
+                            Log.d("FINISHED", "getEventDetails()");
+                        } catch (JSONException e) { e.printStackTrace(); }
+                    }
+                });
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "id,name,link,events");
+        request.setParameters(parameters);
+        request.executeAsync();
     }
 
     @Override
@@ -228,6 +249,15 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                 HashMap results = (HashMap) dataSnapshot.getValue();
 //                Log.d("EVENTS TYPE", results.get("events").getClass().toString());
 
+                // Reset db events
+                databaseEvents = new ArrayList<Event>();
+
+                // Since DB will update its data anytime there is change let it increment a task to be done
+                if(workCounter.get() == 0) {
+                    Log.d("Incrementing", "onStart");
+                    workCounter.incrementAndGet();
+                }
+
                 // Why there is some null things I have no idea
                 ArrayList events = (ArrayList) results.get("events");
 //                Log.d("Events arraylist", events.get(3).getClass().toString());
@@ -239,12 +269,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                         Event event = new Event((String) map.get("description"), (String) map.get("name"),
                                 (String) map.get("id"), (String) map.get("placeName"), (String) map.get("country"), (String) map.get("city"),
                                 (String) map.get("startTime"), (String) map.get("latitude"), (String) map.get("longitude"));
-//                        Log.d("NAME IS", event.toString());
 
-                        // Check to try reduce duplications
-                        if(databaseEvents == null || databaseEvents.size() == events.size()){
-                            databaseEvents = new ArrayList<Event>();
-                        }
                         databaseEvents.add(event);
 
                     }
@@ -252,8 +277,16 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                 Log.d("FINISHED", "retrieving db events");
                 Log.d("DatabaseEvents is", "size" + databaseEvents.size());
 
-                // Because it usually takes the db longer they now get the power
-                setCombinedEvents();
+                // Task of retrieving events from Database is complete
+                int remainingTasks = workCounter.decrementAndGet();
+                Log.d("Decrementing", "onStart");
+
+                // If no more tasks remain
+                if(remainingTasks == 0) {
+                    Log.d("NO more tasks", "onStart");
+                    setCombinedEvents();
+                }
+
 
             }
 
@@ -299,61 +332,40 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         timeFrag.show(this.getSupportFragmentManager(), "timePicker");
     }
 
-    // Gets generic events details from Facebook
-    public void getEventDetails() {
-        // May need to make this wait for a bit
-        GraphRequest request = GraphRequest.newMeRequest(
-                AccessToken.getCurrentAccessToken(),
-                new GraphRequest.GraphJSONObjectCallback() {
-                    @Override
-                    public void onCompleted( JSONObject object, GraphResponse response) {
-                        try {
-                            setUnparsedEventData(object.getJSONObject("events"));
-                            Log.d("FINISHED", "getEventDetails()");
-                        } catch (JSONException e) { e.printStackTrace(); }
-                    }
-                });
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "id,name,link,events");
-        request.setParameters(parameters);
-        request.executeAsync();
-
-    }
-
     // Gets details like Cover Photo from Events from Facebook
-    private void getExtraEventDetails() {
-        Bundle bundle = new Bundle();
-        // Add extra fields to this bundle of shit you want to receive
-        bundle.putString("fields", "cover");
-        Log.d("IN", "getExtraEventsDetails");
-        // Use public variable parsedEventsList
-        for(final Event event : parsedEventsList){
-            new GraphRequest(
-                    AccessToken.getCurrentAccessToken(),
-                    "/" + event.id,
-                    bundle,
-                    HttpMethod.GET,
-                    new GraphRequest.Callback() {
-                        @Override
-                        public void onCompleted(GraphResponse response) {
-                            JSONObject responseJSONObject = response.getJSONObject();
-                            if (responseJSONObject != null && responseJSONObject.has("cover")) {
-                                try {
-                                    event.coverURL = responseJSONObject.getString("source");
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                                Log.d("FINISHED", "getExtraEventDetails");
-                            }
-                            // Call method to set up new fragment
-                            //setUpMyEventsFragmentWithData();
-                        }
-                    }
-            ).executeAsync();
-        }
-
-    }
+//    private void getExtraEventDetails() {
+//        Bundle bundle = new Bundle();
+//        // Add extra fields to this bundle of shit you want to receive
+//        bundle.putString("fields", "cover");
+//        Log.d("IN", "getExtraEventsDetails");
+//        // Use public variable parsedEventsList
+//        for(final Event event : parsedEventsList){
+//            new GraphRequest(
+//                    AccessToken.getCurrentAccessToken(),
+//                    "/" + event.id,
+//                    bundle,
+//                    HttpMethod.GET,
+//                    new GraphRequest.Callback() {
+//                        @Override
+//                        public void onCompleted(GraphResponse response) {
+//                            JSONObject responseJSONObject = response.getJSONObject();
+//                            if (responseJSONObject != null && responseJSONObject.has("cover")) {
+//                                try {
+//                                    event.coverURL = responseJSONObject.getString("source");
+//
+//                                } catch (JSONException e) {
+//                                    e.printStackTrace();
+//                                }
+//                                Log.d("FINISHED", "getExtraEventDetails");
+//                            }
+//                            // Call method to set up new fragment
+//                            //setUpMyEventsFragmentWithData();
+//                        }
+//                    }
+//            ).executeAsync();
+//        }
+//
+//    }
 
     private void setUpMyEventsFragmentWithData() {
         Log.d("SETUPMYEVENTS", "Started");
@@ -376,52 +388,17 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         Log.d("FINISHED", "SetUpEventsNearMeFragmentWithData");
     }
 
-    private void setUnparsedEventData(JSONObject obj){
-        unparsedEventsData = obj;
-
-        Log.d("UNPARSED", unparsedEventsData.toString());
-        new GetEvents().execute();
-    }
-
-    public void setParsedEventsList(ArrayList<Event> eventsList) {
-        //parsedEventsList = eventsList;
-        if(parsedEventsList != null){
-            parsedEventsList.addAll(eventsList);
-        } else {
-            parsedEventsList = eventsList;
-        }
-        Log.d("IN", "SETPARSEDEVENTS LIST");
-
-//        setUpMyEventsFragmentWithData();
-
-        //Pretty Sure the following isnt needed. Map populates without it. Dont want to fully Delete yet, Brian
-        //Log.d("BEFORE", "setUpEventsNearMeFragmentWithData In SetParsedEventsList");
-        //setUpEventsNearMeFragmentWithData();
-
-        // Currently doesn't work so we're going to stop going down the rabbit hole at this stage
-        // Make call to getExtraDetails
-        // getExtraEventDetails();
-    }
-
     private void setCombinedEvents(){
         Log.d("IN COMBINED", "start");
-        // Replacing entirity of this each time this is called
-        // Updating events with current knowledge
-        // Would be nicer to append probably but not right now
+
         combinedEvents = new ArrayList<Event>();
 
-        if(databaseEvents != null) {
-            combinedEvents.addAll(databaseEvents);
-        }
+        // At this point both tasks should be finished and arraylists populated
+        combinedEvents.addAll(facebookEvents);
+        combinedEvents.addAll(databaseEvents);
 
-        if(parsedEventsList != null) {
-            combinedEvents.addAll(parsedEventsList);
-        }
-
-        // Sort events here by time or something
-
-        // Because we're only sure we have events now I get to use my icky global variables
-        // Possibly set up listners or something?
+        // Who requested the data for their fragment?
+        // Don't love this
         if(MY_EVENTS_REQUESTED){
             setUpMyEventsFragmentWithData();
             MY_EVENTS_REQUESTED = false;
@@ -430,6 +407,20 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
             NEARBY_EVENTS_REQUESTED = false;
         }
 
+    }
+
+    // Takes in name of fragment that requested fresh data
+    public void refreshData() {
+        // Only MyEvents can refresh data
+        MY_EVENTS_REQUESTED = true;
+
+        // Database automatically updates data into combinedEvents / databaseEvents
+        // Therefore we don't need to call it here for refresh
+
+        // We do need to get fresh fb data though
+        // New task so increment counter
+        workCounter.incrementAndGet();
+        getData();
     }
 
     @Override
@@ -455,17 +446,22 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     // Used help from on how to parse
     // http://www.androidhive.info/2012/01/android-json-parsing-tutorial/
 
-    public class GetEvents extends AsyncTask<Void, Void, Void> {
-
-        // Received data
-        private JSONObject eventData;
+    private class GetEvents extends AsyncTask<Void, Void, Void> {
         // Generated data
         public ArrayList<Event> eventsList;
 
+        private final AtomicInteger workCounter;
+        private JSONObject unparsedData;
+        private int whoRequested;
+
+        public GetEvents(AtomicInteger workCounter, JSONObject unparsedData) {
+            this.workCounter = workCounter;
+            this.unparsedData = unparsedData;
+            this.whoRequested = whoRequested;
+        }
+
         @Override
         protected void onPreExecute() {
-
-            eventData = unparsedEventsData;
             eventsList = new ArrayList<Event>();
         }
 
@@ -481,9 +477,9 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
             String longitude = "";
             String latitude = "";
 
-            if(eventData.toString() != null) {
+            if(unparsedData.toString() != null) {
                 try {
-                    JSONArray events = eventData.getJSONArray("data");
+                    JSONArray events = unparsedData.getJSONArray("data");
                     //Log.d("events is ", events.toString());
 
                     for (int i = 0; i < events.length(); i++) {
@@ -571,8 +567,17 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             Log.d("FINISHED", "getEvents.execute");
-            setParsedEventsList(eventsList);
+//            setParsedEventsList(eventsList);
+            facebookEvents = eventsList;
 
+            // Task is finished, decrement the counter
+            int remainingTasks = this.workCounter.decrementAndGet();
+            Log.d("Decrementing counter", "GetEvents");
+            // If all tasks are completed
+            if(remainingTasks == 0) {
+                Log.d("No more tasks", "GetEVents");
+                setCombinedEvents();
+            }
         }
     }
 
