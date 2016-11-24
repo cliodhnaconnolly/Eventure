@@ -208,7 +208,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
             mMap.setMyLocationEnabled(true);
 
         }catch (SecurityException e){
-            checkGPS(LOCATION_IS_NOT_ON);
+            checkGPS(NO_LOCATION_PERMISSION);
         }
     }
 
