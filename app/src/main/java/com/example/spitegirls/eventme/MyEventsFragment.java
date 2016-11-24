@@ -1,9 +1,12 @@
 package com.example.spitegirls.eventme;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -42,14 +46,32 @@ public class MyEventsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         eventList = new ArrayList<Event>();
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             final Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_events, container, false);
         listView = (ListView) view.findViewById(R.id.list);
         spinner = (ProgressBar) view.findViewById(R.id.spinner);
+
+
+        //https://developer.android.com/training/swipe/respond-refresh-request.html#RespondRefresh
+        //http://www.survivingwithandroid.com/2014/05/android-swiperefreshlayout-tutorial-2.html
+        //https://www.bignerdranch.com/blog/implementing-swipe-to-refresh/
+        //Didn't use that last one AS much
+
+        final SwipeRefreshLayout swipeView = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh);
+        //I don't like this being final but I'm going blank on how to get around that
+
+        swipeView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                swipeView.setRefreshing(true);
+                Log.d("NAVE", "lol");
+            }
+                });
         return view;
     }
 
