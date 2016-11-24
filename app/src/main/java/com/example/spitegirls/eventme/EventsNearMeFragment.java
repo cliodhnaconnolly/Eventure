@@ -163,47 +163,53 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         mMap.setOnInfoWindowClickListener(this);
         mMap.setMinZoomPreference(MIN_ZOOM_AT_CITY_LEVEL);
 
-        // Set up Location Manager
-        lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+        try {
+            // Set up Location Manager
+            lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+            if (lm == null) {
+                checkGPS(NO_LOCATION_PERMISSION);
+            }
+            // IF LOCATION MANAGER THROWS SECURITY EXCEPTION SET CHECK HERE
 
-        // IF LOCATION MANAGER IS NULL LoCATION IS NOT ON CHECK HERE
-        // IF LOCATION MANAGER THROWS SECURITY EXCEPTION SET CHECK HERE
+            // If GPS Provider has a last known location use this
+            if (lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
+                Log.d("IN IF", "YES");
+                mapView.setVisibility(View.VISIBLE);
+                spinner.setVisibility(View.INVISIBLE);
+                loadingMessage.setVisibility(View.INVISIBLE);
 
-        // If GPS Provider has a last known location use this
-        if(lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null){
-            Log.d("IN IF", "YES");
-            mapView.setVisibility(View.VISIBLE);
-            spinner.setVisibility(View.INVISIBLE);
-            loadingMessage.setVisibility(View.INVISIBLE);
+                Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_TO_STREET_LEVEL));
+            }
+            // If Network Provider has a last known location use this
+            else if (lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
+                Log.d("IN IF", "YEAH");
+                mapView.setVisibility(View.VISIBLE);
+                spinner.setVisibility(View.INVISIBLE);
+                loadingMessage.setVisibility(View.INVISIBLE);
 
-            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_TO_STREET_LEVEL));
-        }
-        // If Network Provider has a last known location use this
-        else if(lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null){
-            Log.d("IN IF", "YEAH");
-            mapView.setVisibility(View.VISIBLE);
-            spinner.setVisibility(View.INVISIBLE);
-            loadingMessage.setVisibility(View.INVISIBLE);
-
-            Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_TO_STREET_LEVEL));
-        }
-        // If none of the above have a last known location go about it the slow way
-        else {
-            // Look for Updates on Location
-            lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0.0f, this);
-            Log.d("IN ELSE", "HELLO");
-        }
+                Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_TO_STREET_LEVEL));
+            }
+            // If none of the above have a last known location go about it the slow way
+            else {
+                // Look for Updates on Location
+                lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0.0f, this);
+                Log.d("IN ELSE", "HELLO");
+            }
 
 
 //        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), ZOOM_TO_STREET_LEVEL));
 
-        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
+            if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            mMap.setMyLocationEnabled(true);
+
+        }catch (SecurityException e){
+            checkGPS(LOCATION_IS_NOT_ON);
         }
-        mMap.setMyLocationEnabled(true);
     }
 
     // Called when user clicks a marker info window
@@ -243,29 +249,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     }
 
 
-    // Commenting out so not sued but Niamh can see for how she previously did checks
-//    private LatLng getCoords() {
-//        LatLng coords = new LatLng(53.3053, -6.2207); //Set default to UCD so the camera has somewhere to go/
-//        try {
-//            lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
-//
-//            Log.d("ENABLED", "GPS IS " + lm.isProviderEnabled(LocationManager.GPS_PROVIDER));
-//            Log.d("ENABLED", "NETWORK IS " + lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
-//
-//            lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0.0f, this);
-//
-//            Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-//            coords = new LatLng(location.getLatitude(), location.getLongitude());
-//
-//        }catch (NullPointerException e){
-//            checkGPS(LOCATION_IS_NOT_ON);
-//        }catch(SecurityException s){
-//            checkGPS(NO_LOCATION_PERMISSION);
-//        }
-//
-//        return coords;
-//    }
-
     // Location Listener Methods
     public void onLocationChanged(Location location) {
         // Set up map to have camera at user location
@@ -277,8 +260,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         loadingMessage.setVisibility(View.INVISIBLE);
 
         // Remove burden of checking location as it is no longer needed
-        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission((Activity) mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission((Activity) mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             lm.removeUpdates(this);
         }
         lm.removeUpdates(this);
@@ -301,17 +284,18 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         if (check == LOCATION_IS_NOT_ON){
             if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 final AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-                alertDialog.setMessage("GPS doesn't seem to be on. You can still view the map but your location will not be detected")
+                alertDialog.setMessage("Cannot show Nearby events until GPS is switched on")
                         .setCancelable(false)
                         .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
                             public void onClick(final DialogInterface dialog, final int id) {
                                 startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
                                 dialog.cancel();
-                                return;
+
                             }
                         })
                         .setNegativeButton("Continue", new DialogInterface.OnClickListener() {
                             public void onClick(final DialogInterface dialog, final int id) {
+
                                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
 
                                 Bundle bundle = new Bundle();

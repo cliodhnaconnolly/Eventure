@@ -2,7 +2,6 @@ package com.example.spitegirls.eventme;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.app.Fragment;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.res.Configuration;
