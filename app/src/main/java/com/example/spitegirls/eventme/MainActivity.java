@@ -168,7 +168,10 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                     break;
                             }
                         } else {
-                            transaction.replace(R.id.my_frame, new ErrorFragment());
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("appearance", ErrorFragment.NO_INTERNET_APPEARANCE);
+                            ErrorFragment fragment = ErrorFragment.newInstance(bundle);
+                            transaction.replace(R.id.my_frame, fragment);
                             transaction.commit();
                         }
                         return false;

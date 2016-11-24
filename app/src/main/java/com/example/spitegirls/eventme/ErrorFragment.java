@@ -77,7 +77,6 @@ public class ErrorFragment extends Fragment {
             }
         }
 
-
         // Set up button listener here
         tapToRetry.setOnClickListener(new View.OnClickListener() {
             @Override
