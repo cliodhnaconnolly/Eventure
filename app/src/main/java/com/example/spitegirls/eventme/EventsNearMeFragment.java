@@ -81,6 +81,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     @Override
     public void onStart() {
+        checkGPS(LOCATION_IS_NOT_ON);
         mGoogleApiClient.connect();
         super.onStart();
     }
@@ -88,7 +89,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        checkGPS(LOCATION_IS_NOT_ON);
+        //checkGPS(LOCATION_IS_NOT_ON);
 
         View view = inflater.inflate(R.layout.fragment_events_near_me, container, false);
 

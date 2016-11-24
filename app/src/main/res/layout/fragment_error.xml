@@ -15,7 +15,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="98dp"
-        android:visibility="visible"/>
+        android:visibility="invisible"/>
 
     <TextView
         android:text="@string/no_internet"
@@ -27,7 +27,7 @@
         android:layout_below="@+id/image_view_internet"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
-        android:visibility="visible"/>
+        android:visibility="invisible"/>
 
     <ImageView
         android:layout_width="100dp"
@@ -40,7 +40,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="98dp"
-        android:visibility="visible"/>
+        android:visibility="invisible"/>
 
     <TextView
         android:text="@string/no_location"
@@ -52,7 +52,7 @@
         android:layout_below="@+id/image_view_location"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
-        android:visibility="visible"/>
+        android:visibility="invisible"/>
 
     <Button
         android:text="@string/tap_to_retry"

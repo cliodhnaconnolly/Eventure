@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
@@ -47,7 +48,7 @@ public class ErrorFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_error, container, false);
+          View view = inflater.inflate(R.layout.fragment_error, container, false);
 
         noInternetImage = (ImageView) view.findViewById(R.id.image_view_internet);
         noInternetText = (TextView) view.findViewById(R.id.text_view_no_internet);
@@ -65,12 +66,14 @@ public class ErrorFragment extends Fragment {
         if(this.getArguments() != null){
             Bundle bundle = this.getArguments();
             error = bundle.getInt("appearance");
-            if(error != NO_INTERNET_APPEARANCE){
-                noInternetText.setVisibility(View.INVISIBLE);
-                noInternetImage.setVisibility(View.INVISIBLE);
-            } else {    // Implies No Internet
-                noLocationImage.setVisibility(View.INVISIBLE);
-                noLocationText.setVisibility(View.INVISIBLE);
+            Log.d("WHAT YA PASSING", error.toString());
+            if(error == NO_INTERNET_APPEARANCE){
+                Log.d("GETTIN IN THE IF", error.toString());
+                noInternetText.setVisibility(View.VISIBLE);
+                noInternetImage.setVisibility(View.VISIBLE);
+            } else if(error == NO_LOCATION_APPEARANCE){
+                noLocationImage.setVisibility(View.VISIBLE);
+                noLocationText.setVisibility(View.VISIBLE);
             }
         }
 
@@ -93,6 +96,7 @@ public class ErrorFragment extends Fragment {
 
                     else if(error == NO_INTERNET_APPEARANCE && (con.getActiveNetworkInfo() != null &&
                             con.getActiveNetworkInfo().isConnectedOrConnecting())){
+                        Log.d(" AM I FUCKING HERE", error.toString());
                         getActivity().finish();
                         final Intent intent = getActivity().getIntent();
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
