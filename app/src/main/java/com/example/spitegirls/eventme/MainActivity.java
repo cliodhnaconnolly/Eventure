@@ -190,7 +190,11 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                     @Override
                     public void onCompleted( JSONObject object, GraphResponse response) {
                         try {
-                            new GetEvents(workCounter, object.getJSONObject("events")).execute();
+                            if(object != null && object.getJSONObject("events") != null) {
+                                new GetEvents(workCounter, object.getJSONObject("events")).execute();
+                            }
+                            // Else no FB events were retrieved move on
+
                             Log.d("FINISHED", "getEventDetails()");
                         } catch (JSONException e) { e.printStackTrace(); }
                     }
@@ -394,9 +398,13 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         combinedEvents = new ArrayList<Event>();
 
         // At this point both tasks should be finished and arraylists populated
-        combinedEvents.addAll(facebookEvents);
-        combinedEvents.addAll(databaseEvents);
-
+        if(facebookEvents != null) {
+            combinedEvents.addAll(facebookEvents);
+        }
+        if(databaseEvents != null) {
+            combinedEvents.addAll(databaseEvents);
+        }
+        
         // Who requested the data for their fragment?
         // Don't love this
         if(MY_EVENTS_REQUESTED){
