@@ -19,15 +19,6 @@ public class Event implements java.io.Serializable{
         this.longitude = longitude;
     }
 
-
-    // Quote from Rem
-    /**
-     * Public fields are used as modern best practice argues that use of set/get
-     * methods is unnecessary as (1) set/get makes the field mutable anyway, and
-     * (2) set/get introduces additional method calls, which reduces performance.
-     */
-    // ie. Please do not create getter and setter methods here
-
     // STANDARD DETAILS
     public String description;
     public String name;

@@ -26,10 +26,7 @@ public class EventDetailsFragment extends Fragment{
     private Event details;
     private TextView title;
     private TextView description;
-    private TextView startTime;
     private TextView startDate;
-    private TextView latitude;
-    private TextView longitude;
     String source;
 
     public static EventDetailsFragment newInstance(Bundle details) {
@@ -47,7 +44,6 @@ public class EventDetailsFragment extends Fragment{
 
     }
 
-    // http://stackoverflow.com/questions/32201453/hashmap-as-param-for-a-fragment
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         if(this.getArguments() != null){
@@ -82,22 +78,6 @@ public class EventDetailsFragment extends Fragment{
                     country.setText(details.country);
                 } else { country.setVisibility(View.GONE); }
 
-                //didn't feel lat and lang belonged in the display as they can't be interpreted by the user, left the code in case people disagree
-//                latitude = (TextView) view.findViewById(R.id.latitude_details);
-//                if(!(details.latitude == null) && !details.latitude.isEmpty()){
-//                    latitude.setText(details.latitude);
-//                } else { latitude.setVisibility(View.GONE); }
-//
-//                longitude = (TextView) view.findViewById(R.id.longitude_details);
-//                if(!(details.longitude == null) && !details.longitude.isEmpty()){
-//                    longitude.setText(details.longitude);
-//                } else { longitude.setVisibility(View.GONE); }
-
-//                TextView sourceText = (TextView) view.findViewById(R.id.source_details);
-//                if(!details.get("source").isEmpty()){
-//                    sourceText.setText(details.get("source"));
-//                } else { sourceText.setVisibility(View.GONE); }
-
                 // Doesn't work yet but trying
 //                String source = (String) bundle.getSerializable("source");
 //                getCoverPhotoSource(details.get("id"));
@@ -120,9 +100,7 @@ public class EventDetailsFragment extends Fragment{
                 String shareBody = "I think you might be interested in this event!" +
                         "\n\nEvent Name: " + title.getText().toString() + "\n\nDescription: "
                         + description.getText().toString() + "\nStart Time: "
-                        + startTime.getText().toString() + "\nLatitude: " +
-                        latitude.getText().toString() + "\nLongitude: "
-                        + longitude.getText().toString() + "\n\n"
+                        + startDate.getText().toString() + "\n\n"
                         + "Go to Eventure to find out more!";
 
                 String shareSubject = "Event you might be interested in! - Eventure";
