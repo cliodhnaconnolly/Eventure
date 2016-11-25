@@ -27,6 +27,7 @@ public class EventDetailsFragment extends Fragment{
     private TextView title;
     private TextView description;
     private TextView startTime;
+    private TextView startDate;
     private TextView latitude;
     private TextView longitude;
     String source;
@@ -53,36 +54,48 @@ public class EventDetailsFragment extends Fragment{
             Bundle bundle = this.getArguments();
 
             if(bundle.getSerializable("event") != null){
-                details = (Event) bundle.getSerializable("event");
 
+                details = (Event) bundle.getSerializable("event");
+                String timeDetails = details.startTime;
+                String eventDate = getEventDate(timeDetails);
+                String eventTime = getEventTime(timeDetails);
                 // Set up info
                 title = (TextView) view.findViewById(R.id.title);
                 title.setText(details.name);
                 description = (TextView) view.findViewById(R.id.description);
                 description.setText(details.description);
 
-                startTime = (TextView) view.findViewById(R.id.start_time_details);
-                startTime.setText(details.startTime);
+                startTime = (TextView) view.findViewById(R.id.event_Time);
+                startTime.setText(eventTime);
+
+                startDate = (TextView) view.findViewById(R.id.event_date);
+                startDate.setText(eventDate);
 
                 TextView city = (TextView) view.findViewById(R.id.city_details);
                 if(!(details.city == null) && !details.city.isEmpty()){
                     city.setText(details.city);
                 } else { city.setVisibility(View.GONE); }
 
+                TextView placeName = (TextView) view.findViewById(R.id.place_Name);
+                if(!(details.placeName == null) &&!(details.placeName.isEmpty())){
+                    placeName.setText(details.placeName);
+                } else {city.setVisibility(View.GONE); }
+
                 TextView country = (TextView) view.findViewById(R.id.country_details);
                 if(!(details.country == null) && !details.country.isEmpty()){
                     country.setText(details.country);
                 } else { country.setVisibility(View.GONE); }
 
-                latitude = (TextView) view.findViewById(R.id.latitude_details);
-                if(!(details.latitude == null) && !details.latitude.isEmpty()){
-                    latitude.setText(details.latitude);
-                } else { latitude.setVisibility(View.GONE); }
-
-                longitude = (TextView) view.findViewById(R.id.longitude_details);
-                if(!(details.longitude == null) && !details.longitude.isEmpty()){
-                    longitude.setText(details.longitude);
-                } else { longitude.setVisibility(View.GONE); }
+                //didn't feel lat and lang belonged in the disblay as they can't be interpreted by the user, left the code in case people disagree
+//                latitude = (TextView) view.findViewById(R.id.latitude_details);
+//                if(!(details.latitude == null) && !details.latitude.isEmpty()){
+//                    latitude.setText(details.latitude);
+//                } else { latitude.setVisibility(View.GONE); }
+//
+//                longitude = (TextView) view.findViewById(R.id.longitude_details);
+//                if(!(details.longitude == null) && !details.longitude.isEmpty()){
+//                    longitude.setText(details.longitude);
+//                } else { longitude.setVisibility(View.GONE); }
 
 //                TextView sourceText = (TextView) view.findViewById(R.id.source_details);
 //                if(!details.get("source").isEmpty()){
@@ -157,6 +170,15 @@ public class EventDetailsFragment extends Fragment{
 
             }
         });
+    }
+
+    private String getEventDate(String timeDetails) {
+        String split[] = timeDetails.split("T");
+        return split[0];
+    }
+    private String getEventTime(String timeDetails) {
+        String split[] = timeDetails.split("T");
+        return split[1];
     }
 
     @Override
