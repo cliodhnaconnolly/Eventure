@@ -58,15 +58,11 @@ public class EventDetailsFragment extends Fragment{
                 details = (Event) bundle.getSerializable("event");
                 String timeDetails = details.startTime;
                 String eventDate = getEventDate(timeDetails);
-                String eventTime = getEventTime(timeDetails);
                 // Set up info
                 title = (TextView) view.findViewById(R.id.title);
                 title.setText(details.name);
                 description = (TextView) view.findViewById(R.id.description);
                 description.setText(details.description);
-
-                startTime = (TextView) view.findViewById(R.id.event_Time);
-                startTime.setText(eventTime);
 
                 startDate = (TextView) view.findViewById(R.id.event_date);
                 startDate.setText(eventDate);
@@ -86,7 +82,7 @@ public class EventDetailsFragment extends Fragment{
                     country.setText(details.country);
                 } else { country.setVisibility(View.GONE); }
 
-                //didn't feel lat and lang belonged in the disblay as they can't be interpreted by the user, left the code in case people disagree
+                //didn't feel lat and lang belonged in the display as they can't be interpreted by the user, left the code in case people disagree
 //                latitude = (TextView) view.findViewById(R.id.latitude_details);
 //                if(!(details.latitude == null) && !details.latitude.isEmpty()){
 //                    latitude.setText(details.latitude);
@@ -172,19 +168,53 @@ public class EventDetailsFragment extends Fragment{
         });
     }
 
-    private String getEventDate(String timeDetails) {
-        String split[] = timeDetails.split("T");
-        return split[0];
-    }
-    private String getEventTime(String timeDetails) {
-        String split[] = timeDetails.split("T");
-        return split[1];
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_event_details, container, false);
+    }
+
+    private String getEventDate(String timeDetails) {
+        String split[] = timeDetails.split("T");
+        String data[] = split[0].split("-");
+
+        int date = Integer.parseInt(data[2]);
+        int month = Integer.parseInt(data[1]);
+
+        // Format date
+        if(date % 10 == 1 && date != 11) {
+            data[2] = data[2] + "st";
+        } else if(date % 10 == 2 && date != 12) {
+            data[2] = data[2] + "nd";
+        } else if(date % 10 == 3 && date != 13) {
+            data[2] = data[2] + "rd";
+        } else {
+            data[2] = data[2] + "th";
+        }
+
+        // Format month
+        switch(month) {
+            case 1 : data[1] = "January"; break;
+            case 2 : data[1] = "February"; break;
+            case 3 : data[1] = "March"; break;
+            case 4 : data[1] = "April"; break;
+            case 5 : data[1] = "May"; break;
+            case 6 : data[1] = "June"; break;
+            case 7 : data[1] = "July"; break;
+            case 8 : data[1] = "August"; break;
+            case 9 : data[1] = "September"; break;
+            case 10 : data[1] = "October"; break;
+            case 11 : data[1] = "November"; break;
+            case 12 : data[1] = "December"; break;
+        }
+
+        String formattedDate = data[2] + " " + data[1] + " " + data[0];
+
+        String time[] = split[1].split(":");
+
+        String formattedTime = " at " + time[0] + ":" + time[1];
+
+        return formattedDate + formattedTime;
     }
 
     // Commenting out for the moment as it doesn't work but may be useful later

@@ -523,10 +523,10 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                             JSONObject place = event.getJSONObject("place");
                             if (place.has("name")){
                                 placeName = place.getString(("name"));
-                            }
-                            else{
+                            } else{
                                 placeName = "";
                             }
+
                             if (place.has("location")) {
                                 JSONObject location = place.getJSONObject("location");
                                 if (location.has("country")) {
@@ -549,13 +549,17 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                 } else {
                                     longitude = "";
                                 }
-                            }
-                            else {
+                            } else {
+                                if(placeName.equals("")){
+                                    placeName = "No location given";
+                                }
                                 country = "";
                                 city = "";
                                 latitude = "";
                                 longitude = "";
                             }
+                        } else {
+                            placeName = "No location given";
                         }
 
                         eventsList.add(new Event(description, name, id, placeName, country, city, startTime, latitude, longitude));
