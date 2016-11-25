@@ -55,7 +55,6 @@ public class LoginActivity extends AppCompatActivity {
         Log.d("IN LOG ACTIVITY", "show meh");
 
         FacebookSdk.sdkInitialize(getApplicationContext());
-        super.onCreate(savedInstanceState);
 
         // Check if user has previously selected an alternate theme
         if(checkThemePref()){
@@ -64,6 +63,7 @@ public class LoginActivity extends AppCompatActivity {
             setTheme(R.style.AppTheme);
         }
 
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         callbackManager = CallbackManager.Factory.create();

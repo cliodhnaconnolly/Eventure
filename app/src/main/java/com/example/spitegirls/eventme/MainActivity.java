@@ -73,14 +73,14 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
         // Check if user has previously selected an alternate theme
         if(checkThemePref()){
             setTheme(R.style.OriginalAppTheme);
         } else {
             setTheme(R.style.AppTheme);
         }
+
+        super.onCreate(savedInstanceState);
 
         workCounter = new AtomicInteger(NUMBER_OF_TASKS);
 
