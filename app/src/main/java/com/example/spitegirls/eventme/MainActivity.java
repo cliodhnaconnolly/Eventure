@@ -21,6 +21,7 @@ import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     private boolean MY_EVENTS_REQUESTED = false;
     private boolean NEARBY_EVENTS_REQUESTED = false;
-    private static final int NUMBER_OF_TASKS = 2;
+    private static final int NUMBER_OF_TASKS = 3;
 
     private AtomicInteger workCounter;
 
@@ -337,39 +338,49 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     }
 
     // Gets details like Cover Photo from Events from Facebook
-//    private void getExtraEventDetails() {
-//        Bundle bundle = new Bundle();
-//        // Add extra fields to this bundle of shit you want to receive
-//        bundle.putString("fields", "cover");
-//        Log.d("IN", "getExtraEventsDetails");
-//        // Use public variable parsedEventsList
-//        for(final Event event : parsedEventsList){
-//            new GraphRequest(
-//                    AccessToken.getCurrentAccessToken(),
-//                    "/" + event.id,
-//                    bundle,
-//                    HttpMethod.GET,
-//                    new GraphRequest.Callback() {
-//                        @Override
-//                        public void onCompleted(GraphResponse response) {
-//                            JSONObject responseJSONObject = response.getJSONObject();
-//                            if (responseJSONObject != null && responseJSONObject.has("cover")) {
-//                                try {
-//                                    event.coverURL = responseJSONObject.getString("source");
-//
-//                                } catch (JSONException e) {
-//                                    e.printStackTrace();
-//                                }
-//                                Log.d("FINISHED", "getExtraEventDetails");
-//                            }
-//                            // Call method to set up new fragment
-//                            //setUpMyEventsFragmentWithData();
-//                        }
-//                    }
-//            ).executeAsync();
-//        }
-//
-//    }
+    private void getExtraEventDetails() {
+        Bundle bundle = new Bundle();
+        // Add extra fields to this bundle of shit you want to receive
+        bundle.putString("fields", "cover");
+        Log.d("IN", "getExtraEventsDetails");
+        // Use public variable parsedEventsList
+        for(final Event event : facebookEvents){
+            new GraphRequest(
+                    AccessToken.getCurrentAccessToken(),
+                    "/" + event.id,
+                    bundle,
+                    HttpMethod.GET,
+                    new GraphRequest.Callback() {
+                        @Override
+                        public void onCompleted(GraphResponse response) {
+                            JSONObject responseJSONObject = response.getJSONObject();
+                            Log.d("RESPONSE " + event.name, responseJSONObject.toString());
+                            if (responseJSONObject != null && responseJSONObject.has("cover")) {
+                                try {
+                                    Log.d("Has", "Cover");
+                                    JSONObject cover = responseJSONObject.getJSONObject("cover");
+                                    event.coverURL = cover.getString("source");
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                Log.d("FINISHED", "getExtraEventDetails");
+
+                                // Task is finished, decrement the counter
+                                int remainingTasks = workCounter.decrementAndGet();
+                                Log.d("Decrementing counter", "GetExtraEventDetails");
+                                // If all tasks are completed
+                                if(remainingTasks == 0) {
+                                    Log.d("No more tasks", "GetExtraEventDetails");
+                                    setCombinedEvents();
+                                }
+                            }
+                        }
+                    }
+            ).executeAsync();
+        }
+
+    }
 
     private void setUpMyEventsFragmentWithData() {
         Log.d("SETUPMYEVENTS", "Started");
@@ -581,6 +592,9 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
             Log.d("FINISHED", "getEvents.execute");
 //            setParsedEventsList(eventsList);
             facebookEvents = eventsList;
+
+            // Call extra event details
+            getExtraEventDetails();
 
             // Task is finished, decrement the counter
             int remainingTasks = this.workCounter.decrementAndGet();

@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ShareActionProvider;
@@ -27,7 +28,7 @@ public class EventDetailsFragment extends Fragment{
     private TextView title;
     private TextView description;
     private TextView startDate;
-    String source;
+    private Button findOnMap;
 
     public static EventDetailsFragment newInstance(Bundle details) {
         EventDetailsFragment fragment = new EventDetailsFragment();
@@ -63,15 +64,15 @@ public class EventDetailsFragment extends Fragment{
                 startDate = (TextView) view.findViewById(R.id.event_date);
                 startDate.setText(eventDate);
 
+                TextView placeName = (TextView) view.findViewById(R.id.place_Name);
+                if(!(details.placeName == null) &&!(details.placeName.isEmpty())){
+                    placeName.setText(details.placeName);
+                } else {placeName.setVisibility(View.GONE); }
+
                 TextView city = (TextView) view.findViewById(R.id.city_details);
                 if(!(details.city == null) && !details.city.isEmpty()){
                     city.setText(details.city);
                 } else { city.setVisibility(View.GONE); }
-
-                TextView placeName = (TextView) view.findViewById(R.id.place_Name);
-                if(!(details.placeName == null) &&!(details.placeName.isEmpty())){
-                    placeName.setText(details.placeName);
-                } else {city.setVisibility(View.GONE); }
 
                 TextView country = (TextView) view.findViewById(R.id.country_details);
                 if(!(details.country == null) && !details.country.isEmpty()){
@@ -83,10 +84,16 @@ public class EventDetailsFragment extends Fragment{
 //                getCoverPhotoSource(details.get("id"));
 
                 if( details.coverURL != null) {
-                    new DownloadImage((ImageView) view.findViewById(R.id.coverPhoto)).execute(source);
+                    new DownloadImage((ImageView) view.findViewById(R.id.cover_photo)).execute(details.coverURL);
                 } else {
                     Log.d("Source is ", "source is null");
-                    view.findViewById(R.id.coverPhoto).setVisibility(View.GONE); }
+                    view.findViewById(R.id.cover_photo).setVisibility(View.GONE);
+                }
+
+                if(details.longitude.equals("")){
+                    findOnMap = (Button) view.findViewById(R.id.find_on_map);
+                    findOnMap.setVisibility(View.GONE);
+                }
             }
         }
 

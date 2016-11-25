@@ -75,55 +75,58 @@
                 android:layout_margin="16dp">
 
                 <TextView
-                    android:text="TextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/event_date"
                     android:visibility="visible"/>
 
                 <TextView
-                    android:text="TextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/place_Name" />
 
                 <TextView
-                    android:text="TextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/city_details"
                     android:visibility="visible" />
 
                 <TextView
-                    android:text="TextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/country_details"
                     android:visibility="visible"/>
 
-                //didn't feel lat and lang belonged in the disblay as they can't be interpreted by the user, left the code in case people disagree
-                <!--<TextView-->
-                    <!--android:text="TextView"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:id="@+id/latitude_details"-->
-                    <!--android:visibility="visible"/>-->
+                <TextView
+                    android:text="@string/event_photos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/event_photos"
+                    android:layout_marginTop="5dp"
+                    android:visibility="visible"/>
 
-                <!--<TextView-->
-                    <!--android:text="TextView"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:id="@+id/longitude_details"-->
-                    <!--android:visibility="visible"/>-->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:id="@+id/viewLine2"
+                    android:layout_margin="8dp"
+                    android:background="#ffc5c5c5"/>
 
                 <ImageView
-                    android:layout_width="200dp"
-                    android:layout_height="200dp"
-                    android:id="@+id/coverPhoto"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/cover_photo"
                     android:layout_gravity="center_horizontal"
                     android:visibility="visible"/>
+
+                <Button
+                    android:text="@string/find_on_map"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/find_on_map" />
+
 
             </LinearLayout>
 

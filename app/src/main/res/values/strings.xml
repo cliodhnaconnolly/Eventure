@@ -9,15 +9,13 @@
     <string name="text_my_account">My Account</string>
     <string name="title_activity_my_account">MyAccount</string>
 
-    <string name="text_welcome">Welcome to EventMe</string>
-
     <!--Create Event Strings-->
-    <string name="text_create_your_event">Create your event...</string>
-    <string name="text_event_name">Name your event...</string>
-    <string name="text_location">Give it a location...</string>
+    <string name="text_create_your_event">Create your event&#8230;</string>
+    <string name="text_event_name">Name your event&#8230;</string>
+    <string name="text_location">Give it a location&#8230;</string>
     <string name="text_date">Pick a Date</string>
     <string name="text_time">Pick a Time</string>
-    <string name="text_description">Tell us about your event...</string>
+    <string name="text_description">Tell us about your event&#8230;</string>
 
     <string name="text_submit">Submit Event</string>
     <string name="text_please_note">Please note any event you submit here will be public and viewable by all users of Eventure</string>
@@ -38,8 +36,9 @@
     <string name="tap_to_retry">Tap to Retry</string>
 
     <!--Events Near Me Strings-->
-    <string name="loading_message">Finding your location...</string>
+    <string name="loading_message">Finding your location&#8230;</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!--Event Details Strings-->
+    <string name="event_photos">Event Photos</string>
+    <string name="find_on_map">Find on Map</string>
 </resources>
