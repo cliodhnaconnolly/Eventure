@@ -54,6 +54,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     private TextView loadingMessage;
     private ProgressBar spinner;
 
+    private AlertDialog alertMessage;
+
     private Context mContext;
     private LocationManager lm;
 
@@ -160,15 +162,27 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
             }
         }
 
+        getLocation();
+
+        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mMap.setMyLocationEnabled(true);
+
         mMap.setOnInfoWindowClickListener(this);
         mMap.setMinZoomPreference(MIN_ZOOM_AT_CITY_LEVEL);
+    }
 
+    private void getLocation(){
         try {
             // Set up Location Manager
             lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
-            if (lm == null) {
-                checkGPS(NO_LOCATION_PERMISSION);
+            if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                Log.d("LOCATION IS", "NULL");
+                checkGPS(LOCATION_IS_NOT_ON);
             }
+            Log.d("LOCATION IS", "NOT NULL? " + lm.toString());
             // IF LOCATION MANAGER THROWS SECURITY EXCEPTION SET CHECK HERE
 
             // If GPS Provider has a last known location use this
@@ -201,11 +215,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
 //        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), ZOOM_TO_STREET_LEVEL));
 
-            if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            mMap.setMyLocationEnabled(true);
 
         }catch (SecurityException e){
             checkGPS(NO_LOCATION_PERMISSION);
@@ -251,6 +260,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     // Location Listener Methods
     public void onLocationChanged(Location location) {
+        Log.d("LOCATION", "CHANGED");
         // Set up map to have camera at user location
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_TO_STREET_LEVEL));
 
@@ -281,6 +291,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     
     private void checkGPS(int check) {
         LocationManager manager = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+        Log.d("IN CHECK", "INT IS " + check);
         if (check == LOCATION_IS_NOT_ON){
             if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 final AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
@@ -306,7 +317,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
                                 dialog.cancel();
                             }
                         });
-                final AlertDialog alertMessage = alertDialog.create();
+//                final AlertDialog alertMessage = alertDialog.create();
+                alertMessage = alertDialog.create();
                 alertMessage.show();
             }
         }
@@ -333,9 +345,11 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
                         }
                     });
 
-            final AlertDialog alertMessage = alertDialog.create();
+//            final AlertDialog alertMessage = alertDialog.create();
+            alertMessage = alertDialog.create();
             alertMessage.show();
         }
+
 
     }
 
@@ -357,7 +371,13 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     @Override
     public void onResume() {
+        if(alertMessage != null && alertMessage.isShowing()){
+            alertMessage.cancel();
+        }
         mapView.onResume();
+        if(mMap != null){
+            getLocation();
+        }
         super.onResume();
     }
 

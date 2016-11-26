@@ -131,7 +131,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onStop();
         //Facebook login
         accessTokenTracker.stopTracking();
-        profileTracker.stopTracking();
+//        profileTracker.stopTracking();
     }
 
     @Override
