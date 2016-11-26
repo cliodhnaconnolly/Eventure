@@ -334,7 +334,8 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
         // Parsing inputted Date
         int day = Integer.parseInt(splitDate[2]);
-        int month = Integer.parseInt(splitDate[1]);
+        // Calendar does things differently, January = 0
+        int month = Integer.parseInt(splitDate[1]) -1;
         int year = Integer.parseInt(splitDate[0]);
 
         int hours = Integer.parseInt(splitTime[0]);
