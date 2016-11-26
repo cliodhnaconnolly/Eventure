@@ -177,10 +177,10 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                     name.setError(getString(R.string.error_name));
                 }
 
-                final String date = dateButton.getText().toString();
+                String date = dateButton.getText().toString();
                 if(!isValidDate(date)) {
                     dateButton.requestFocus();
-                    dateButton.setError(getString(R.string.error_date));
+                    //dateButton.setError(getString(R.string.error_date));
                     // Doesn't seem to pop up so...
                     Toast.makeText(getContext(), getString(R.string.error_date), Toast.LENGTH_LONG).show();
                 }
@@ -194,8 +194,8 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
                 // Don't want to overload with errors
                 if(!isInFuture(date, time) && isValidTime(time) && isValidDate(date)) {
-                    dateButton.requestFocus();
-                    dateButton.setError(getString(R.string.error_date_time));
+                    //dateButton.requestFocus();
+                    //dateButton.setError(getString(R.string.error_date_time));
                     // Doesn't seem to pop up so...
                     Toast.makeText(getContext(), getString(R.string.error_date_time),
                             Toast.LENGTH_LONG).show();
@@ -315,9 +315,11 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     private boolean isInFuture(String date, String time){
         // Today's date
         Calendar today = Calendar.getInstance();
+        Log.d("TOdays date", today.toString());
 
         // Inputted date
         Calendar input = parseDateTime(date, time);
+        Log.d("Inputted date", input.toString());
 
         if(today.after(input)) {
             return false;
@@ -333,10 +335,10 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         String[] splitTime = time.split(":");
 
         // Parsing inputted Date
-        int day = Integer.parseInt(splitDate[2]);
+        int day = Integer.parseInt(splitDate[0]);
         // Calendar does things differently, January = 0
-        int month = Integer.parseInt(splitDate[1]) -1;
-        int year = Integer.parseInt(splitDate[0]);
+        int month = Integer.parseInt(splitDate[1]) - 1;
+        int year = Integer.parseInt(splitDate[2]);
 
         int hours = Integer.parseInt(splitTime[0]);
         int minutes = Integer.parseInt(splitTime[1]);
