@@ -147,13 +147,9 @@ public class LoginActivity extends AppCompatActivity {
             main.putExtra("surname", profile.getLastName());
             main.putExtra("imageUrl", profile.getProfilePictureUri(200,200).toString());
             startActivity(main);
+        } else {
+            Log.d("PROFILE WAS", "NULL");
         }
-    }
-
-    public void getPermissions() {
-        LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "user_friends",
-                "user_birthday", "user_events", "user_location"));
-        LoginManager.getInstance().logInWithPublishPermissions(this, Arrays.asList("rsvp_event", "publish_actions"));
     }
 
     public void checkInternetConnection(){
