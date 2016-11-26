@@ -9,6 +9,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -25,7 +28,11 @@ public class MyEventsFragment extends Fragment {
 
     private ListView listView;
     public ProgressBar spinner;
-    private ArrayList<Event> eventList;
+    // We no longer need this to have such a scope
+//    private ArrayList<Event> eventList;
+
+    private ArrayList<Event> pastEvents;
+    private ArrayList<Event> futureEvents;
 
     public static MyEventsFragment newInstance(Bundle bundle) {
         MyEventsFragment fragment = new MyEventsFragment();
@@ -45,7 +52,7 @@ public class MyEventsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        eventList = new ArrayList<Event>();
+        setHasOptionsMenu(true);
 
     }
 
@@ -82,8 +89,12 @@ public class MyEventsFragment extends Fragment {
             Bundle bundle = this.getArguments();
 
             if(bundle.getSerializable("arraylist") != null){
-                eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
+                ArrayList<Event> eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
 
+                // Sort list and populate pastEvents and FutureEvents
+
+
+                // Default is future so populate futre in this adapter initially
                 CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, eventList);
                 listView.setAdapter(adapter);
                 spinner.setVisibility(View.INVISIBLE);
@@ -96,6 +107,8 @@ public class MyEventsFragment extends Fragment {
                         Log.d("LONG L IS", Long.toString(l));
 
                         Bundle args = new Bundle();
+                        // this needs to become futureEvents.get(i)
+                        // yes i know theres an error but ownt be when you populate lists
                         args.putSerializable("event", eventList.get(i));
 
                         EventDetailsFragment eventFrag = EventDetailsFragment.newInstance(args);
@@ -113,6 +126,45 @@ public class MyEventsFragment extends Fragment {
             Log.d("INSTEAD", "IS NULL");
         }
 
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        menuInflater.inflate(R.menu.time_frame, menu);
+        super.onCreateOptionsMenu(menu, menuInflater);
+    }
+
+    /**
+     * react to the user tapping/selecting an options menu item
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_time_past:
+                item.setChecked(true);
+                // REMOVE THIS TOAST AFTER TESTING
+                Toast.makeText(getActivity(), "MENU PAST CLICK", Toast.LENGTH_SHORT).show();
+
+                // Create custom list adapter with past events
+                // check for nulls before hand that pastEvents has shit although i think itll be fine without
+                // unless you want to make a "No events" textview appear
+                // set listview to have custom adapter
+                // if this takes a longer period of time put up a spinner and take it down when done
+                return true;
+            case R.id.menu_item_time_future:
+                item.setChecked(true);
+                // REMOVE THIS TOAST AFTER TESTING
+                Toast.makeText(getActivity(), "MENU FUTURE CLICK", Toast.LENGTH_SHORT).show();
+
+                // Create custom list adapter with future events
+                // check for nulls before hand that futureEvents has shit although i think itll be fine without
+                // unless you want to make a "No events" textview appear
+                // set listview to have custom adapter
+                // if this takes a longer period of time put up a spinner and take it down when done
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     // When orientation changes we want to maintain the item in bottom nav
