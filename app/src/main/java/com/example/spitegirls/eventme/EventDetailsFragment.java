@@ -73,8 +73,8 @@ public class EventDetailsFragment extends Fragment{
             if(bundle.getSerializable("event") != null){
 
                 details = (Event) bundle.getSerializable("event");
-                String timeDetails = details.startTime;
-                String eventDate = getEventDate(timeDetails);
+//                String timeDetails = details.startTime;
+//                String eventDate = getEventDate(timeDetails);
                 // Set up info
                 title = (TextView) view.findViewById(R.id.title);
                 title.setText(details.name);
@@ -82,7 +82,7 @@ public class EventDetailsFragment extends Fragment{
                 description.setText(details.description);
 
                 startDate = (TextView) view.findViewById(R.id.event_date);
-                startDate.setText(eventDate);
+                startDate.setText(details.getReadableDate());
 
                 TextView placeName = (TextView) view.findViewById(R.id.place_Name);
                 if(!(details.placeName == null) &&!(details.placeName.isEmpty())){
@@ -119,6 +119,8 @@ public class EventDetailsFragment extends Fragment{
                     findOnMap = (Button) view.findViewById(R.id.find_on_map);
                     findOnMap.setVisibility(View.GONE);
                 }
+
+                Log.d("CALENDAR IS", details.getCalendarDate().toString());
             }
         }
 
@@ -182,49 +184,6 @@ public class EventDetailsFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_event_details, container, false);
-    }
-
-    private String getEventDate(String timeDetails) {
-        String split[] = timeDetails.split("T");
-        String data[] = split[0].split("-");
-
-        int date = Integer.parseInt(data[2]);
-        int month = Integer.parseInt(data[1]);
-
-        // Format date
-        if(date % 10 == 1 && date != 11) {
-            data[2] = data[2] + "st";
-        } else if(date % 10 == 2 && date != 12) {
-            data[2] = data[2] + "nd";
-        } else if(date % 10 == 3 && date != 13) {
-            data[2] = data[2] + "rd";
-        } else {
-            data[2] = data[2] + "th";
-        }
-
-        // Format month
-        switch(month) {
-            case 1 : data[1] = "January"; break;
-            case 2 : data[1] = "February"; break;
-            case 3 : data[1] = "March"; break;
-            case 4 : data[1] = "April"; break;
-            case 5 : data[1] = "May"; break;
-            case 6 : data[1] = "June"; break;
-            case 7 : data[1] = "July"; break;
-            case 8 : data[1] = "August"; break;
-            case 9 : data[1] = "September"; break;
-            case 10 : data[1] = "October"; break;
-            case 11 : data[1] = "November"; break;
-            case 12 : data[1] = "December"; break;
-        }
-
-        String formattedDate = data[2] + " " + data[1] + " " + data[0];
-
-        String time[] = split[1].split(":");
-
-        String formattedTime = " at " + time[0] + ":" + time[1];
-
-        return formattedDate + formattedTime;
     }
 
     private void getFirebasePhotos(){

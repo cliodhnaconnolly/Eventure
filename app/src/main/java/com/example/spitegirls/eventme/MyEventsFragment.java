@@ -29,7 +29,7 @@ public class MyEventsFragment extends Fragment {
     private ListView listView;
     public ProgressBar spinner;
     // We no longer need this to have such a scope
-//    private ArrayList<Event> eventList;
+    private ArrayList<Event> eventList;
 
     private ArrayList<Event> pastEvents;
     private ArrayList<Event> futureEvents;
@@ -89,7 +89,8 @@ public class MyEventsFragment extends Fragment {
             Bundle bundle = this.getArguments();
 
             if(bundle.getSerializable("arraylist") != null){
-                ArrayList<Event> eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
+//                ArrayList<Event> eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
+                eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
 
                 // Sort list and populate pastEvents and FutureEvents
 

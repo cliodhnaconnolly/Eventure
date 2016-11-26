@@ -169,27 +169,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             }
         });
 
-//        Uri file = Uri.fromFile(new File("path/to/images/rivers.jpg"));
-//        StorageReference riversRef = mStorageRef.child("images/rivers.jpg");
-//
-//        riversRef.putFile(file)
-//                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//                    @Override
-//                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                        // Get a URL to the uploaded content
-//                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
-//                    }
-//                })
-//                .addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception exception) {
-//                        // Handle unsuccessful uploads
-//                        // ...
-//                    }
-//                });
-
-
-
         view.findViewById(R.id.buttonSubmit).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -338,11 +317,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         Calendar today = Calendar.getInstance();
 
         // Inputted date
-        Calendar input = Calendar.getInstance();
-        String[] splitDate = date.split("-");
-        String[] splitTime = time.split(":");
-
-        input = parseDateTime(date, time);
+        Calendar input = parseDateTime(date, time);
 
         if(today.after(input)) {
             return false;
@@ -358,9 +333,9 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         String[] splitTime = time.split(":");
 
         // Parsing inputted Date
-        int day = Integer.parseInt(splitDate[0]);
+        int day = Integer.parseInt(splitDate[2]);
         int month = Integer.parseInt(splitDate[1]);
-        int year = Integer.parseInt(splitDate[2]);
+        int year = Integer.parseInt(splitDate[0]);
 
         int hours = Integer.parseInt(splitTime[0]);
         int minutes = Integer.parseInt(splitTime[1]);
