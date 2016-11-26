@@ -73,23 +73,32 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
 
-        profileTracker = new ProfileTracker() {
-            @Override
-            protected void onCurrentProfileChanged(Profile oldProfile, Profile newProfile) {
-                nextActivity(newProfile);
-            }
-        };
+//        profileTracker = new ProfileTracker() {
+//            @Override
+//            protected void onCurrentProfileChanged(Profile oldProfile, Profile newProfile) {
+//                nextActivity(newProfile);
+//            }
+//        };
         accessTokenTracker.startTracking();
-        profileTracker.startTracking();
+//        profileTracker.startTracking();
 
         LoginButton loginButton = (LoginButton)findViewById(R.id.login_button);
         callback = new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                AccessToken accessToken = loginResult.getAccessToken();
-                Profile profile = Profile.getCurrentProfile();
-                //getPermissions();
-                nextActivity(profile);
+                if(Profile.getCurrentProfile() == null) {
+                    profileTracker = new ProfileTracker() {
+                        @Override
+                        protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
+                            Log.d("Got new profile", currentProfile.getFirstName());
+                            profileTracker.stopTracking();
+                            nextActivity(currentProfile);
+                        }
+                    };
+                } else {
+                    Profile profile = Profile.getCurrentProfile();
+                    nextActivity(profile);
+                }
                 Toast.makeText(getApplicationContext(), "Logging in...", Toast.LENGTH_SHORT).show();    }
 
             @Override
