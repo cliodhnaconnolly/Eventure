@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "151187382893-sbj8i0epq7qtfb0qh8nspbgnrenle4ba.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.spitegirls.eventme",
+            "certificate_hash": "E613D9B9BBF0929FE5E968585EF3AE8CD59D2468"
+          }
+        },
+        {
           "client_id": "151187382893-fget6n3hag304jfqtqp24hqb9onugh25.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "151187382893-fget6n3hag304jfqtqp24hqb9onugh25.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

@@ -4,11 +4,14 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.IntegerRes;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.DialogFragment;
 import android.text.format.DateFormat;
@@ -31,7 +34,13 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -39,6 +48,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
+import static android.content.Intent.createChooser;
 
 public class CreateEventFragment extends android.support.v4.app.Fragment {
 
@@ -60,17 +71,27 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     private LinearLayout buttonLayout;
 
     public static int EVENT_NAME_CHAR_LIMIT = 72;
+    public static int PICK_IMAGE_REQUEST = 1;
+
+    private boolean photoSubmitted;
 
     private EditText name;
     private EditText description;
     private PlaceAutocompleteFragment autocompleteFragment;
     private Place place;
 
+    private Intent intent;
+
+
+//    private StorageReference mStorageRef;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        photoSubmitted = false;
         date = Calendar.getInstance();
         dateAndTime = Calendar.getInstance();
+//        mStorageRef = FirebaseStorage.getInstance().getReference();
         return inflater.inflate(R.layout.fragment_create_event, container, false);
     }
 
@@ -129,6 +150,45 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             }
         });
 
+        // Gonna add a button but
+        Button uploadButton = (Button) view.findViewById(R.id.uploadButton);
+        uploadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                photoSubmitted = true;
+                intent = new Intent();
+                // Show only images, no videos or anything else
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+//                intent = Intent.createChooser(intent, "Select Picture");
+                // Always show the chooser (if there are multiple options available)
+                getActivity().startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+
+                Button button = (Button) view.findViewById(R.id.uploadButton);
+                button.setText("Photo selected");
+            }
+        });
+
+//        Uri file = Uri.fromFile(new File("path/to/images/rivers.jpg"));
+//        StorageReference riversRef = mStorageRef.child("images/rivers.jpg");
+//
+//        riversRef.putFile(file)
+//                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                    @Override
+//                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                        // Get a URL to the uploaded content
+//                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
+//                    }
+//                })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception exception) {
+//                        // Handle unsuccessful uploads
+//                        // ...
+//                    }
+//                });
+
+
 
         view.findViewById(R.id.buttonSubmit).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -167,7 +227,8 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                         isInFuture(date, time)) {
                     Event event = createEvent(eventName, place, description.getText().toString(),
                             parseDateTime(date, time));
-                    ((MainActivity) getActivity()).writeNewEvent(event);
+//                    getActivity().startActivityForResult(intent, PICK_IMAGE_REQUEST);
+                    ((MainActivity) getActivity()).writeNewEvent(event, photoSubmitted);
 
                     // Resets fields
                     name.setText("");

@@ -79,13 +79,21 @@
             <!--Background Description Layout-->
             <!--http://www.androidaccessories.net/visual-cues-with-androids-multi-line-edittext-widget-2.html-->
 
+            <Button
+                android:text="@string/upload_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/buttonLayout"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/uploadButton" />
+
             <EditText
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
                 android:id="@+id/editTextDescription"
                 android:lines="5"
                 android:textSize="14sp"
-                android:layout_below="@+id/buttonLayout"
+                android:layout_below="@+id/uploadButton"
                 android:layout_width="match_parent"
                 android:background="@drawable/rectangle"
                 android:textAlignment="center"

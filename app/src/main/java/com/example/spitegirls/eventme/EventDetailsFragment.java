@@ -6,7 +6,10 @@ import android.content.pm.LabeledIntent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.text.Html;
@@ -19,6 +22,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ShareActionProvider;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +40,12 @@ public class EventDetailsFragment extends Fragment{
     private TextView description;
     private TextView startDate;
     private Button findOnMap;
+    private ImageView cover;
+    private View line;
+    private TextView eventPhotos;
+
+    private StorageReference mStorageRef;
+    private StorageReference eventStorage;
 
     public static EventDetailsFragment newInstance(Bundle details) {
         EventDetailsFragment fragment = new EventDetailsFragment();
@@ -48,6 +65,9 @@ public class EventDetailsFragment extends Fragment{
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         if(this.getArguments() != null){
+            // Sets up storage reference
+            mStorageRef = FirebaseStorage.getInstance().getReference();
+
             Bundle bundle = this.getArguments();
 
             if(bundle.getSerializable("event") != null){
@@ -79,15 +99,20 @@ public class EventDetailsFragment extends Fragment{
                     country.setText(details.country);
                 } else { country.setVisibility(View.GONE); }
 
-                // Doesn't work yet but trying
-//                String source = (String) bundle.getSerializable("source");
-//                getCoverPhotoSource(details.get("id"));
-
+                cover = (ImageView) view.findViewById(R.id.cover_photo);
                 if( details.coverURL != null) {
-                    new DownloadImage((ImageView) view.findViewById(R.id.cover_photo)).execute(details.coverURL);
+                    new DownloadImage(cover).execute(details.coverURL);
                 } else {
                     Log.d("Source is ", "source is null");
                     view.findViewById(R.id.cover_photo).setVisibility(View.GONE);
+
+                    line = (View) view.findViewById(R.id.viewLine2);
+                    line.setVisibility(View.GONE);
+
+                    eventPhotos = (TextView) view.findViewById(R.id.event_photos);
+                    eventPhotos.setVisibility(View.GONE);
+                    // Might or might not be able to return value
+                    getFirebasePhotos();
                 }
 
                 if(details.longitude.equals("")){
@@ -202,38 +227,28 @@ public class EventDetailsFragment extends Fragment{
         return formattedDate + formattedTime;
     }
 
-    // Commenting out for the moment as it doesn't work but may be useful later
-    // Makes Facebook Graph API call to get specific event data
-//    private void getCoverPhotoSource(String id){
-//
-//        Bundle coverBundle = new Bundle();
-//        coverBundle.putString("fields", "cover,id");
-//        // Getting cover photo from event_id
-//        GraphRequest request = new GraphRequest(
-//                AccessToken.getCurrentAccessToken(),
-//                "/" + id,
-//                coverBundle,
-//                HttpMethod.GET,
-//                new GraphRequest.Callback() {
-//                    public void onCompleted(GraphResponse response) {
-//                        JSONObject responseJSONObject = response.getJSONObject();
-//                        Log.d("RESPONSE IS", "<" + responseJSONObject.toString() + ">");
-//                        if (responseJSONObject != null && responseJSONObject.has("cover")) {
-//                            try {
-////                                sources.put(responseJSONObject.getString("id"), responseJSONObject.getString("source"));
-//                                source = responseJSONObject.getString("source");
-//                                //Log.d("SORUCE IS NOW", "<" + source + ">");
-//                                //setDone(true);
-//
-//                            } catch (JSONException e) { e.printStackTrace(); }
-//                        } else {
-//                            Log.d("FALSE", "ALARM");
-//                        }
-//
-//                    }
-//                }
-//        );
-//        request.executeAsync();
-//    }
+    private void getFirebasePhotos(){
+
+//            File localFile = File.createTempFile("images/" + details.id, "jpg");
+//            eventStorage.getFile(localFile)
+        eventStorage = mStorageRef.child("photos/" + details.id);
+        final long ONE_MEGABYTE = 1024 * 1024;
+        eventStorage.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                cover.setImageBitmap(bitmap);
+                cover.setVisibility(View.VISIBLE);
+                line.setVisibility(View.VISIBLE);
+                eventPhotos.setVisibility(View.VISIBLE);
+            }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.d("FAILED", "to retrieve photo, id was " + details.id);
+            }
+        });
+
+    }
 
 }

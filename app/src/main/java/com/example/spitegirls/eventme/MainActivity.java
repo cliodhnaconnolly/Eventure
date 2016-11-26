@@ -3,11 +3,14 @@ package com.example.spitegirls.eventme;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.DialogFragment;
@@ -16,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -23,16 +27,23 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,13 +75,18 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     private DatabaseReference mEventReference;
     private DatabaseReference mIdReference;
 
+    private StorageReference mStorageRef;
+    private StorageReference eventStorage;
+
     private int currentId;
 
     private boolean MY_EVENTS_REQUESTED = false;
     private boolean NEARBY_EVENTS_REQUESTED = false;
-    private static final int NUMBER_OF_TASKS = 3;
+    private static final int NUMBER_OF_TASKS = 2;
 
     private AtomicInteger workCounter;
+
+    private Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +106,9 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         // Sets up database references
         mEventReference = FirebaseDatabase.getInstance().getReference();
         mIdReference = FirebaseDatabase.getInstance().getReference();
+
+        // Sets up storage reference
+        mStorageRef = FirebaseStorage.getInstance().getReference();
 
         FacebookSdk.sdkInitialize(getApplicationContext());
 
@@ -304,6 +323,25 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+//        Log.d("Request code", ""+requestCode);
+//
+//        Log.d("Result Code", "SHould be " + RESULT_OK + ", is " + requestCode);
+//        Log.d("IS DATA NOT NULL?", "" + (data != null));
+//        Log.d("IS GET DATA NOT NULL", "" + (data.getData() != null));
+        if (requestCode == CreateEventFragment.PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+
+            uri = data.getData();
+            Log.d("HELLO", "got photo");
+            Log.d("PATH IS", uri.getPath());
+
+        }
+
+    }
+
+
     public Long getFreshId(){
         Long newFreshId = Long.valueOf(currentId + 1);
         // Current ID should update once the following call is made
@@ -311,8 +349,32 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         return newFreshId;
     }
 
-    public void writeNewEvent(Event event) {
-        mEventReference.child("events").child(getFreshId().toString()).setValue(event);
+    public void writeNewEvent(Event event, boolean isPhotoSubmitted) {
+        String eventId = getFreshId().toString();
+        mEventReference.child("events").child(eventId).setValue(event);
+
+        if(isPhotoSubmitted) {
+            // Going to rewrite what is here each time
+            eventStorage = mStorageRef.child("photos/" + (eventId));
+
+            eventStorage.putFile(uri)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            // Get a URL to the uploaded content
+                            Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                            Log.d("GOOD JOB", "url is " + downloadUrl.toString());
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle unsuccessful uploads
+                            // ...
+                            Log.d("BAD JOB", "sad sad");
+                        }
+                    });
+        }
     }
 
     private void writeNewEvent(String description, String name, String id, String placeName, String country, String city, String startTime, String latitude, String longitude) {
@@ -366,14 +428,14 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                 }
                                 Log.d("FINISHED", "getExtraEventDetails");
 
-                                // Task is finished, decrement the counter
-                                int remainingTasks = workCounter.decrementAndGet();
-                                Log.d("Decrementing counter", "GetExtraEventDetails");
-                                // If all tasks are completed
-                                if(remainingTasks == 0) {
-                                    Log.d("No more tasks", "GetExtraEventDetails");
-                                    setCombinedEvents();
-                                }
+//                                // Task is finished, decrement the counter
+//                                int remainingTasks = workCounter.decrementAndGet();
+//                                Log.d("Decrementing counter", "GetExtraEventDetails");
+//                                // If all tasks are completed
+//                                if(remainingTasks == 0) {
+//                                    Log.d("No more tasks", "GetExtraEventDetails");
+//                                    setCombinedEvents();
+//                                }
                             }
                         }
                     }

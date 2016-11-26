@@ -16,6 +16,7 @@
     <string name="text_date">Pick a Date</string>
     <string name="text_time">Pick a Time</string>
     <string name="text_description">Tell us about your event&#8230;</string>
+    <string name="upload_photo">Upload a Photo</string>
 
     <string name="text_submit">Submit Event</string>
     <string name="text_please_note">Please note any event you submit here will be public and viewable by all users of Eventure</string>
