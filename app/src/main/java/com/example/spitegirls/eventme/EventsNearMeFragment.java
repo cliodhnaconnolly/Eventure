@@ -134,11 +134,11 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
                     Double longitude = Double.parseDouble(currEvent.longitude);
                     LatLng FirstEvent = new LatLng(latitude, longitude);
                     if (currEvent.placeName != null && currEvent.startTime != null) {
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Place: " + currEvent.placeName + ". Time: " + currEvent.startTime));
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Place: " + currEvent.placeName + ". Time: " + currEvent.getReadableDate()));
                         marker.setTag(currEvent);
                     }
                     else if(currEvent.placeName == null && currEvent.startTime != null) {
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Time: " + currEvent.startTime));
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Time: " + currEvent.getReadableDate()));
                         marker.setTag(currEvent);
                     }
                     else if(currEvent.placeName != null && currEvent.startTime == null){
@@ -197,7 +197,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
                 lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0.0f, this);
                 Log.d("IN ELSE", "HELLO");
             }
-
+            Log.d("Nothing", "skipped thing if map didnt load");
 
 //        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), ZOOM_TO_STREET_LEVEL));
 

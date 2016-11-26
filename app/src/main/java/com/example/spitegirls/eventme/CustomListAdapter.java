@@ -41,18 +41,12 @@ public class CustomListAdapter extends ArrayAdapter<Event> {
 
         if(event != null) {
             TextView textName = (TextView) v.findViewById(R.id.name);
-            TextView textStartTime = (TextView) v.findViewById(R.id.start_time);
-            TextView textId = (TextView) v.findViewById(R.id.id);
-            TextView textCity = (TextView) v.findViewById(R.id.city);
-
-//          ImageView eventIconView = (ImageView) rowView.findViewById(R.id.event_icon);
+            TextView textPlaceName = (TextView) v.findViewById(R.id.place_name);
+            TextView textTime = (TextView) v.findViewById(R.id.time);
 
             textName.setText(event.name);
-            textStartTime.setText(event.startTime);
-            textId.setText(event.id);
-            textCity.setText(event.city);
-
-//          new DownloadImage((ImageView) view.findViewById(R.id.event_icon)).execute(eventList.get(position).get("source"));
+            textPlaceName.setText(event.placeName);
+            textTime.setText(event.getReadableDate());
 
         }
 
