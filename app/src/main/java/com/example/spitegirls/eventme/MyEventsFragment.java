@@ -37,6 +37,9 @@ public class MyEventsFragment extends Fragment {
     private ArrayList<Event> pastEvents;
     private ArrayList<Event> futureEvents;
 
+    private MenuItem futureOption;
+    private MenuItem pastOption;
+
     public static MyEventsFragment newInstance(Bundle bundle) {
         MyEventsFragment fragment = new MyEventsFragment();
         if(bundle != null){
@@ -132,8 +135,7 @@ public class MyEventsFragment extends Fragment {
 
                         Bundle args = new Bundle();
                         // this needs to become futureEvents.get(i)
-                        MenuItem menuItem = (MenuItem) view.findViewById(R.id.menu_item_time_future);
-                        if(menuItem.isChecked()){
+                        if(futureOption.isChecked()){
                             args.putSerializable("event", futureEvents.get(i));
                         } else {
                             args.putSerializable("event", pastEvents.get(i));
@@ -160,6 +162,7 @@ public class MyEventsFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.time_frame, menu);
         super.onCreateOptionsMenu(menu, menuInflater);
+        futureOption = (MenuItem) menu.findItem(R.id.menu_item_time_future);
     }
 
     /**
