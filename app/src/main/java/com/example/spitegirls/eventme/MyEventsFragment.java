@@ -23,6 +23,9 @@ import android.widget.Toast;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class MyEventsFragment extends Fragment {
 
@@ -89,14 +92,34 @@ public class MyEventsFragment extends Fragment {
             Bundle bundle = this.getArguments();
 
             if(bundle.getSerializable("arraylist") != null){
-//                ArrayList<Event> eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
                 eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
-
+                futureEvents = new ArrayList<Event>();
+                pastEvents = new ArrayList<Event>();
                 // Sort list and populate pastEvents and FutureEvents
+                Calendar today = Calendar.getInstance();
+
+                for(int i = 0; i < eventList.size(); i++){
+                    if(today.after(eventList.get(i).getCalendarDate())) {
+                        pastEvents.add(eventList.get(i));
+                    }
+                    else{
+                        futureEvents.add(eventList.get(i));
+                    }
+                }
+
+                //Sorting list by date
+                Collections.sort(futureEvents, new Comparator<Event>() {
+                    public int compare(Event ev1, Event ev2) {
+                        if (ev2.startTime == null || ev1.startTime == null) return 0;
+                        return ev1.startTime.compareTo(ev2.startTime);
+                    }
+                });
+
+                 //Sort list and populate pastEvents and FutureEvents
 
 
                 // Default is future so populate futre in this adapter initially
-                CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, eventList);
+                CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, futureEvents);
                 listView.setAdapter(adapter);
                 spinner.setVisibility(View.INVISIBLE);
 
@@ -109,8 +132,7 @@ public class MyEventsFragment extends Fragment {
 
                         Bundle args = new Bundle();
                         // this needs to become futureEvents.get(i)
-                        // yes i know theres an error but ownt be when you populate lists
-                        args.putSerializable("event", eventList.get(i));
+                        args.putSerializable("event", futureEvents.get(i));
 
                         EventDetailsFragment eventFrag = EventDetailsFragment.newInstance(args);
                         getActivity().getSupportFragmentManager().beginTransaction()
