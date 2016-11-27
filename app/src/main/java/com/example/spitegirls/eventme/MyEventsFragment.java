@@ -2,8 +2,10 @@ package com.example.spitegirls.eventme;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -28,6 +30,9 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class MyEventsFragment extends Fragment {
+
+    SharedPreferences preference;
+    SharedPreferences.Editor editor;
 
     private ListView listView;
     public ProgressBar spinner;
@@ -59,6 +64,8 @@ public class MyEventsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        preference = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
+        editor = preference.edit();
 
     }
 
@@ -85,7 +92,7 @@ public class MyEventsFragment extends Fragment {
                 Log.d("NAVE", "lol");
                 ((MainActivity) getActivity()).refreshData();
             }
-                });
+                       });
         return view;
     }
 
@@ -120,34 +127,17 @@ public class MyEventsFragment extends Fragment {
 
                  //Sort list and populate pastEvents and FutureEvents
 
+                // First check existing state
+                boolean futureTrue = preference.getBoolean("futureEvents", true);
 
-                // Default is future so populate future in this adapter initially
-                CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, futureEvents);
-                listView.setAdapter(adapter);
-                spinner.setVisibility(View.INVISIBLE);
+                Log.d("FUTURE TRUE IS", "" + futureTrue);
 
-                // Adding functionality for user clicks
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        Log.d("INT I IS", Integer.toString(i));
-                        Log.d("LONG L IS", Long.toString(l));
-
-                        Bundle args = new Bundle();
-                        // this needs to become futureEvents.get(i)
-                        if(futureOption.isChecked()){
-                            args.putSerializable("event", futureEvents.get(i));
-                        } else {
-                            args.putSerializable("event", pastEvents.get(i));
-                        }
-                        
-                        EventDetailsFragment eventFrag = EventDetailsFragment.newInstance(args);
-                        getActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.my_frame, eventFrag)
-                                .addToBackStack(null)
-                                .commit();
-                    }
-                });
+                // Depending on saved preference we set up list
+                if(futureTrue){
+                    setUpList(futureEvents);
+                } else {
+                    setUpList(pastEvents);
+                }
 
             }
 
@@ -158,29 +148,54 @@ public class MyEventsFragment extends Fragment {
 
     }
 
+    private void setUpList(final ArrayList<Event> givenList) {
+        // Default is future so populate future in this adapter initially
+        CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, givenList);
+        listView.setAdapter(adapter);
+        spinner.setVisibility(View.INVISIBLE);
+
+        // Adding functionality for user clicks
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Log.d("INT I IS", Integer.toString(i));
+                Log.d("LONG L IS", Long.toString(l));
+
+                Bundle args = new Bundle();
+                args.putSerializable("event", givenList.get(i));
+
+                EventDetailsFragment eventFrag = EventDetailsFragment.newInstance(args);
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.my_frame, eventFrag)
+                        .addToBackStack(null)
+                        .commit();
+            }
+        });
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.time_frame, menu);
         super.onCreateOptionsMenu(menu, menuInflater);
         futureOption = (MenuItem) menu.findItem(R.id.menu_item_time_future);
+        pastOption = (MenuItem) menu.findItem(R.id.menu_item_time_past);
+
+        if(preference.getBoolean("futureEvents", true)){
+            futureOption.setChecked(true);
+        } else {
+            pastOption.setChecked(true);
+        }
     }
 
-    /**
-     * react to the user tapping/selecting an options menu item
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_time_past:
                 item.setChecked(true);
-                // REMOVE THIS TOAST AFTER TESTING
-                Toast.makeText(getActivity(), "MENU PAST CLICK", Toast.LENGTH_SHORT).show();
 
-                // Create custom list adapter with past events
-                // check for nulls before hand that pastEvents has shit although i think itll be fine without
-                // unless you want to make a "No events" textview appear
-                // set listview to have custom adapter
-                // if this takes a longer period of time put up a spinner and take it down when done
+                // Preference stored for future use
+                editor.putBoolean("futureEvents", false);
+                editor.commit();
 
                 if(pastEvents != null){
                     CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, pastEvents);
@@ -190,14 +205,11 @@ public class MyEventsFragment extends Fragment {
                 return true;
             case R.id.menu_item_time_future:
                 item.setChecked(true);
-                // REMOVE THIS TOAST AFTER TESTING
-                Toast.makeText(getActivity(), "MENU FUTURE CLICK", Toast.LENGTH_SHORT).show();
 
-                // Create custom list adapter with future events
-                // check for nulls before hand that futureEvents has shit although i think itll be fine without
-                // unless you want to make a "No events" textview appear
-                // set listview to have custom adapter
-                // if this takes a longer period of time put up a spinner and take it down when done
+                // Preference stored for future use
+                editor.putBoolean("futureEvents", true);
+                editor.commit();
+
                 if(futureEvents != null){
                     CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, futureEvents);
                     listView.setAdapter(adapter);
@@ -209,11 +221,10 @@ public class MyEventsFragment extends Fragment {
         }
     }
 
-    // When orientation changes we want to maintain the item in bottom nav
-    // Don't really need this cause 0 is default anyways
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+
 
         BottomNavigationView bottomNavigationView;
 
