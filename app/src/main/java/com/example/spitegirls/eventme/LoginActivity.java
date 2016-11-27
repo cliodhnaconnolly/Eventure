@@ -11,6 +11,8 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -87,12 +89,15 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 if(Profile.getCurrentProfile() == null) {
+                    final ProgressBar spinner = (ProgressBar) findViewById(R.id.spinnerLogin);
+                    spinner.setVisibility(View.VISIBLE);
                     profileTracker = new ProfileTracker() {
                         @Override
                         protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
                             Log.d("Got new profile", currentProfile.getFirstName());
                             profileTracker.stopTracking();
                             nextActivity(currentProfile);
+                            spinner.setVisibility(View.INVISIBLE);
                         }
                     };
                 } else {
