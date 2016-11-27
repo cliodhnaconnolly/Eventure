@@ -118,7 +118,7 @@ public class MyEventsFragment extends Fragment {
                  //Sort list and populate pastEvents and FutureEvents
 
 
-                // Default is future so populate futre in this adapter initially
+                // Default is future so populate future in this adapter initially
                 CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, futureEvents);
                 listView.setAdapter(adapter);
                 spinner.setVisibility(View.INVISIBLE);
@@ -132,8 +132,13 @@ public class MyEventsFragment extends Fragment {
 
                         Bundle args = new Bundle();
                         // this needs to become futureEvents.get(i)
-                        args.putSerializable("event", futureEvents.get(i));
-
+                        MenuItem menuItem = (MenuItem) view.findViewById(R.id.menu_item_time_future);
+                        if(menuItem.isChecked()){
+                            args.putSerializable("event", futureEvents.get(i));
+                        } else {
+                            args.putSerializable("event", pastEvents.get(i));
+                        }
+                        
                         EventDetailsFragment eventFrag = EventDetailsFragment.newInstance(args);
                         getActivity().getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.my_frame, eventFrag)
@@ -173,6 +178,12 @@ public class MyEventsFragment extends Fragment {
                 // unless you want to make a "No events" textview appear
                 // set listview to have custom adapter
                 // if this takes a longer period of time put up a spinner and take it down when done
+
+                if(pastEvents != null){
+                    CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, pastEvents);
+                    listView.setAdapter(adapter);
+                    spinner.setVisibility(View.INVISIBLE);
+                }
                 return true;
             case R.id.menu_item_time_future:
                 item.setChecked(true);
@@ -184,6 +195,11 @@ public class MyEventsFragment extends Fragment {
                 // unless you want to make a "No events" textview appear
                 // set listview to have custom adapter
                 // if this takes a longer period of time put up a spinner and take it down when done
+                if(futureEvents != null){
+                    CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, futureEvents);
+                    listView.setAdapter(adapter);
+                    spinner.setVisibility(View.INVISIBLE);
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
