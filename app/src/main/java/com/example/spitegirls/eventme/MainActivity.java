@@ -1,9 +1,11 @@
 package com.example.spitegirls.eventme;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -42,12 +44,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static android.R.attr.bitmap;
 import static com.facebook.GraphRequest.TAG;
 
 // This is the most useful thing I've found RE:fragments
@@ -86,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     private AtomicInteger workCounter;
 
-    private Uri uri;
+    private byte[] photo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -326,16 +332,21 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        Log.d("Request code", ""+requestCode);
-//
-//        Log.d("Result Code", "SHould be " + RESULT_OK + ", is " + requestCode);
-//        Log.d("IS DATA NOT NULL?", "" + (data != null));
-//        Log.d("IS GET DATA NOT NULL", "" + (data.getData() != null));
-        if (requestCode == CreateEventFragment.PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
-            uri = data.getData();
-            Log.d("HELLO", "got photo");
-            Log.d("PATH IS", uri.getPath());
+        if (requestCode == CreateEventFragment.PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri uri = data.getData();
+            try {
+                ContentResolver contentResolver = getContentResolver();
+                InputStream inputStream = contentResolver.openInputStream(uri);
+
+                // Compress image so can download from storage promptly
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 30, byteArrayOutputStream);
+
+                photo = byteArrayOutputStream.toByteArray();
+
+            } catch (FileNotFoundException e) { e.printStackTrace(); }
 
         }
 
@@ -356,8 +367,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         if(isPhotoSubmitted) {
             // Going to rewrite what is here each time
             eventStorage = mStorageRef.child("photos/" + (eventId));
-
-            eventStorage.putFile(uri)
+            eventStorage.putBytes(photo)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {

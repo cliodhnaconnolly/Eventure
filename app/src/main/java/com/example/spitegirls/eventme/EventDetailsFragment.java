@@ -188,20 +188,20 @@ public class EventDetailsFragment extends Fragment{
 
     private void getFirebasePhotos(){
 
-//            File localFile = File.createTempFile("images/" + details.id, "jpg");
-//            eventStorage.getFile(localFile)
         eventStorage = mStorageRef.child("photos/" + details.id);
+        // Buffer limit for download from storage to optimise performance
         final long ONE_MEGABYTE = 1024 * 1024;
         eventStorage.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
+                Log.d("GOT AN IMAGE", "" + bytes.length);
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 cover.setImageBitmap(bitmap);
                 cover.setVisibility(View.VISIBLE);
                 line.setVisibility(View.VISIBLE);
                 eventPhotos.setVisibility(View.VISIBLE);
             }
-                }).addOnFailureListener(new OnFailureListener() {
+        }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
                 Log.d("FAILED", "to retrieve photo, id was " + details.id);

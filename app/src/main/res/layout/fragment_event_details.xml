@@ -118,6 +118,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/cover_photo"
                     android:layout_gravity="center_horizontal"
+                    android:adjustViewBounds="true"
                     android:visibility="visible"/>
 
                 <Button
