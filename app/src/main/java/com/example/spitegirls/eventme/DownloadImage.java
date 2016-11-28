@@ -8,7 +8,7 @@ import android.widget.ImageView;
 
 import java.io.InputStream;
 
-
+// Given URL and ImageView downloads image and sets to display
 public class DownloadImage extends AsyncTask<String, Void, Bitmap> {
 
     ImageView bmImage;
