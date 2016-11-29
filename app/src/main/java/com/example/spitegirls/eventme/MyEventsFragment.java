@@ -108,6 +108,8 @@ public class MyEventsFragment extends Fragment {
                 // Sort list and populate pastEvents and FutureEvents
                 Calendar today = Calendar.getInstance();
 
+                Log.d("CALENDAR DATE IS", today.toString());
+
                 for(int i = 0; i < eventList.size(); i++){
                     if(today.after(eventList.get(i).getCalendarDate())) {
                         pastEvents.add(eventList.get(i));
@@ -156,7 +158,6 @@ public class MyEventsFragment extends Fragment {
     }
 
     private void setUpList(final ArrayList<Event> givenList) {
-        // Default is future so populate future in this adapter initially
         CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, givenList);
         listView.setAdapter(adapter);
         spinner.setVisibility(View.INVISIBLE);
@@ -205,8 +206,9 @@ public class MyEventsFragment extends Fragment {
                 editor.commit();
 
                 if(pastEvents != null){
-                    CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, pastEvents);
-                    listView.setAdapter(adapter);
+//                    CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, pastEvents);
+//                    listView.setAdapter(adapter);
+                    setUpList(pastEvents);
                     spinner.setVisibility(View.INVISIBLE);
                 }
                 return true;
@@ -218,8 +220,7 @@ public class MyEventsFragment extends Fragment {
                 editor.commit();
 
                 if(futureEvents != null){
-                    CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, futureEvents);
-                    listView.setAdapter(adapter);
+                    setUpList(futureEvents);
                     spinner.setVisibility(View.INVISIBLE);
                 }
                 return true;

@@ -121,12 +121,12 @@
                     android:adjustViewBounds="true"
                     android:visibility="visible"/>
 
-                <Button
-                    android:text="@string/find_on_map"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:id="@+id/find_on_map" />
+                <!--<Button-->
+                    <!--android:text="@string/find_on_map"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_gravity="center_horizontal"-->
+                    <!--android:id="@+id/find_on_map" />-->
 
 
             </LinearLayout>
