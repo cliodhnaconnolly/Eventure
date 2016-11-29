@@ -368,6 +368,11 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
         } else {
             Toast.makeText(this, "Permission denied", Toast.LENGTH_LONG).show();
+
+            // If permission denied disable EventsNearMeFragment
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.my_frame, new ErrorFragment());
+            transaction.commit();
         }
         return;
     }

@@ -84,6 +84,11 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     @Override
     public void onStart() {
+
+        checkGPS(LOCATION_IS_NOT_ON);
+        mGoogleApiClient.connect();
+        super.onStart();
+
         // Checks if locations permission given if not request it
         if (ContextCompat.checkSelfPermission(getActivity(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -94,25 +99,31 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
                         0);  // MAKE THIS A CONSTANT PLZ LIKE LOCATION_IS_NOT_ON
         }
 
-        checkGPS(LOCATION_IS_NOT_ON);
-        mGoogleApiClient.connect();
+//        checkGPS(LOCATION_IS_NOT_ON);
+//        mGoogleApiClient.connect();
 
-        super.onStart();
+//        super.onStart();
     }
 
-    // Needed in MainActivity not here
 //    @Override
 //    public void onRequestPermissionsResult(int requestCode,
 //                                           String permissions[], int[] grantResults) {
-//        Log.d("I HAVE BEEN SUMMONED", "EventsNearMe");
+//        Log.d("I HAVE BEEN SUMMONED", "MainActivity");
+//        Log.d("GRaNT RESULT SIS NULL", "" + (grantResults == null));
+//        Log.d("GRANT RESULTS LENGTH IS", "" + grantResults.length);
 //        // If request is cancelled, the result arrays are empty.
 //        if (grantResults.length > 0
 //                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 //
-//            Toast.makeText(mContext, "Permission granted", Toast.LENGTH_LONG);
+//            Toast.makeText(getContext(), "Permission granted", Toast.LENGTH_LONG).show();
 //
 //        } else {
-//            Toast.makeText(mContext, "Permission denied", Toast.LENGTH_LONG);
+//            Toast.makeText(getContext(), "Permission denied", Toast.LENGTH_LONG).show();
+//
+//            // If permission denied disable EventsNearMeFragment
+//            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+//            transaction.replace(R.id.my_frame, new ErrorFragment());
+//            transaction.commitAllowingStateLoss();
 //        }
 //        return;
 //    }
