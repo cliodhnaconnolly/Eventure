@@ -8,14 +8,9 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Address;
 import android.location.Geocoder;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.IntegerRes;
-import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.test.suitebuilder.annotation.Suppress;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,33 +28,24 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.location.places.ui.SupportPlaceAutocompleteFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import com.google.android.gms.vision.text.Line;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
-import static android.content.Intent.createChooser;
-import static com.google.android.gms.fitness.data.zzr.Su;
+import static com.example.spitegirls.eventme.R.id.buttonLayout;
 
 public class CreateEventFragment extends android.support.v4.app.Fragment {
 
-    public static CreateEventFragment newInstance() {
-        return new CreateEventFragment();
-    }
+//    public static CreateEventFragment newInstance() {
+//        return new CreateEventFragment();
+//    }
 
     public CreateEventFragment() {
 
@@ -69,10 +55,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     public Calendar dateAndTime;
     public static Button dateButton;
     public static Button timeButton;
-
-    private RelativeLayout innerLayout;
-    private RelativeLayout outerLayout;
-    private LinearLayout buttonLayout;
 
     public static int EVENT_NAME_CHAR_LIMIT = 72;
     public static int PICK_IMAGE_REQUEST = 1;
@@ -86,6 +68,19 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
     private Intent intent;
 
+    @Override
+    public void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState == null){
+            autocompleteFragment = new SupportPlaceAutocompleteFragment();
+
+            //add child fragment
+            getChildFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.place_autocomplete_fragment, autocompleteFragment, "tag")
+                    .commit();
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -93,28 +88,15 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         photoSubmitted = false;
         date = Calendar.getInstance();
         dateAndTime = Calendar.getInstance();
-        if (savedInstanceState == null){
-            autocompleteFragment = new SupportPlaceAutocompleteFragment();
 
-            //add child fragment
-            getChildFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.place_autocomplete_fragment, autocompleteFragment, "tag")
-                    .commit();
-//                    autocompleteFragment.setText("");
-//                    autocompleteFragment.setHint(getString(R.string.text_location));
-
-
-
-        }
-//        mStorageRef = FirebaseStorage.getInstance().getReference();
         return inflater.inflate(R.layout.fragment_create_event, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+
         // We want to hide the keyboard when the user selects somewhere else on the screen
-        outerLayout = (RelativeLayout) view.findViewById(R.id.outerRelative);
+        RelativeLayout outerLayout = (RelativeLayout) view.findViewById(R.id.outerRelative);
         outerLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
@@ -123,7 +105,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             }
         });
 
-        innerLayout = (RelativeLayout) view.findViewById(R.id.innerRelative);
+        RelativeLayout innerLayout = (RelativeLayout) view.findViewById(R.id.innerRelative);
         innerLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
@@ -132,7 +114,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             }
         });
 
-        buttonLayout = (LinearLayout) view.findViewById(R.id.buttonLayout);
+        LinearLayout buttonLayout = (LinearLayout) view.findViewById(R.id.buttonLayout);
         buttonLayout.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -147,6 +129,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         name = (EditText) view.findViewById(R.id.editTextEventName);
         description = (EditText) view.findViewById(R.id.editTextDescription);
 
+
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener(){
             @Override
             public void onPlaceSelected(Place selectedPlace) {
@@ -160,8 +143,15 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             }
         });
 
-//                            autocompleteFragment.setText("");
-//                    autocompleteFragment.setHint(getString(R.string.text_location));
+        Log.d("IS AUTOCOMPLETE NULL", "" + (autocompleteFragment == null));
+        Log.d("IS GET VIEW NULL", "" + (autocompleteFragment.getView() == null));
+        // Should work but seems problem is autocompleteFragment.onCreateView hasnt finished yet and short
+        // of making a new class that inherits from it we cant do anything
+//
+//        EditText prompt = (EditText) autocompleteFragment.getView().findViewById(R.id.place_autocomplete_search_input);
+//        Log.d("IS PROMPT NULL", "" + (prompt == null));
+//        prompt.setText("");
+//        prompt.setHint(getString(R.string.text_location));
 
 
         // Gonna add a button but
@@ -171,11 +161,9 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             public void onClick(View view) {
                 photoSubmitted = true;
                 intent = new Intent();
-                // Show only images, no videos or anything else
+                // Only want images
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-//                intent = Intent.createChooser(intent, "Select Picture");
-                // Always show the chooser (if there are multiple options available)
                 getActivity().startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
 
                 Button button = (Button) view.findViewById(R.id.uploadButton);
@@ -194,23 +182,17 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                 String date = dateButton.getText().toString();
                 if(!isValidDate(date)) {
                     dateButton.requestFocus();
-                    //dateButton.setError(getString(R.string.error_date));
-                    // Doesn't seem to pop up so...
                     Toast.makeText(getContext(), getString(R.string.error_date), Toast.LENGTH_LONG).show();
                 }
 
                 final String time = timeButton.getText().toString();
                 if(!isValidTime(time)) {
                     timeButton.setError(getString(R.string.error_time));
-                    // Doesn't seem to pop up so...
                     Toast.makeText(getContext(), getString(R.string.error_time), Toast.LENGTH_LONG).show();
                 }
 
                 // Don't want to overload with errors
                 if(!isInFuture(date, time) && isValidTime(time) && isValidDate(date)) {
-                    //dateButton.requestFocus();
-                    //dateButton.setError(getString(R.string.error_date_time));
-                    // Doesn't seem to pop up so...
                     Toast.makeText(getContext(), getString(R.string.error_date_time),
                             Toast.LENGTH_LONG).show();
                 }
@@ -218,16 +200,18 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                 // If the data given is good continue with creation of event
                 if(isValidName(eventName) && isValidDate(date) && isValidTime(time) &&
                         isInFuture(date, time)) {
+
+                    // We allow users to submit location-less events and events without photos
+                    // as we feel these are not necessary to event creation
                     Event event = createEvent(eventName, place, description.getText().toString(),
                             parseDateTime(date, time));
-//                    getActivity().startActivityForResult(intent, PICK_IMAGE_REQUEST);
                     ((MainActivity) getActivity()).writeNewEvent(event, photoSubmitted);
 
                     // Resets fields
                     name.setText("");
                     name.setHint(getString(R.string.text_event_name));
-                    autocompleteFragment.setText("");
-                    autocompleteFragment.setHint(getString(R.string.text_location));
+//                    autocompleteFragment.setText("");
+//                    autocompleteFragment.setHint(getString(R.string.text_location));
                     dateButton.setText("");
                     dateButton.setHint(getString(R.string.text_date));
                     timeButton.setText("");
@@ -418,16 +402,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     }
 
     // When orientation changes we want to maintain the item in bottom nav
-
-
-    @Override
-    public void onDestroy(){
-//        autocompleteFragment = (PlaceAutocompleteFragment) getActivity().
-//                getSupportFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-//        this.getFragmentManager().beginTransaction().remove(CreateEventFragment.newInstance()).commit();
-        super.onDestroy();
-    }
-
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
