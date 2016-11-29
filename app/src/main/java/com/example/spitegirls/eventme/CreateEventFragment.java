@@ -14,6 +14,7 @@ import android.support.annotation.IntegerRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,6 +34,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.location.places.ui.SupportPlaceAutocompleteFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -77,20 +79,30 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
     private EditText name;
     private EditText description;
-    private PlaceAutocompleteFragment autocompleteFragment;
+    private SupportPlaceAutocompleteFragment autocompleteFragment;
     private Place place;
 
     private Intent intent;
 
 
 //    private StorageReference mStorageRef;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         photoSubmitted = false;
         date = Calendar.getInstance();
         dateAndTime = Calendar.getInstance();
+        if (savedInstanceState == null){
+            autocompleteFragment = new SupportPlaceAutocompleteFragment();
+
+            //add child fragment
+            getChildFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.place_autocomplete_fragment, autocompleteFragment, "tag")
+                    .commit();
+//                    autocompleteFragment.setText("");
+//                    autocompleteFragment.setHint(getString(R.string.text_location));
+        }
 //        mStorageRef = FirebaseStorage.getInstance().getReference();
         return inflater.inflate(R.layout.fragment_create_event, container, false);
     }
@@ -131,12 +143,11 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         name = (EditText) view.findViewById(R.id.editTextEventName);
         description = (EditText) view.findViewById(R.id.editTextDescription);
 
-        autocompleteFragment = (PlaceAutocompleteFragment) getActivity().
-                getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+//        autocompleteFragment = (SupportPlaceAutocompleteFragment) getActivity().
+//                getSupportFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
 
-        autocompleteFragment.setText("");
-        autocompleteFragment.setHint(getString(R.string.text_location));
 
+//
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener(){
             @Override
             public void onPlaceSelected(Place selectedPlace) {
@@ -404,6 +415,16 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     }
 
     // When orientation changes we want to maintain the item in bottom nav
+
+
+    @Override
+    public void onDestroy(){
+//        autocompleteFragment = (PlaceAutocompleteFragment) getActivity().
+//                getSupportFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+//        this.getFragmentManager().beginTransaction().remove(CreateEventFragment.newInstance()).commit();
+        super.onDestroy();
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
