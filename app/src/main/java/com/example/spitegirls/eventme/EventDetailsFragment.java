@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ShareActionProvider;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
@@ -39,13 +41,11 @@ public class EventDetailsFragment extends Fragment{
     private TextView title;
     private TextView description;
     private TextView startDate;
-    private Button findOnMap;
     private ImageView cover;
     private View line;
     private TextView eventPhotos;
 
     private StorageReference mStorageRef;
-    private StorageReference eventStorage;
 
     public static EventDetailsFragment newInstance(Bundle details) {
         EventDetailsFragment fragment = new EventDetailsFragment();
@@ -59,7 +59,6 @@ public class EventDetailsFragment extends Fragment{
     }
 
     public EventDetailsFragment() {
-
     }
 
     @Override
@@ -73,8 +72,7 @@ public class EventDetailsFragment extends Fragment{
             if(bundle.getSerializable("event") != null){
 
                 details = (Event) bundle.getSerializable("event");
-//                String timeDetails = details.startTime;
-//                String eventDate = getEventDate(timeDetails);
+
                 // Set up info
                 title = (TextView) view.findViewById(R.id.title);
                 title.setText(details.name);
@@ -115,10 +113,28 @@ public class EventDetailsFragment extends Fragment{
                     getFirebasePhotos();
                 }
 
-                if(details.longitude.equals("")){
-                    findOnMap = (Button) view.findViewById(R.id.find_on_map);
-                    findOnMap.setVisibility(View.GONE);
-                }
+//                Button findOnMap = (Button) view.findViewById(R.id.find_on_map);
+//                if(details.longitude.equals("")){
+//                    findOnMap.setVisibility(View.GONE);
+//                } else {
+//                    findOnMap.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View view) {
+//                            Bundle mapBundle = new Bundle();
+//                            mapBundle.putString("latitude", details.latitude);
+//                            mapBundle.putString("longitude", details.longitude);
+//
+//                            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+//                            EventsNearMeFragment eventFrag = EventsNearMeFragment.newInstance(mapBundle);
+//                            transaction.replace(R.id.my_frame, eventFrag);
+//                            transaction.commit();
+//
+//                            // Problem is EventsNearMe needs the combinedList from main
+//                            // I could steal this from main but its ugly
+//                            // We dont have access here
+//                        }
+//                    });
+//                }
 
                 Log.d("CALENDAR IS", details.getCalendarDate().toString());
             }
@@ -187,8 +203,7 @@ public class EventDetailsFragment extends Fragment{
     }
 
     private void getFirebasePhotos(){
-
-        eventStorage = mStorageRef.child("photos/" + details.id);
+        StorageReference eventStorage = mStorageRef.child("photos/" + details.id);
         // Buffer limit for download from storage to optimise performance
         final long ONE_MEGABYTE = 1024 * 1024;
         eventStorage.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
