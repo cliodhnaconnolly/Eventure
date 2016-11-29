@@ -18,6 +18,7 @@
     <string name="text_time">Pick a Time</string>
     <string name="text_description">Tell us about your event&#8230;</string>
     <string name="upload_photo">Upload a Photo</string>
+    <string name="search">Search</string>
 
     <string name="text_submit">Submit Event</string>
     <string name="text_please_note">Please note any event you submit here will be public and viewable by all users of Eventure</string>
@@ -31,7 +32,6 @@
     <string name="text_log_out">Log Out</string>
     <string name="text_switch">Change Theme Color</string>
 
-
     <!--Error Strings-->
     <string name="no_internet">No connections available</string>
     <string name="no_location">No location available</string>
@@ -43,7 +43,4 @@
     <!--Event Details Strings-->
     <string name="event_photos">Event Photos</string>
     <string name="find_on_map">Find on Map</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

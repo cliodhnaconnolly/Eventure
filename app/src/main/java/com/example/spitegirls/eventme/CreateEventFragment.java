@@ -210,8 +210,8 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                     // Resets fields
                     name.setText("");
                     name.setHint(getString(R.string.text_event_name));
-//                    autocompleteFragment.setText("");
-//                    autocompleteFragment.setHint(getString(R.string.text_location));
+                    autocompleteFragment.setText("");
+                    autocompleteFragment.setHint(getString(R.string.search));
                     dateButton.setText("");
                     dateButton.setHint(getString(R.string.text_date));
                     timeButton.setText("");
