@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -22,6 +23,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -352,6 +354,23 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        Log.d("I HAVE BEEN SUMMONED", "MainActivity");
+        Log.d("GRaNT RESULT SIS NULL", "" + (grantResults == null));
+        Log.d("GRANT RESULTS LENGTH IS", "" + grantResults.length);
+        // If request is cancelled, the result arrays are empty.
+        if (grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            Toast.makeText(this, "Permission granted", Toast.LENGTH_LONG).show();
+
+        } else {
+            Toast.makeText(this, "Permission denied", Toast.LENGTH_LONG).show();
+        }
+        return;
+    }
 
     public Long getFreshId(){
         Long newFreshId = Long.valueOf(currentId + 1);

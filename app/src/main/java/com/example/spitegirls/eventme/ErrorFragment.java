@@ -77,6 +77,15 @@ public class ErrorFragment extends Fragment {
             }
         }
 
+        // ELSE
+        // (NO ARGUMENTS MEAN NO TAP TO RETRY BUT YES LOCATION
+        // {
+        // tapToRetry.setVisibility(View.GONE)
+        // noLocationImage.setVisibility(View.VISIBLE)
+        // noLocationText.setVisibility(View.VISIBLE)
+        // return; if possibly otherwise doesnt matter, we can have onClickListener OR Move onCLickListener to inside if(this.getArgs != null)
+        // }
+
         // Set up button listener here
         tapToRetry.setOnClickListener(new View.OnClickListener() {
             @Override
