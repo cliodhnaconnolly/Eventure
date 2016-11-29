@@ -262,9 +262,14 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             }
         }
 
-        // Making the calendar format look more familiar
-        SimpleDateFormat simpleDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
-        String startTime = simpleDate.format(date.getTime());
+//        // Making the calendar format look more familiar
+//        SimpleDateFormat simpleDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+//        String startTime = simpleDate.format(date.getTime());
+
+        String startTime = date.get(Calendar.YEAR) + "-" + (date.get(Calendar.MONTH)+1) + "-"
+                + date.get(Calendar.DAY_OF_MONTH) + "T" + date.get(Calendar.HOUR_OF_DAY) + ":"
+                + date.get(Calendar.MINUTE) + ":" + date.get(Calendar.SECOND);
+        Log.d("START TIME IS", startTime);
 
         return new Event(description, name, ((MainActivity) getActivity()).getFreshId().toString(), placeName, country,
                 city, startTime, latitude, longitude);

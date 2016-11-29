@@ -172,6 +172,8 @@ public class MyEventsFragment extends Fragment {
                 Bundle args = new Bundle();
                 args.putSerializable("event", givenList.get(i));
 
+                Log.d("TIME IS", givenList.get(i).getCalendarDate().toString());
+
                 EventDetailsFragment eventFrag = EventDetailsFragment.newInstance(args);
                 getActivity().getSupportFragmentManager().beginTransaction()
                         .replace(R.id.my_frame, eventFrag)
