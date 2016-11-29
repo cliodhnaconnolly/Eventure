@@ -39,15 +39,12 @@
                 android:textSize="14sp"
                 android:hint="@string/text_event_name" />
 
-            <fragment
+            <FrameLayout
                 android:id="@+id/place_autocomplete_fragment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text"
-                android:hint="@string/text_location"
                 android:layout_below="@+id/editTextEventName"
-                android:name="com.google.android.gms.location.places.ui.SupportPlaceAutocompleteFragment"
-                tools:layout="@layout/place_autocomplete_fragment" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

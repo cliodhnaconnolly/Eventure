@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.test.suitebuilder.annotation.Suppress;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -52,6 +53,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import static android.content.Intent.createChooser;
+import static com.google.android.gms.fitness.data.zzr.Su;
 
 public class CreateEventFragment extends android.support.v4.app.Fragment {
 
@@ -85,7 +87,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     private Intent intent;
 
 
-//    private StorageReference mStorageRef;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -98,10 +99,13 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             //add child fragment
             getChildFragmentManager()
                     .beginTransaction()
-                    .add(R.id.place_autocomplete_fragment, autocompleteFragment, "tag")
+                    .replace(R.id.place_autocomplete_fragment, autocompleteFragment, "tag")
                     .commit();
 //                    autocompleteFragment.setText("");
 //                    autocompleteFragment.setHint(getString(R.string.text_location));
+
+
+
         }
 //        mStorageRef = FirebaseStorage.getInstance().getReference();
         return inflater.inflate(R.layout.fragment_create_event, container, false);
@@ -143,11 +147,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         name = (EditText) view.findViewById(R.id.editTextEventName);
         description = (EditText) view.findViewById(R.id.editTextDescription);
 
-//        autocompleteFragment = (SupportPlaceAutocompleteFragment) getActivity().
-//                getSupportFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-
-
-//
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener(){
             @Override
             public void onPlaceSelected(Place selectedPlace) {
@@ -160,6 +159,10 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                 Log.i("TAG", "An error occurred: " + status);
             }
         });
+
+//                            autocompleteFragment.setText("");
+//                    autocompleteFragment.setHint(getString(R.string.text_location));
+
 
         // Gonna add a button but
         Button uploadButton = (Button) view.findViewById(R.id.uploadButton);
