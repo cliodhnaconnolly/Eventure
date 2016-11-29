@@ -100,23 +100,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         super.onStart();
     }
 
-    // Needed in MainActivity not here
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode,
-//                                           String permissions[], int[] grantResults) {
-//        Log.d("I HAVE BEEN SUMMONED", "EventsNearMe");
-//        // If request is cancelled, the result arrays are empty.
-//        if (grantResults.length > 0
-//                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//
-//            Toast.makeText(mContext, "Permission granted", Toast.LENGTH_LONG);
-//
-//        } else {
-//            Toast.makeText(mContext, "Permission denied", Toast.LENGTH_LONG);
-//        }
-//        return;
-//    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -340,13 +323,13 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
                                 Bundle bundle = new Bundle();
                                 bundle.putInt("appearance", ErrorFragment.NO_LOCATION_APPEARANCE);
+                                //bundle.putInt("appearance", 3);
                                 ErrorFragment fragment = ErrorFragment.newInstance(bundle);
                                 transaction.replace(R.id.my_frame, fragment);
                                 transaction.commit();
                                 dialog.cancel();
                             }
                         });
-//                final AlertDialog alertMessage = alertDialog.create();
                 alertMessage = alertDialog.create();
                 alertMessage.show();
             }

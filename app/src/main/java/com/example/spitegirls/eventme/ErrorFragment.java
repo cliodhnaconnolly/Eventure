@@ -66,9 +66,7 @@ public class ErrorFragment extends Fragment {
         if(this.getArguments() != null){
             Bundle bundle = this.getArguments();
             error = bundle.getInt("appearance");
-            Log.d("WHAT YA PASSING", error.toString());
             if(error == NO_INTERNET_APPEARANCE){
-                Log.d("GETTIN IN THE IF", error.toString());
                 noInternetText.setVisibility(View.VISIBLE);
                 noInternetImage.setVisibility(View.VISIBLE);
             } else if(error == NO_LOCATION_APPEARANCE){
@@ -77,14 +75,13 @@ public class ErrorFragment extends Fragment {
             }
         }
 
-        // ELSE
-        // (NO ARGUMENTS MEAN NO TAP TO RETRY BUT YES LOCATION
-        // {
-        // tapToRetry.setVisibility(View.GONE)
-        // noLocationImage.setVisibility(View.VISIBLE)
-        // noLocationText.setVisibility(View.VISIBLE)
-        // return; if possibly otherwise doesnt matter, we can have onClickListener OR Move onCLickListener to inside if(this.getArgs != null)
-        // }
+        else{
+         tapToRetry.setVisibility(View.GONE);
+         noLocationImage.setVisibility(View.VISIBLE);
+         noLocationText.setVisibility(View.VISIBLE);
+         tapToRetry.setVisibility(View.VISIBLE);
+        return; //if possibly otherwise doesnt matter, we can have onClickListener OR Move onCLickListener to inside if(this.getArgs != null)
+        }
 
         // Set up button listener here
         tapToRetry.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +101,6 @@ public class ErrorFragment extends Fragment {
 
                     else if(error == NO_INTERNET_APPEARANCE && (con.getActiveNetworkInfo() != null &&
                             con.getActiveNetworkInfo().isConnectedOrConnecting())){
-                        Log.d(" AM I FUCKING HERE", error.toString());
                         getActivity().finish();
                         final Intent intent = getActivity().getIntent();
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);

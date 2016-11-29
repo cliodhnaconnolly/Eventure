@@ -357,9 +357,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
-        Log.d("I HAVE BEEN SUMMONED", "MainActivity");
-        Log.d("GRaNT RESULT SIS NULL", "" + (grantResults == null));
-        Log.d("GRANT RESULTS LENGTH IS", "" + grantResults.length);
         // If request is cancelled, the result arrays are empty.
         if (grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -367,6 +364,12 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
             Toast.makeText(this, "Permission granted", Toast.LENGTH_LONG).show();
 
         } else {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            Bundle bundle = new Bundle();
+            bundle.putInt("appearance", 2);
+            ErrorFragment fragment = ErrorFragment.newInstance(bundle);
+            transaction.replace(R.id.my_frame, fragment);
+            transaction.commit();
             Toast.makeText(this, "Permission denied", Toast.LENGTH_LONG).show();
         }
         return;
