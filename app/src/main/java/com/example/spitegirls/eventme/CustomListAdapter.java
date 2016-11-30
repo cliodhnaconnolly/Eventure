@@ -45,7 +45,16 @@ public class CustomListAdapter extends ArrayAdapter<Event> {
             TextView textTime = (TextView) v.findViewById(R.id.time);
 
             textName.setText(event.name);
-            textPlaceName.setText(event.placeName);
+            if(event.placeName != null && !event.placeName.isEmpty()){
+                textPlaceName.setText(event.placeName);
+            } else if(event.city != null && !event.city.isEmpty()) {
+                textPlaceName.setText(event.city);
+            } else if(event.country != null && !event.country.isEmpty()){
+                textPlaceName.setText(event.country);
+            } else {
+                textPlaceName.setText("No location given");
+            }
+
             textTime.setText(event.getReadableDate());
 
         }

@@ -76,8 +76,13 @@ public class EventDetailsFragment extends Fragment{
                 // Set up info
                 title = (TextView) view.findViewById(R.id.title);
                 title.setText(details.name);
+
                 description = (TextView) view.findViewById(R.id.description);
-                description.setText(details.description);
+                if(details.description != null && !details.description.isEmpty()){
+                    description.setText(details.description);
+                } else {
+                    description.setVisibility(View.GONE);
+                }
 
                 startDate = (TextView) view.findViewById(R.id.event_date);
                 startDate.setText(details.getReadableDate());
@@ -112,29 +117,6 @@ public class EventDetailsFragment extends Fragment{
                     // Might or might not be able to return value
                     getFirebasePhotos();
                 }
-
-//                Button findOnMap = (Button) view.findViewById(R.id.find_on_map);
-//                if(details.longitude.equals("")){
-//                    findOnMap.setVisibility(View.GONE);
-//                } else {
-//                    findOnMap.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View view) {
-//                            Bundle mapBundle = new Bundle();
-//                            mapBundle.putString("latitude", details.latitude);
-//                            mapBundle.putString("longitude", details.longitude);
-//
-//                            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-//                            EventsNearMeFragment eventFrag = EventsNearMeFragment.newInstance(mapBundle);
-//                            transaction.replace(R.id.my_frame, eventFrag);
-//                            transaction.commit();
-//
-//                            // Problem is EventsNearMe needs the combinedList from main
-//                            // I could steal this from main but its ugly
-//                            // We dont have access here
-//                        }
-//                    });
-//                }
 
                 Log.d("CALENDAR IS", details.getCalendarDate().toString());
             }

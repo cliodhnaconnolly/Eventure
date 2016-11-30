@@ -134,8 +134,6 @@ public class MyEventsFragment extends Fragment {
                     }
                 });
 
-                 //Sort list and populate pastEvents and FutureEvents
-
                 // First check existing state
                 boolean futureTrue = preference.getBoolean("futureEvents", true);
 
