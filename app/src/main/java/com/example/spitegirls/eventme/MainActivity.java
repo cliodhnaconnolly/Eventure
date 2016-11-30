@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     private StorageReference eventStorage;
 
     private int currentId;
+    private boolean permissionDenied;
 
     private boolean MY_EVENTS_REQUESTED = false;
     private boolean NEARBY_EVENTS_REQUESTED = false;
@@ -370,12 +371,29 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
             Toast.makeText(this, "Permission denied", Toast.LENGTH_LONG).show();
 
             // If permission denied disable EventsNearMeFragment
+//            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//            transaction.replace(R.id.my_frame, new ErrorFragment());
+//            transaction.commit();
+
+            permissionDenied = true;
+        }
+
+        return;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Preferred method of negotiating IllegalStateException according to Internet
+        if(permissionDenied){
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.my_frame, new ErrorFragment());
             transaction.commit();
+
+            permissionDenied = false;
         }
-        return;
     }
+
 
     public Long getFreshId(){
         Long newFreshId = Long.valueOf(currentId + 1);

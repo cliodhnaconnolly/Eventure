@@ -105,28 +105,28 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 //        super.onStart();
     }
 
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode,
-//                                           String permissions[], int[] grantResults) {
-//        Log.d("I HAVE BEEN SUMMONED", "MainActivity");
-//        Log.d("GRaNT RESULT SIS NULL", "" + (grantResults == null));
-//        Log.d("GRANT RESULTS LENGTH IS", "" + grantResults.length);
-//        // If request is cancelled, the result arrays are empty.
-//        if (grantResults.length > 0
-//                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//
-//            Toast.makeText(getContext(), "Permission granted", Toast.LENGTH_LONG).show();
-//
-//        } else {
-//            Toast.makeText(getContext(), "Permission denied", Toast.LENGTH_LONG).show();
-//
-//            // If permission denied disable EventsNearMeFragment
-//            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-//            transaction.replace(R.id.my_frame, new ErrorFragment());
-//            transaction.commitAllowingStateLoss();
-//        }
-//        return;
-//    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        Log.d("I HAVE BEEN SUMMONED", "MainActivity");
+        Log.d("GRaNT RESULT SIS NULL", "" + (grantResults == null));
+        Log.d("GRANT RESULTS LENGTH IS", "" + grantResults.length);
+        // If request is cancelled, the result arrays are empty.
+        if (grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            Toast.makeText(mContext, "Permission granted", Toast.LENGTH_LONG).show();
+
+        } else {
+            Toast.makeText(mContext, "Permission denied", Toast.LENGTH_LONG).show();
+
+            // If permission denied disable EventsNearMeFragment
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.my_frame, new ErrorFragment());
+            transaction.commit();
+        }
+        return;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -257,7 +257,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
 
         }catch (SecurityException e){
-            checkGPS(NO_LOCATION_PERMISSION);
+            // Exception caught, dealt with by Requesting Permissions but brief moment in time
+            // Before RequestingPermissions result shuts down fragment
         }
     }
 
@@ -357,7 +358,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
                                 dialog.cancel();
                             }
                         });
-//                final AlertDialog alertMessage = alertDialog.create();
                 alertMessage = alertDialog.create();
                 alertMessage.show();
             }
@@ -385,7 +385,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
                         }
                     });
 
-//            final AlertDialog alertMessage = alertDialog.create();
             alertMessage = alertDialog.create();
             alertMessage.show();
         }
