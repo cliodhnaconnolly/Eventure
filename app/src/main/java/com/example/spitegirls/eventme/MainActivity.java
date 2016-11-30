@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     private AtomicInteger workCounter;
 
     private byte[] photo;
+    private boolean firstBackPress = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,6 +167,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                         if(isNetworkAvailable()) {
                             switch (item.getItemId()) {
                                 case R.id.my_events:
+                                    firstBackPress = false;
                                     // Checks if data to display is ready
                                     if(combinedEvents == null) {
                                         transaction.replace(R.id.my_frame, new MyEventsFragment());
@@ -179,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
                                     break;
                                 case R.id.events_near_me:
+                                    firstBackPress = false;
                                     //Makes sure data is pulled in case they go to map first. Sets up events for events near me fragment.
                                     if(combinedEvents == null) {
                                         transaction.replace(R.id.my_frame, new EventsNearMeFragment());
@@ -190,10 +193,12 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                     }
                                     break;
                                 case R.id.create_event:
+                                    firstBackPress = false;
                                     transaction.replace(R.id.my_frame, new CreateEventFragment());
                                     transaction.commit();
                                     break;
                                 case R.id.my_account:
+                                    firstBackPress = false;
                                     accountFragment = MyAccountFragment.newInstance(inBundle);
                                     transaction.replace(R.id.my_frame, accountFragment);
                                     transaction.commit();
@@ -391,33 +396,19 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     @Override
     public void onBackPressed() {
-        // Work for Double tap to exit
-        // Issues caused in that if you went from
-        // My Events -> My Account and hit back it refreshes activity (No good)
-//        if(backPressedOnce) {
-//           super.onBackPressed();
-//           finishAffinity();
-//        }
-//
-////        super.onBackPressed();
-////        backPressedOnce = true;
-////        Toast.makeText(this, "Press back again to exit app", Toast.LENGTH_SHORT).show();
-////
-////        new Handler().postDelayed(new Runnable() {
-////            @Override
-////            public void run() {
-////                backPressedOnce = false;
-////            }
-////        }, BACK_PRESS_DELAY);
-
-        // Gives us functionality similar to other Google Apps using Navigation Bars
-        // Such as Youtube
+        //two backs will exit, no delay set
         FragmentManager fm = getSupportFragmentManager();
-        // If nothing present in backstack, exit app on back
+        // If nothing present in backstack, and it's second pressing of back exit app on back
         if(fm.getBackStackEntryCount() == 0){
-            super.onBackPressed();
-            finishAffinity();
+            if (!firstBackPress){
+                Toast.makeText(this, "Press back again", Toast.LENGTH_SHORT).show();
+                firstBackPress = true;
+            }
+            else {
+                finishAffinity();
+            }
         } else {
+            firstBackPress = false;
             super.onBackPressed();
         }
     }
