@@ -17,6 +17,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -154,6 +155,10 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        FragmentManager fm = getSupportFragmentManager();
+                        for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
+                            fm.popBackStack(); //clear stack as android does not like backing through navigation tabs
+                        }
                         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                         if(isNetworkAvailable()) {
                             switch (item.getItemId()) {
