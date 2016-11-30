@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.os.Handler;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -93,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     private boolean MY_EVENTS_REQUESTED = false;
     private boolean NEARBY_EVENTS_REQUESTED = false;
     private static final int NUMBER_OF_TASKS = 2;
+    private static final int BACK_PRESS_DELAY = 2000;
+    private boolean backPressedOnce = false;
 
     private AtomicInteger workCounter;
 
@@ -384,6 +387,39 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         }
 
         return;
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Work for Double tap to exit
+        // Issues caused in that if you went from
+        // My Events -> My Account and hit back it refreshes activity (No good)
+//        if(backPressedOnce) {
+//           super.onBackPressed();
+//           finishAffinity();
+//        }
+//
+////        super.onBackPressed();
+////        backPressedOnce = true;
+////        Toast.makeText(this, "Press back again to exit app", Toast.LENGTH_SHORT).show();
+////
+////        new Handler().postDelayed(new Runnable() {
+////            @Override
+////            public void run() {
+////                backPressedOnce = false;
+////            }
+////        }, BACK_PRESS_DELAY);
+
+        // Gives us functionality similar to other Google Apps using Navigation Bars
+        // Such as Youtube
+        FragmentManager fm = getSupportFragmentManager();
+        // If nothing present in backstack, exit app on back
+        if(fm.getBackStackEntryCount() == 0){
+            super.onBackPressed();
+            finishAffinity();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
