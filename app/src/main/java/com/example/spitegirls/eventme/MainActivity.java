@@ -401,7 +401,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         // If nothing present in backstack, and it's second pressing of back exit app on back
         if(fm.getBackStackEntryCount() == 0){
             if (!firstBackPress){
-                Toast.makeText(this, "Press back again", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Press BACK again to exit", Toast.LENGTH_SHORT).show();
                 firstBackPress = true;
             }
             else {
