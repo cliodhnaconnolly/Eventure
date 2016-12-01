@@ -324,22 +324,19 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                     workCounter.incrementAndGet();
                 }
 
-                // Why there is some null things I have no idea
-                ArrayList events = (ArrayList) results.get("events");
+                // Events retrieved from database
+                HashMap events = (HashMap) results.get("events");
                 if(events != null) {
-//                Log.d("Events arraylist", events.get(3).getClass().toString());
-//                Log.d("Events size", "number" + events.size());
-                    for (int i = 0; i < events.size(); i++) {
-                        if (events.get(i) != null) {
-                            HashMap map = (HashMap) events.get(i);
-//                        Log.d("map", map.entrySet().toString());
-                            Event event = new Event((String) map.get("description"), (String) map.get("name"),
-                                    (String) map.get("id"), (String) map.get("placeName"), (String) map.get("country"), (String) map.get("city"),
-                                    (String) map.get("startTime"), (String) map.get("latitude"), (String) map.get("longitude"));
 
-                            databaseEvents.add(event);
+                    for (Object event : events.values()){
+                        HashMap map = (HashMap) event;
+                        Event submittedEvent = new Event((String) map.get("description"), (String) map.get("name"),
+                                (String) map.get("id"), (String) map.get("placeName"), (String) map.get("country"), (String) map.get("city"),
+                                (String) map.get("startTime"), (String) map.get("latitude"), (String) map.get("longitude"));
 
-                        }
+                            databaseEvents.add(submittedEvent);
+
+//                        }
                     }
                     Log.d("FINISHED", "retrieving db events");
                     Log.d("DatabaseEvents is", "size" + databaseEvents.size());
