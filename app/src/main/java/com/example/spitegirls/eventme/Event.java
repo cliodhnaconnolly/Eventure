@@ -83,6 +83,15 @@ public class Event implements java.io.Serializable{
 
         String time[] = split[1].split(":");
 
+        // Making format more understandable to people, 09:05 vs 9:5
+        if(time[0].length() == 1){
+            time[0] = "0" + time[0];
+        }
+
+        if(time[1].length() == 1){
+            time[1] = "0" + time[1];
+        }
+
         String formattedTime = " at " + time[0] + ":" + time[1];
 
         return formattedDate + formattedTime;

@@ -119,18 +119,33 @@ public class MyEventsFragment extends Fragment {
                     }
                 }
 
+//                //Sorting lists by date
+//                Collections.sort(futureEvents, new Comparator<Event>() {
+//                    public int compare(Event ev1, Event ev2) {
+//                        if (ev2.startTime == null || ev1.startTime == null) return 0; //Just to be safe
+//                        return ev1.startTime.compareTo(ev2.startTime);
+//                    }
+//                });
+//
+//                Collections.sort(pastEvents, new Comparator<Event>() {
+//                    public int compare(Event ev1, Event ev2) {
+//                        if (ev1.startTime == null || ev2.startTime == null) return 0; //Just to be safe
+//                        return ev2.startTime.compareTo(ev1.startTime);
+//                    }
+//                });
+
                 //Sorting lists by date
                 Collections.sort(futureEvents, new Comparator<Event>() {
                     public int compare(Event ev1, Event ev2) {
                         if (ev2.startTime == null || ev1.startTime == null) return 0; //Just to be safe
-                        return ev1.startTime.compareTo(ev2.startTime);
+                        return ev1.getCalendarDate().compareTo(ev2.getCalendarDate());
                     }
                 });
 
                 Collections.sort(pastEvents, new Comparator<Event>() {
                     public int compare(Event ev1, Event ev2) {
                         if (ev1.startTime == null || ev2.startTime == null) return 0; //Just to be safe
-                        return ev2.startTime.compareTo(ev1.startTime);
+                        return ev2.getCalendarDate().compareTo(ev1.getCalendarDate());
                     }
                 });
 
