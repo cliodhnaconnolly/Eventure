@@ -47,6 +47,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     public Calendar dateAndTime;
     public static Button dateButton;
     public static Button timeButton;
+    public static Button uploadButton;
 
     public static int EVENT_NAME_CHAR_LIMIT = 72;
     public static int PICK_IMAGE_REQUEST = 1;
@@ -135,7 +136,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             }
         });
 
-        Button uploadButton = (Button) view.findViewById(R.id.uploadButton);
+        uploadButton = (Button) view.findViewById(R.id.uploadButton);
         uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -195,6 +196,8 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                     dateButton.setHint(getString(R.string.text_date));
                     timeButton.setText("");
                     timeButton.setHint(getString(R.string.text_time));
+                    uploadButton.setText("");
+                    uploadButton.setHint(getString(R.string.upload_photo));
                     description.setText("");
                     description.setHint(getString(R.string.text_description));
 
