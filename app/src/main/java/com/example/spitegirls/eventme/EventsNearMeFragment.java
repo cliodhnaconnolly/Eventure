@@ -83,24 +83,24 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     @Override
     public void onStart() {
 
-        checkGPS();
-        mGoogleApiClient.connect();
         super.onStart();
 
-        // Checks if locations permission given if not request it
-        if (ContextCompat.checkSelfPermission(getActivity(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+        if(this.getArguments() != null) {
+
+            checkGPS();
+            mGoogleApiClient.connect();
+
+            // Checks if locations permission given if not request it
+            if (ContextCompat.checkSelfPermission(getActivity(),
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
 
                 ActivityCompat.requestPermissions(getActivity(),
                         new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                         0);  // MAKE THIS A CONSTANT PLZ LIKE LOCATION_IS_NOT_ON
+            }
+
         }
-
-//        checkGPS(LOCATION_IS_NOT_ON);
-//        mGoogleApiClient.connect();
-
-//        super.onStart();
     }
 
     @Override
@@ -136,19 +136,21 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         spinner = (ProgressBar) view.findViewById(R.id.spinnerMap);
         loadingMessage = (TextView) view.findViewById(R.id.loading_message);
 
-        mapView = (MapView) view.findViewById(R.id.mapView);
-        mapView.setVisibility(View.INVISIBLE);
-        mapView.onCreate(savedInstanceState);
+        if(this.getArguments() != null) {
+            mapView = (MapView) view.findViewById(R.id.mapView);
+            mapView.setVisibility(View.INVISIBLE);
+            mapView.onCreate(savedInstanceState);
 
-        mapView.getMapAsync(this);
+            mapView.getMapAsync(this);
 
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(mContext )
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+            mGoogleApiClient = new GoogleApiClient
+                    .Builder(mContext )
+                    .addApi(Places.GEO_DATA_API)
+                    .addApi(Places.PLACE_DETECTION_API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+        }
 
         return view;
     }
@@ -158,58 +160,59 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         mMap = googleMap;
         Bundle bundle = this.getArguments();
         // Got a null pointer exception here when I went straight to here from my account (no my events)
-        if(bundle.getSerializable("arraylist") != null) {
-            eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
-        }
+        if(bundle != null) {
+            Log.d("BUNDLE GIVEN", "YES");
+            if (bundle.getSerializable("arraylist") != null) {
+                eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
+            }
 
-        // Add info to marker
-        // https://developers.google.com/maps/documentation/android-api/marker
-        // Info on infoWindowClickListener also on that page
-        for(int i = 0; i < eventList.size(); i++){
-            Event currEvent = eventList.get(i);
-            if(eventCheck(currEvent)){
-                Log.d("STARTING TO ADD MARKER", currEvent.name);
-                try {
-                    Double latitude = Double.parseDouble(currEvent.latitude);
-                    Double longitude = Double.parseDouble(currEvent.longitude);
-                    LatLng FirstEvent = new LatLng(latitude, longitude);
-                    if (currEvent.placeName != null && currEvent.startTime != null) {
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Place: " + currEvent.placeName + ". Time: " + currEvent.getReadableDate()));
-                        marker.setTag(currEvent);
-                    }
-                    else if(currEvent.placeName == null && currEvent.startTime != null) {
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Time: " + currEvent.getReadableDate()));
-                        marker.setTag(currEvent);
-                    }
-                    else if(currEvent.placeName != null && currEvent.startTime == null){
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Place: " + currEvent.placeName));
-                        marker.setTag(currEvent);
-                    }
-                    else {
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name));
-                        marker.setTag(currEvent);
-                    }
+            // Add info to marker
+            // https://developers.google.com/maps/documentation/android-api/marker
+            // Info on infoWindowClickListener also on that page
+            for (int i = 0; i < eventList.size(); i++) {
+                Event currEvent = eventList.get(i);
+                if (eventCheck(currEvent)) {
+                    Log.d("STARTING TO ADD MARKER", currEvent.name);
+                    try {
+                        Double latitude = Double.parseDouble(currEvent.latitude);
+                        Double longitude = Double.parseDouble(currEvent.longitude);
+                        LatLng FirstEvent = new LatLng(latitude, longitude);
+                        if (currEvent.placeName != null && currEvent.startTime != null) {
+                            Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Place: " + currEvent.placeName + ". Time: " + currEvent.getReadableDate()));
+                            marker.setTag(currEvent);
+                        } else if (currEvent.placeName == null && currEvent.startTime != null) {
+                            Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Time: " + currEvent.getReadableDate()));
+                            marker.setTag(currEvent);
+                        } else if (currEvent.placeName != null && currEvent.startTime == null) {
+                            Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name).snippet("Place: " + currEvent.placeName));
+                            marker.setTag(currEvent);
+                        } else {
+                            Marker marker = mMap.addMarker(new MarkerOptions().position(FirstEvent).title(currEvent.name));
+                            marker.setTag(currEvent);
+                        }
 
-                    Log.d("ADDED MARKER", currEvent.name);
-                }catch(NumberFormatException e){
-                    e.printStackTrace();
+                        Log.d("ADDED MARKER", currEvent.name);
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Log.d("NO MARKER, YEAR IS:", currEvent.startTime.substring(0, 4));
                 }
             }
-            else {
-                Log.d("NO MARKER, YEAR IS:", currEvent.startTime.substring(0,4));
+
+            getLocation();
+
+            if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
             }
+
+            Log.d("LOCATION ENABLED", "YES");
+            mMap.setMyLocationEnabled(true);
+
+            mMap.setOnInfoWindowClickListener(this);
+            mMap.setMinZoomPreference(MIN_ZOOM_AT_CITY_LEVEL);
         }
-
-        getLocation();
-
-        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mMap.setMyLocationEnabled(true);
-
-        mMap.setOnInfoWindowClickListener(this);
-        mMap.setMinZoomPreference(MIN_ZOOM_AT_CITY_LEVEL);
     }
 
     private void getLocation(){
@@ -384,29 +387,40 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         if(alertMessage != null && alertMessage.isShowing()){
             alertMessage.cancel();
         }
-        mapView.onResume();
-        if(mMap != null){
-            getLocation();
+
+        if(this.getArguments() != null) {
+            mapView.onResume();
+            if(mMap != null){
+                getLocation();
+            }
         }
+
+        // Should this be at top of here's good
         super.onResume();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mapView.onDestroy();
+        if(this.getArguments() != null){
+            mapView.onDestroy();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mapView.onPause();
+        if(this.getArguments() != null){
+            mapView.onPause();
+        }
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        mapView.onLowMemory();
+        if(this.getArguments() != null){
+            mapView.onLowMemory();
+        }
     }
 
     // When orientation changes we want to maintain the item in bottom nav

@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static android.R.attr.bitmap;
+import static android.R.attr.data;
 import static com.facebook.GraphRequest.TAG;
 
 // This is the most useful thing I've found RE:fragments
@@ -91,11 +92,10 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     private int currentId;
     private boolean permissionDenied;
 
+    // Change to camel case
     private boolean MY_EVENTS_REQUESTED = false;
     private boolean NEARBY_EVENTS_REQUESTED = false;
     private static final int NUMBER_OF_TASKS = 2;
-    private static final int BACK_PRESS_DELAY = 2000;
-    private boolean backPressedOnce = false;
 
     private AtomicInteger workCounter;
 
@@ -158,6 +158,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        // Try replace later call to getSupportFragmentManager() with this
+                        // Clears stack between bottom navigation tabs according to Google Material Design Guidelines
                         FragmentManager fm = getSupportFragmentManager();
                         for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
                             fm.popBackStack(); //clear stack as android does not like backing through navigation tabs
@@ -167,25 +169,70 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                             switch (item.getItemId()) {
                                 case R.id.my_events:
                                     // Checks if data to display is ready
-                                    if(combinedEvents == null) {
+                                    // Data not ready, user has selected same tab again
+                                    if(combinedEvents == null && MY_EVENTS_REQUESTED) {
+                                        Log.d("IN IF", "A");
+                                        transaction.replace(R.id.my_frame, new MyEventsFragment());
+                                        transaction.commit();
+                                    }
+                                    // Data not ready, user previously requested it in NearbyEvents tab
+                                    else if(combinedEvents == null && MY_EVENTS_REQUESTED) {
+                                        Log.d("IN IF", "B");
+                                        // Update user requested tab
+                                        MY_EVENTS_REQUESTED = true;
+                                        NEARBY_EVENTS_REQUESTED = false;
+
+                                        // Continue to load blank fragment until data is ready
+                                        transaction.replace(R.id.my_frame, new MyEventsFragment());
+                                        transaction.commit();
+                                    }
+                                    // Data not ready, not previously requested
+                                    else if(combinedEvents == null && !MY_EVENTS_REQUESTED && !NEARBY_EVENTS_REQUESTED) {
+                                        Log.d("IN IF", "C");
+
                                         transaction.replace(R.id.my_frame, new MyEventsFragment());
                                         transaction.commit();
                                         getData();
                                         MY_EVENTS_REQUESTED = true;
-                                    } else {
+                                    }
+                                    else {
+                                        Log.d("IN IF", "D");
                                         setUpMyEventsFragmentWithData();
-                                        // Wanna refresh data anyways for next time?
                                     }
 
                                     break;
                                 case R.id.events_near_me:
-                                    //Makes sure data is pulled in case they go to map first. Sets up events for events near me fragment.
-                                    if(combinedEvents == null) {
+//                                     Makes sure data is pulled in case they go to map first. Sets up events for events near me fragment.
+                                    // Data not ready, user changed tab was previously requested from My Events
+                                    if (combinedEvents == null && MY_EVENTS_REQUESTED) {
+                                        Log.d("IN IF", "E");
+                                        // Update user requested tab
+                                        NEARBY_EVENTS_REQUESTED = true;
+                                        MY_EVENTS_REQUESTED = false;
+
+                                        // Data is being requested so put up blank fragment and wait
+                                        transaction.replace(R.id.my_frame, new EventsNearMeFragment());
+                                        transaction.commit();
+
+                                    }
+                                    // Data not ready, user repeated request of current tab
+                                    else if(combinedEvents == null && NEARBY_EVENTS_REQUESTED) {
+                                        Log.d("IN IF", "F");
+                                        // Refresh blank fragment purely for them to feel better about waiting all the milliseconds
+                                        transaction.replace(R.id.my_frame, new EventsNearMeFragment());
+                                        transaction.commit();
+                                    }
+                                    // Data not ready, data not previously requested
+                                    else if(combinedEvents == null && !MY_EVENTS_REQUESTED && !NEARBY_EVENTS_REQUESTED) {
+                                        Log.d("IN IF", "G");
                                         transaction.replace(R.id.my_frame, new EventsNearMeFragment());
                                         transaction.commit();
                                         getData();
                                         NEARBY_EVENTS_REQUESTED = true;
-                                    } else {
+                                    }
+                                    // Data is ready, load fragment with data
+                                    else {
+                                        Log.d("IN IF", "H");
                                         setUpEventsNearMeFragmentWithData();
                                     }
                                     break;
@@ -391,27 +438,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     @Override
     public void onBackPressed() {
-        // Work for Double tap to exit
-        // Issues caused in that if you went from
-        // My Events -> My Account and hit back it refreshes activity (No good)
-//        if(backPressedOnce) {
-//           super.onBackPressed();
-//           finishAffinity();
-//        }
-//
-////        super.onBackPressed();
-////        backPressedOnce = true;
-////        Toast.makeText(this, "Press back again to exit app", Toast.LENGTH_SHORT).show();
-////
-////        new Handler().postDelayed(new Runnable() {
-////            @Override
-////            public void run() {
-////                backPressedOnce = false;
-////            }
-////        }, BACK_PRESS_DELAY);
-
-        // Gives us functionality similar to other Google Apps using Navigation Bars
-        // Such as Youtube
+        // Gives us functionality similar to other Google Apps using Bottom Navigation Bars such as Youtube
         FragmentManager fm = getSupportFragmentManager();
         // If nothing present in backstack, exit app on back
         if(fm.getBackStackEntryCount() == 0){
@@ -426,16 +453,18 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     public void onResume() {
         super.onResume();
         // Preferred method of negotiating IllegalStateException according to Internet
+        // Used when permission is denied in pop-up and application resumes
         if(permissionDenied){
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.my_frame, new ErrorFragment());
             transaction.commit();
 
+            // Reset boolean
             permissionDenied = false;
         }
     }
 
-
+    // Generates new ID number for community-generated events
     public Long getFreshId(){
         Long newFreshId = Long.valueOf(currentId + 1);
         // Current ID should update once the following call is made
@@ -470,10 +499,10 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         }
     }
 
-    private void writeNewEvent(String description, String name, String id, String placeName, String country, String city, String startTime, String latitude, String longitude) {
-        Event event = new Event(description, name, id, placeName, country, city, startTime, latitude, longitude);
-        mEventReference.child("events").child(getFreshId().toString()).setValue(event);
-    }
+//    private void writeNewEvent(String description, String name, String id, String placeName, String country, String city, String startTime, String latitude, String longitude) {
+//        Event event = new Event(description, name, id, placeName, country, city, startTime, latitude, longitude);
+//        mEventReference.child("events").child(getFreshId().toString()).setValue(event);
+//    }
 
     // Checks locally stored preferences for decision about themes
     private boolean checkThemePref(){
@@ -572,7 +601,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         }
         
         // Who requested the data for their fragment?
-        // Don't love this
         if(MY_EVENTS_REQUESTED){
             setUpMyEventsFragmentWithData();
             MY_EVENTS_REQUESTED = false;
