@@ -62,8 +62,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     private ArrayList<Event> eventList;
 
-    private static final int LOCATION_IS_NOT_ON = 1;
-    private static final int NO_LOCATION_PERMISSION = 2;
     private static final int MIN_ZOOM_AT_CITY_LEVEL = 10;
     private static final int ZOOM_TO_STREET_LEVEL = 17;
 
@@ -85,7 +83,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     @Override
     public void onStart() {
 
-        checkGPS(LOCATION_IS_NOT_ON);
+        checkGPS();
         mGoogleApiClient.connect();
         super.onStart();
 
@@ -220,7 +218,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
             lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
             if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 Log.d("LOCATION IS", "NULL");
-                checkGPS(LOCATION_IS_NOT_ON);
+                checkGPS();
             }
             Log.d("LOCATION IS", "NOT NULL? " + lm.toString());
             // IF LOCATION MANAGER THROWS SECURITY EXCEPTION SET CHECK HERE
@@ -330,10 +328,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     public void onProviderDisabled(String provider) {
     }
     
-    private void checkGPS(int check) {
+    private void checkGPS() {
         LocationManager manager = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
-        Log.d("IN CHECK", "INT IS " + check);
-        if (check == LOCATION_IS_NOT_ON){
             if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 final AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
                 alertDialog.setMessage("Cannot show Nearby events until GPS is switched on")
@@ -363,34 +359,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
             }
         }
 
-        else if( check == NO_LOCATION_PERMISSION){
-            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-            alertDialog.setMessage("App needs permission before displaying Events Nearby")
-                    .setCancelable(false)
-                    .setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
-                        public void onClick(final DialogInterface dialog, final int id) {
-                            if (mContext == null) {
-                                return;
-                            }
-                            final Intent intent = new Intent();
-                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                            intent.addCategory(Intent.CATEGORY_DEFAULT);
-                            intent.setData(Uri.parse("package:" + mContext.getPackageName()));
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                            mContext.startActivity(intent);
-
-                            dialog.cancel();
-                        }
-                    });
-
-            alertMessage = alertDialog.create();
-            alertMessage.show();
-        }
 
 
-    }
 
     @Override
     public void onConnected(Bundle connectionHint) {
@@ -410,6 +380,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     @Override
     public void onResume() {
+        //Needed to close dialog when coming back from settings on older versions of Android
         if(alertMessage != null && alertMessage.isShowing()){
             alertMessage.cancel();
         }
