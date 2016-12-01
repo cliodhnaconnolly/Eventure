@@ -427,16 +427,17 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        int eventsNearby = 1;
 
         BottomNavigationView bottomNavigationView;
 
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
-            bottomNavigationView.getMenu().getItem(1).setChecked(true);
+            bottomNavigationView.getMenu().getItem(eventsNearby).setChecked(true);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
             bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
-            bottomNavigationView.getMenu().getItem(1).setChecked(true);
+            bottomNavigationView.getMenu().getItem(eventsNearby).setChecked(true);
         }
     }
 

@@ -31,21 +31,13 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.location.places.ui.SupportPlaceAutocompleteFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.vision.text.Line;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-import static com.example.spitegirls.eventme.R.id.buttonLayout;
-
 public class CreateEventFragment extends android.support.v4.app.Fragment {
-
-//    public static CreateEventFragment newInstance() {
-//        return new CreateEventFragment();
-//    }
 
     public CreateEventFragment() {
 
@@ -74,7 +66,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         if (savedInstanceState == null){
             autocompleteFragment = new SupportPlaceAutocompleteFragment();
 
-            //add child fragment
+            //adds autocomplete widget as a child fragment
             getChildFragmentManager()
                     .beginTransaction()
                     .add(R.id.place_autocomplete_fragment, autocompleteFragment, "tag")
@@ -96,6 +88,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
 
         // We want to hide the keyboard when the user selects somewhere else on the screen
+        // Keyboard is automatically hidden when back is pressed but if they are not used to this functionality
         RelativeLayout outerLayout = (RelativeLayout) view.findViewById(R.id.outerRelative);
         outerLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -129,7 +122,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         name = (EditText) view.findViewById(R.id.editTextEventName);
         description = (EditText) view.findViewById(R.id.editTextDescription);
 
-
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener(){
             @Override
             public void onPlaceSelected(Place selectedPlace) {
@@ -143,18 +135,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             }
         });
 
-        Log.d("IS AUTOCOMPLETE NULL", "" + (autocompleteFragment == null));
-        Log.d("IS GET VIEW NULL", "" + (autocompleteFragment.getView() == null));
-        // Should work but seems problem is autocompleteFragment.onCreateView hasnt finished yet and short
-        // of making a new class that inherits from it we cant do anything
-//
-//        EditText prompt = (EditText) autocompleteFragment.getView().findViewById(R.id.place_autocomplete_search_input);
-//        Log.d("IS PROMPT NULL", "" + (prompt == null));
-//        prompt.setText("");
-//        prompt.setHint(getString(R.string.text_location));
-
-
-        // Gonna add a button but
         Button uploadButton = (Button) view.findViewById(R.id.uploadButton);
         uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -167,7 +147,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                 getActivity().startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
 
                 Button button = (Button) view.findViewById(R.id.uploadButton);
-                button.setText("Photo selected");
+                button.setText(getString(R.string.photo_selected));
             }
         });
 
@@ -191,7 +171,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                     Toast.makeText(getContext(), getString(R.string.error_time), Toast.LENGTH_LONG).show();
                 }
 
-                // Don't want to overload with errors
+                // Don't want to overload user with errors
                 if(!isInFuture(date, time) && isValidTime(time) && isValidDate(date)) {
                     Toast.makeText(getContext(), getString(R.string.error_date_time),
                             Toast.LENGTH_LONG).show();
@@ -262,10 +242,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             }
         }
 
-//        // Making the calendar format look more familiar
-//        SimpleDateFormat simpleDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
-//        String startTime = simpleDate.format(date.getTime());
-
+        // Format time as such to match output from event creation and Facebook Events
         String startTime = date.get(Calendar.YEAR) + "-" + (date.get(Calendar.MONTH)+1) + "-"
                 + date.get(Calendar.DAY_OF_MONTH) + "T" + date.get(Calendar.HOUR_OF_DAY) + ":"
                 + date.get(Calendar.MINUTE) + ":" + date.get(Calendar.SECOND);
@@ -296,22 +273,12 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
     // Validates Event Time
     private boolean isValidTime(String time){
-        if(time.equals("Pick a Time")){
-            // User did not pick a time
-            return false;
-        } else {
-            return true;
-        }
+        return time.equals("Pick a Time");
     }
 
     // Validates Event Date
     private boolean isValidDate(String date){
-        if(date.equals("Pick a Date")){
-            // User did not pick a date
-            return false;
-        }
-
-        return true;
+        return date.equals("Pick a Date");
     }
 
     // Checks date and time is in future
@@ -324,11 +291,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         Calendar input = parseDateTime(date, time);
         Log.d("Inputted date", input.toString());
 
-        if(today.after(input)) {
-            return false;
-        } else {
-            return true;
-        }
+        return !today.after(input);
     }
 
     private Calendar parseDateTime(String date, String time){
@@ -351,9 +314,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
         return input;
     }
-
-    // Pickers used for Date and Time
-    // https://developer.android.com/guide/topics/ui/controls/pickers.html
 
     public static class DatePickerFragment extends DialogFragment
             implements DatePickerDialog.OnDateSetListener{
@@ -410,16 +370,17 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        int createEvent = 2;
 
         BottomNavigationView bottomNavigationView;
 
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
-            bottomNavigationView.getMenu().getItem(2).setChecked(true);
+            bottomNavigationView.getMenu().getItem(createEvent).setChecked(true);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
             bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
-            bottomNavigationView.getMenu().getItem(2).setChecked(true);
+            bottomNavigationView.getMenu().getItem(createEvent).setChecked(true);
         }
     }
 }
