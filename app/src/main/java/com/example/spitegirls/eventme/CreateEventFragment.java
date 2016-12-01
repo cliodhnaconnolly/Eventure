@@ -39,27 +39,25 @@ import java.util.Locale;
 
 public class CreateEventFragment extends android.support.v4.app.Fragment {
 
-    public CreateEventFragment() {
-
-    }
-
     public Calendar date;
     public Calendar dateAndTime;
     public static Button dateButton;
     public static Button timeButton;
-    public static Button uploadButton;
+    public Button uploadButton;
+    private EditText name;
+    private EditText description;
+    private SupportPlaceAutocompleteFragment autocompleteFragment;
+    private Place place;
 
     public static int EVENT_NAME_CHAR_LIMIT = 72;
     public static int PICK_IMAGE_REQUEST = 1;
 
     private boolean photoSubmitted;
 
-    private EditText name;
-    private EditText description;
-    private SupportPlaceAutocompleteFragment autocompleteFragment;
-    private Place place;
-
     private Intent intent;
+
+    public CreateEventFragment() {
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -192,12 +190,9 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                     name.setHint(getString(R.string.text_event_name));
                     autocompleteFragment.setText("");
                     autocompleteFragment.setHint(getString(R.string.search));
-                    dateButton.setText("");
-                    dateButton.setHint(getString(R.string.text_date));
-                    timeButton.setText("");
-                    timeButton.setHint(getString(R.string.text_time));
-                    uploadButton.setText("");
-                    uploadButton.setHint(getString(R.string.upload_photo));
+                    dateButton.setText(getString(R.string.text_date));
+                    timeButton.setText(getString(R.string.text_time));
+                    uploadButton.setText(getString(R.string.upload_photo));
                     description.setText("");
                     description.setHint(getString(R.string.text_description));
 

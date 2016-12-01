@@ -327,7 +327,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                 // Events retrieved from database
                 HashMap events = (HashMap) results.get("events");
                 if(events != null) {
-
                     for (Object event : events.values()){
                         HashMap map = (HashMap) event;
                         Event submittedEvent = new Event((String) map.get("description"), (String) map.get("name"),
