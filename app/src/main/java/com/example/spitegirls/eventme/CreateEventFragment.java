@@ -167,12 +167,11 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
                 final String time = timeButton.getText().toString();
                 if(!isValidTime(time)) {
-                    timeButton.setError(getString(R.string.error_time));
                     Toast.makeText(getContext(), getString(R.string.error_time), Toast.LENGTH_LONG).show();
                 }
 
                 // Don't want to overload user with errors
-                if(!isInFuture(date, time) && isValidTime(time) && isValidDate(date)) {
+                if(isValidTime(time) && isValidDate(date) && !isInFuture(date, time)) {
                     Toast.makeText(getContext(), getString(R.string.error_date_time),
                             Toast.LENGTH_LONG).show();
                 }
@@ -273,12 +272,12 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
 
     // Validates Event Time
     private boolean isValidTime(String time){
-        return time.equals("Pick a Time");
+        return !time.equals("Pick a Time");
     }
 
     // Validates Event Date
     private boolean isValidDate(String date){
-        return date.equals("Pick a Date");
+        return !date.equals("Pick a Date");
     }
 
     // Checks date and time is in future
