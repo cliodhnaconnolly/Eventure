@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.DialogFragment;
@@ -23,9 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
-import android.os.Handler;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -49,29 +46,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static android.R.attr.bitmap;
-import static android.R.attr.data;
 import static com.facebook.GraphRequest.TAG;
-
-// This is the most useful thing I've found RE:fragments
-// https://guides.codepath.com/android/Creating-and-Using-Fragments#fragment-lifecycle
-
-// How to branch and merge
-// https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging
-
-// Link to view database possibly you may need to login or something
-// https://console.firebase.google.com/project/eventure-36efb/database/data/
-
-// How to read and write from database
-// https://firebase.google.com/docs/database/android/read-and-write
 
 public class MainActivity extends AppCompatActivity implements MyAccountFragment.OnItemSelectedListener {
 
@@ -87,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     private DatabaseReference mIdReference;
 
     private StorageReference mStorageRef;
-    private StorageReference eventStorage;
 
     private int currentId;
     private boolean permissionDenied;
@@ -125,10 +105,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
         FacebookSdk.sdkInitialize(getApplicationContext());
 
+        // Retrieves profile information from the LoginActivity
         final Bundle inBundle = getIntent().getExtras();
-
-        // Behaviour should match official Google guidelines
-        // https://material.google.com/components/bottom-navigation.html#bottom-navigation-behavior
 
         BottomNavigationView bottomBar = (BottomNavigationView)
                 findViewById(R.id.bottom_navigation);
@@ -348,22 +326,24 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
                 // Why there is some null things I have no idea
                 ArrayList events = (ArrayList) results.get("events");
+                if(events != null) {
 //                Log.d("Events arraylist", events.get(3).getClass().toString());
 //                Log.d("Events size", "number" + events.size());
-                for(int i=0; i<events.size(); i++){
-                    if(events.get(i) != null){
-                        HashMap map = (HashMap) events.get(i);
+                    for (int i = 0; i < events.size(); i++) {
+                        if (events.get(i) != null) {
+                            HashMap map = (HashMap) events.get(i);
 //                        Log.d("map", map.entrySet().toString());
-                        Event event = new Event((String) map.get("description"), (String) map.get("name"),
-                                (String) map.get("id"), (String) map.get("placeName"), (String) map.get("country"), (String) map.get("city"),
-                                (String) map.get("startTime"), (String) map.get("latitude"), (String) map.get("longitude"));
+                            Event event = new Event((String) map.get("description"), (String) map.get("name"),
+                                    (String) map.get("id"), (String) map.get("placeName"), (String) map.get("country"), (String) map.get("city"),
+                                    (String) map.get("startTime"), (String) map.get("latitude"), (String) map.get("longitude"));
 
-                        databaseEvents.add(event);
+                            databaseEvents.add(event);
 
+                        }
                     }
+                    Log.d("FINISHED", "retrieving db events");
+                    Log.d("DatabaseEvents is", "size" + databaseEvents.size());
                 }
-                Log.d("FINISHED", "retrieving db events");
-                Log.d("DatabaseEvents is", "size" + databaseEvents.size());
 
                 // Task of retrieving events from Database is complete
                 int remainingTasks = workCounter.decrementAndGet();
@@ -478,7 +458,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
         if(isPhotoSubmitted) {
             // Going to rewrite what is here each time
-            eventStorage = mStorageRef.child("photos/" + (eventId));
+            StorageReference eventStorage = mStorageRef.child("photos/" + (eventId));
             eventStorage.putBytes(photo)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
