@@ -4,11 +4,12 @@
 
     <string name="facebook_app_id">1167128870029414</string>
 
+    <!--Navigation Strings-->
     <string name="text_my_events">My Events</string>
     <string name="text_events_near_me">Nearby Events</string>
     <string name="text_create_event">Create Events</string>
     <string name="text_my_account">My Account</string>
-    <string name="title_activity_my_account">MyAccount</string>
+    <!--<string name="title_activity_my_account">MyAccount</string>-->
 
     <!--Create Event Strings-->
     <string name="text_create_your_event">Create your event&#8230;</string>
@@ -32,6 +33,9 @@
     <string name="text_hello">Hello:</string>
     <string name="text_log_out">Log Out</string>
     <string name="text_switch">Change Theme Color</string>
+
+    <!--My Event Strings-->
+    <string name="no_location_given">No location given</string>
 
     <!--Error Strings-->
     <string name="no_internet">No connections available</string>
