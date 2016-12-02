@@ -48,4 +48,14 @@
     <!--Event Details Strings-->
     <string name="event_photos">Event Photos</string>
     <string name="find_on_map">Find on Map</string>
+
+    <!--Sharing Strings-->
+    <string name="share_interested">I think you might be interested in this event!</string>
+    <string name="share_event_name">\n\nEvent Name: </string>
+    <string name="share_description">\n\nDescription: </string>
+    <string name="share_start_time">\nStart Time: </string>
+    <string name="share_subject">"Event you might be interested in! - Eventure"</string>
+    <string name="share_find_out_more">Go to Eventure to find out more!</string>
+
+    <string name="share_via">Share via...</string>
 </resources>

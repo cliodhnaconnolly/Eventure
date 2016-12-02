@@ -12,26 +12,18 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.ShareActionProvider;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,8 +43,6 @@ public class EventDetailsFragment extends Fragment{
         EventDetailsFragment fragment = new EventDetailsFragment();
         if(details != null){
             fragment.setArguments(details);
-            Log.d("INPUT TO ", details.toString());
-            Log.d("SET ARGS", fragment.getArguments().toString());
 
         }
         return fragment;
@@ -106,7 +96,7 @@ public class EventDetailsFragment extends Fragment{
                 if( details.coverURL != null) {
                     new DownloadImage(cover).execute(details.coverURL);
                 } else {
-                    Log.d("Source is ", "source is null");
+                    Log.d("Image source is ", "source is null");
                     view.findViewById(R.id.cover_photo).setVisibility(View.GONE);
 
                     line = (View) view.findViewById(R.id.viewLine2);
@@ -114,7 +104,6 @@ public class EventDetailsFragment extends Fragment{
 
                     eventPhotos = (TextView) view.findViewById(R.id.event_photos);
                     eventPhotos.setVisibility(View.GONE);
-                    // Might or might not be able to return value
                     getFirebasePhotos();
                 }
 
@@ -122,20 +111,20 @@ public class EventDetailsFragment extends Fragment{
             }
         }
 
-        // FB doesn't work because they're assholes
         FloatingActionButton button = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Resources resources = getResources();
+//                Resources resources = getResources();
 
-                String shareBody = "I think you might be interested in this event!" +
-                        "\n\nEvent Name: " + title.getText().toString() + "\n\nDescription: "
-                        + description.getText().toString() + "\nStart Time: "
+                String shareBody = getString(R.string.share_interested) +
+                        getString(R.string.share_event_name) + title.getText().toString()
+                        + getString(R.string.text_description)
+                        + description.getText().toString() + getString(R.string.share_start_time)
                         + startDate.getText().toString() + "\n\n"
-                        + "Go to Eventure to find out more!";
+                        + getString(R.string.share_find_out_more);
 
-                String shareSubject = "Event you might be interested in! - Eventure";
+                String shareSubject = getString(R.string.share_subject);
 
 
                 PackageManager pm = getActivity().getPackageManager();
@@ -144,7 +133,7 @@ public class EventDetailsFragment extends Fragment{
 
                 Intent blankIntent = new Intent();
                 blankIntent.setAction(Intent.ACTION_SEND);
-                Intent openInChooser = Intent.createChooser(blankIntent, "Share via..");
+                Intent openInChooser = Intent.createChooser(blankIntent, getString(R.string.share_via));
 
                 List<ResolveInfo> resInfo = pm.queryIntentActivities(sendIntent, 0);
                 List<LabeledIntent> intentList = new ArrayList<LabeledIntent>();
@@ -170,7 +159,7 @@ public class EventDetailsFragment extends Fragment{
 
                 // Converts list with intents to array
                 LabeledIntent[] extraIntents = intentList.toArray( new LabeledIntent[ intentList.size() ]);
-
+                // Launch chooser for sharing
                 openInChooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, extraIntents);
                 startActivity(openInChooser);
 
@@ -184,14 +173,15 @@ public class EventDetailsFragment extends Fragment{
         return inflater.inflate(R.layout.fragment_event_details, container, false);
     }
 
+    // Retrieves images from Firebase database to display within event details
     private void getFirebasePhotos(){
         StorageReference eventStorage = mStorageRef.child("photos/" + details.id);
+
         // Buffer limit for download from storage to optimise performance
         final long ONE_MEGABYTE = 1024 * 1024;
         eventStorage.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {
-                Log.d("GOT AN IMAGE", "" + bytes.length);
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 cover.setImageBitmap(bitmap);
                 cover.setVisibility(View.VISIBLE);

@@ -2,13 +2,11 @@ package com.example.spitegirls.eventme;
 
 import java.util.Calendar;
 
-import static android.R.id.input;
-
 // Class used to store event objects
 public class Event implements java.io.Serializable{
 
     public Event(){
-        // Used by Firebase
+        // Empty constructor used by Firebase
     }
 
     public Event(String description, String name, String id, String placeName, String country, String city,
@@ -33,14 +31,12 @@ public class Event implements java.io.Serializable{
     public String country;
     public String city;
     public String startTime;
-    // Can update this format to be more useful later
     public String latitude;
     public String longitude;
 
     // NON-STANDARD DETAILS
     public String coverURL;
 
-    // For testing purposes only with Log.d
     public String toString(){
         return "{" + name + ", " + id + ", "+ placeName +" " + country + "," + city + "," + startTime + ","+ latitude + "," + longitude + "}" ;
     }

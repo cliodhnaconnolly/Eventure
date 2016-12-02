@@ -125,12 +125,12 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
             @Override
             public void onPlaceSelected(Place selectedPlace) {
                 place = selectedPlace;
-                Log.i("TAG", "Place: " + place.getName());
+                Log.i("PLACE SELECT", "Place: " + place.getName());
             }
             @Override
             public void onError(Status status) {
                 place = null;
-                Log.i("TAG", "An error occurred: " + status);
+                Log.i("PLACE SELECT ERROR", "An error occurred: " + status);
             }
         });
 
