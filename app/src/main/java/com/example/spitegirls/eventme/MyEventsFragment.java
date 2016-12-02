@@ -1,7 +1,5 @@
 package com.example.spitegirls.eventme;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -19,10 +17,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,22 +30,14 @@ public class MyEventsFragment extends Fragment {
 
     private ListView listView;
     public ProgressBar spinner;
-    // We no longer need this to have such a scope
-    private ArrayList<Event> eventList;
 
     private ArrayList<Event> pastEvents;
     private ArrayList<Event> futureEvents;
-
-    private MenuItem futureOption;
-    private MenuItem pastOption;
 
     public static MyEventsFragment newInstance(Bundle bundle) {
         MyEventsFragment fragment = new MyEventsFragment();
         if(bundle != null){
             fragment.setArguments(bundle);
-//            Log.d("INPUT TO ", bundle.toString());
-//            Log.d("SET ARGS", fragment.getArguments().toString());
-
         }
         return fragment;
     }
@@ -76,20 +62,12 @@ public class MyEventsFragment extends Fragment {
         listView = (ListView) view.findViewById(R.id.list);
         spinner = (ProgressBar) view.findViewById(R.id.spinner);
 
-
-        //https://developer.android.com/training/swipe/respond-refresh-request.html#RespondRefresh
-        //http://www.survivingwithandroid.com/2014/05/android-swiperefreshlayout-tutorial-2.html
-        //https://www.bignerdranch.com/blog/implementing-swipe-to-refresh/
-        //Didn't use that last one AS much
-
         final SwipeRefreshLayout swipeView = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefresh);
-        //I don't like this being final but I'm going blank on how to get around that
 
         swipeView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 swipeView.setRefreshing(true);
-                Log.d("NAVE", "lol");
                 ((MainActivity) getActivity()).refreshData();
             }
                        });
@@ -102,7 +80,7 @@ public class MyEventsFragment extends Fragment {
             Bundle bundle = this.getArguments();
 
             if(bundle.getSerializable("arraylist") != null){
-                eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
+                ArrayList<Event> eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
                 futureEvents = new ArrayList<Event>();
                 pastEvents = new ArrayList<Event>();
                 // Sort list and populate pastEvents and FutureEvents
@@ -118,21 +96,6 @@ public class MyEventsFragment extends Fragment {
                         futureEvents.add(eventList.get(i));
                     }
                 }
-
-//                //Sorting lists by date
-//                Collections.sort(futureEvents, new Comparator<Event>() {
-//                    public int compare(Event ev1, Event ev2) {
-//                        if (ev2.startTime == null || ev1.startTime == null) return 0; //Just to be safe
-//                        return ev1.startTime.compareTo(ev2.startTime);
-//                    }
-//                });
-//
-//                Collections.sort(pastEvents, new Comparator<Event>() {
-//                    public int compare(Event ev1, Event ev2) {
-//                        if (ev1.startTime == null || ev2.startTime == null) return 0; //Just to be safe
-//                        return ev2.startTime.compareTo(ev1.startTime);
-//                    }
-//                });
 
                 //Sorting lists by date
                 Collections.sort(futureEvents, new Comparator<Event>() {
@@ -152,8 +115,6 @@ public class MyEventsFragment extends Fragment {
                 // First check existing state
                 boolean futureTrue = preference.getBoolean("futureEvents", true);
 
-                Log.d("FUTURE TRUE IS", "" + futureTrue);
-
                 // Depending on saved preference we set up list
                 if(futureTrue){
                     setUpList(futureEvents);
@@ -165,7 +126,6 @@ public class MyEventsFragment extends Fragment {
 
         } else {
             spinner.setVisibility(View.VISIBLE);
-            Log.d("INSTEAD", "IS NULL");
         }
 
     }
@@ -179,13 +139,8 @@ public class MyEventsFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.d("INT I IS", Integer.toString(i));
-                Log.d("LONG L IS", Long.toString(l));
-
                 Bundle args = new Bundle();
                 args.putSerializable("event", givenList.get(i));
-
-                Log.d("TIME IS", givenList.get(i).getCalendarDate().toString());
 
                 EventDetailsFragment eventFrag = EventDetailsFragment.newInstance(args);
                 getActivity().getSupportFragmentManager().beginTransaction()
@@ -200,8 +155,8 @@ public class MyEventsFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.time_frame, menu);
         super.onCreateOptionsMenu(menu, menuInflater);
-        futureOption = (MenuItem) menu.findItem(R.id.menu_item_time_future);
-        pastOption = (MenuItem) menu.findItem(R.id.menu_item_time_past);
+        MenuItem futureOption = menu.findItem(R.id.menu_item_time_future);
+        MenuItem pastOption = menu.findItem(R.id.menu_item_time_past);
 
         if(preference.getBoolean("futureEvents", true)){
             futureOption.setChecked(true);
@@ -221,8 +176,6 @@ public class MyEventsFragment extends Fragment {
                 editor.commit();
 
                 if(pastEvents != null){
-//                    CustomListAdapter adapter = new CustomListAdapter(getActivity(), R.layout.list_layout, pastEvents);
-//                    listView.setAdapter(adapter);
                     setUpList(pastEvents);
                     spinner.setVisibility(View.INVISIBLE);
                 }
@@ -247,17 +200,17 @@ public class MyEventsFragment extends Fragment {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-
+        int myEventsFragment = 0;
 
         BottomNavigationView bottomNavigationView;
 
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
-            bottomNavigationView.getMenu().getItem(0).setChecked(true);
+            bottomNavigationView.getMenu().getItem(myEventsFragment).setChecked(true);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
             bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
-            bottomNavigationView.getMenu().getItem(0).setChecked(true);
+            bottomNavigationView.getMenu().getItem(myEventsFragment).setChecked(true);
         }
     }
 

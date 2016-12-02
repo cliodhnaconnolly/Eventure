@@ -7,20 +7,16 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.IntentCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.app.AlertDialog;
 
 public class MyAccountFragment extends Fragment {
@@ -150,17 +146,17 @@ public class MyAccountFragment extends Fragment {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        int myAccountFragment = 3;
 
         BottomNavigationView bottomNavigationView;
 
         // Checks the orientation of the screen
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
-            bottomNavigationView.getMenu().getItem(3).setChecked(true);
-            Log.d("ORIENTATION LANDSCAPE", "tried");
+            bottomNavigationView.getMenu().getItem(myAccountFragment).setChecked(true);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
             bottomNavigationView = (BottomNavigationView) getActivity().findViewById(R.id.bottom_navigation);
-            bottomNavigationView.getMenu().getItem(3).setChecked(true);
+            bottomNavigationView.getMenu().getItem(myAccountFragment).setChecked(true);
         }
     }
 }
