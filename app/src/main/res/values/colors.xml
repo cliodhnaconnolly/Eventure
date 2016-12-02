@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--Normal Colour Scheme-->
     <color name="colorPrimary">#d26068</color>
     <color name="colorPrimaryDark">#71383f</color>
     <color name="colorAccent">#a0c6ea</color>
     <color name="white">#FFFFFF</color>
 
+    <!--Alternate Colour Scheme / Was our original colour scheme-->
     <color name="colorOriginalPrimary">#80d4b8</color>
     <color name="colorOriginalPrimaryDark">#589c85</color>
     <color name="colorOriginalAccent">#FF4081</color>

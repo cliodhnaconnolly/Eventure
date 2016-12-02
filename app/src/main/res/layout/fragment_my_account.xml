@@ -6,7 +6,6 @@
     android:orientation="vertical"
     tools:context="com.example.spitegirls.eventme.MyAccountFragment">
 
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -38,6 +37,7 @@
                 android:layout_height="200dp"
                 android:layout_below="@+id/nameAndSurname"
                 android:id="@+id/profileImage"
+                android:contentDescription="@string/profile_description"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:layout_centerHorizontal="true"/>

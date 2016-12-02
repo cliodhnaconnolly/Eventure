@@ -9,6 +9,7 @@
         android:layout_height="100dp"
         android:layout_gravity="center"
         app:srcCompat="@drawable/ic_no_internet"
+        android:contentDescription="@string/image_description"
         android:id="@+id/image_view_internet"
         android:cropToPadding="false"
         android:adjustViewBounds="false"
@@ -27,6 +28,7 @@
 
     <ImageView
         android:layout_width="100dp"
+        android:contentDescription="@string/image_description"
         android:layout_height="100dp"
         android:layout_gravity="center"
         app:srcCompat="@drawable/ic_no_location"

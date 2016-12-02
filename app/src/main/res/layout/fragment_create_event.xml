@@ -5,8 +5,6 @@
     android:id="@+id/outerRelative"
     tools:context="com.example.spitegirls.eventme.CreateEventFragment">
 
-    <!--https://github.com/codepath/android_guides/wiki/Working-with-the-EditText-->
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -35,7 +33,6 @@
                 android:layout_height="wrap_content"
                 android:inputType="text"
                 android:id="@+id/editTextEventName"
-                android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
                 android:textSize="14sp"
                 android:hint="@string/text_event_name" />
@@ -44,7 +41,6 @@
                 android:text="@string/text_location"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="4dp"
                 android:textSize="12sp"
                 android:id="@+id/textView"
                 android:layout_alignTop="@+id/place_autocomplete_fragment" />
@@ -82,9 +78,6 @@
                     android:nextFocusForward="@+id/editTextDescription"/>
 
             </LinearLayout>
-
-            <!--Background Description Layout-->
-            <!--http://www.androidaccessories.net/visual-cues-with-androids-multi-line-edittext-widget-2.html-->
 
             <Button
                 android:text="@string/upload_photo"
