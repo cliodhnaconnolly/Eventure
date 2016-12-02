@@ -3,7 +3,6 @@ package com.example.spitegirls.eventme;
 import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
-import android.media.Image;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -15,11 +14,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.w3c.dom.Text;
-
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
 
 public class ErrorFragment extends Fragment {
 
@@ -64,11 +58,12 @@ public class ErrorFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         if(this.getArguments() != null){
+
+            // Get passed constant from arguments to see which Error display is required
             Bundle bundle = this.getArguments();
             error = bundle.getInt("appearance");
-            Log.d("WHAT YA PASSING", error.toString());
+
             if(error == NO_INTERNET_APPEARANCE){
-                Log.d("GETTIN IN THE IF", error.toString());
                 noInternetText.setVisibility(View.VISIBLE);
                 noInternetImage.setVisibility(View.VISIBLE);
             } else if(error == NO_LOCATION_APPEARANCE){
@@ -81,20 +76,20 @@ public class ErrorFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     if(error != null){
-                        LocationManager loc = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
-                        ConnectivityManager con =
+                        LocationManager locationManager = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+                        ConnectivityManager connectivityManager =
                                 (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
 
-                        if(error == NO_LOCATION_APPEARANCE && loc.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                        // If issue has been rectified restart activity now with issue sorted
+                        if(error == NO_LOCATION_APPEARANCE && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
                             getActivity().finish();
                             final Intent intent = getActivity().getIntent();
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
                             getActivity().startActivity(intent);
                         }
 
-                        else if(error == NO_INTERNET_APPEARANCE && (con.getActiveNetworkInfo() != null &&
-                                con.getActiveNetworkInfo().isConnectedOrConnecting())){
-                            Log.d(" AM I FUCKING HERE", error.toString());
+                        else if(error == NO_INTERNET_APPEARANCE && (connectivityManager.getActiveNetworkInfo() != null &&
+                                connectivityManager.getActiveNetworkInfo().isConnectedOrConnecting())){
                             getActivity().finish();
                             final Intent intent = getActivity().getIntent();
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
@@ -105,6 +100,7 @@ public class ErrorFragment extends Fragment {
             });
 
         } else {
+            // If no arguments given it is a location permissions error
             tapToRetry.setVisibility(View.GONE);
             noLocationImage.setVisibility(View.VISIBLE);
             noLocationText.setVisibility(View.VISIBLE);
