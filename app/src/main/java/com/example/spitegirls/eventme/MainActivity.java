@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     private byte[] photo;
 
+    public boolean isPhotoSubmitted = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Check if user has previously selected an alternate theme
@@ -341,6 +343,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 30, byteArrayOutputStream);
 
                 photo = byteArrayOutputStream.toByteArray();
+                isPhotoSubmitted = true;
 
             } catch (FileNotFoundException e) { e.printStackTrace(); }
 
@@ -403,7 +406,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         return newFreshId;
     }
 
-    public void writeNewEvent(Event event, boolean isPhotoSubmitted) {
+    public void writeNewEvent(Event event) {
         String eventId = getFreshId().toString();
         mEventReference.child("events").child(eventId).setValue(event);
 
@@ -423,6 +426,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                             Log.d("PHOTO UPLOAD", "FAILURE");
                         }
                     });
+            isPhotoSubmitted = false;
         }
     }
 

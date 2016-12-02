@@ -52,8 +52,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     public static int EVENT_NAME_CHAR_LIMIT = 72;
     public static int PICK_IMAGE_REQUEST = 1;
 
-    private boolean photoSubmitted;
-
     private Intent intent;
 
     public CreateEventFragment() {
@@ -76,7 +74,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        photoSubmitted = false;
         date = Calendar.getInstance();
         dateAndTime = Calendar.getInstance();
 
@@ -138,7 +135,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                photoSubmitted = true;
                 intent = new Intent();
                 // Only want images
                 intent.setType("image/*");
@@ -146,7 +142,10 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                 getActivity().startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
 
                 Button button = (Button) view.findViewById(R.id.uploadButton);
-                button.setText(getString(R.string.photo_selected));
+                if(((MainActivity) getActivity()).isPhotoSubmitted){
+
+                    button.setText(getString(R.string.photo_selected));
+                }
             }
         });
 
@@ -183,7 +182,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                     // as we feel these are not necessary to event creation
                     Event event = createEvent(eventName, place, description.getText().toString(),
                             parseDateTime(date, time));
-                    ((MainActivity) getActivity()).writeNewEvent(event, photoSubmitted);
+                    ((MainActivity) getActivity()).writeNewEvent(event);
 
                     // Resets fields
                     name.setText("");
