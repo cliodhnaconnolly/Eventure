@@ -72,9 +72,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     private int currentId;
     private boolean permissionDenied;
 
-    // Change to camel case
-    private boolean MY_EVENTS_REQUESTED = false;
-    private boolean NEARBY_EVENTS_REQUESTED = false;
+    private boolean myEventsRequested = false;
+    private boolean nearbyEventsRequested = false;
     private static final int NUMBER_OF_TASKS = 2;
 
     private AtomicInteger workCounter;
@@ -119,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                 transaction.replace(R.id.my_frame, new MyEventsFragment());
                 transaction.commit();
                 getData();
-                MY_EVENTS_REQUESTED = true;
+                myEventsRequested = true;
             } else {
                 setUpMyEventsFragmentWithData();
             }
@@ -136,7 +135,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        // Try replace later call to getSupportFragmentManager() with this
                         // Clears stack between bottom navigation tabs according to Google Material Design Guidelines
                         FragmentManager fm = getSupportFragmentManager();
                         for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
@@ -148,45 +146,39 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                 case R.id.my_events:
                                     // Checks if data to display is ready
                                     // Data not ready, user has selected same tab again
-                                    if(combinedEvents == null && MY_EVENTS_REQUESTED) {
-                                        Log.d("IN IF", "A");
+                                    if(combinedEvents == null && myEventsRequested) {
                                         transaction.replace(R.id.my_frame, new MyEventsFragment());
                                         transaction.commit();
                                     }
                                     // Data not ready, user previously requested it in NearbyEvents tab
-                                    else if(combinedEvents == null && MY_EVENTS_REQUESTED) {
-                                        Log.d("IN IF", "B");
+                                    else if(combinedEvents == null && myEventsRequested) {
                                         // Update user requested tab
-                                        MY_EVENTS_REQUESTED = true;
-                                        NEARBY_EVENTS_REQUESTED = false;
+                                        myEventsRequested = true;
+                                        nearbyEventsRequested = false;
 
                                         // Continue to load blank fragment until data is ready
                                         transaction.replace(R.id.my_frame, new MyEventsFragment());
                                         transaction.commit();
                                     }
                                     // Data not ready, not previously requested
-                                    else if(combinedEvents == null && !MY_EVENTS_REQUESTED && !NEARBY_EVENTS_REQUESTED) {
-                                        Log.d("IN IF", "C");
-
+                                    else if(combinedEvents == null && !myEventsRequested && !nearbyEventsRequested) {
                                         transaction.replace(R.id.my_frame, new MyEventsFragment());
                                         transaction.commit();
                                         getData();
-                                        MY_EVENTS_REQUESTED = true;
+                                        myEventsRequested = true;
                                     }
                                     else {
-                                        Log.d("IN IF", "D");
                                         setUpMyEventsFragmentWithData();
                                     }
 
                                     break;
                                 case R.id.events_near_me:
-//                                     Makes sure data is pulled in case they go to map first. Sets up events for events near me fragment.
+                                    // Makes sure data is pulled in case they go to map first. Sets up events for events near me fragment.
                                     // Data not ready, user changed tab was previously requested from My Events
-                                    if (combinedEvents == null && MY_EVENTS_REQUESTED) {
-                                        Log.d("IN IF", "E");
+                                    if (combinedEvents == null && myEventsRequested) {
                                         // Update user requested tab
-                                        NEARBY_EVENTS_REQUESTED = true;
-                                        MY_EVENTS_REQUESTED = false;
+                                        nearbyEventsRequested = true;
+                                        myEventsRequested = false;
 
                                         // Data is being requested so put up blank fragment and wait
                                         transaction.replace(R.id.my_frame, new EventsNearMeFragment());
@@ -194,23 +186,20 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
                                     }
                                     // Data not ready, user repeated request of current tab
-                                    else if(combinedEvents == null && NEARBY_EVENTS_REQUESTED) {
-                                        Log.d("IN IF", "F");
+                                    else if(combinedEvents == null && nearbyEventsRequested) {
                                         // Refresh blank fragment purely for them to feel better about waiting all the milliseconds
                                         transaction.replace(R.id.my_frame, new EventsNearMeFragment());
                                         transaction.commit();
                                     }
                                     // Data not ready, data not previously requested
-                                    else if(combinedEvents == null && !MY_EVENTS_REQUESTED && !NEARBY_EVENTS_REQUESTED) {
-                                        Log.d("IN IF", "G");
+                                    else if(combinedEvents == null && !myEventsRequested && !nearbyEventsRequested) {
                                         transaction.replace(R.id.my_frame, new EventsNearMeFragment());
                                         transaction.commit();
                                         getData();
-                                        NEARBY_EVENTS_REQUESTED = true;
+                                        nearbyEventsRequested = true;
                                     }
                                     // Data is ready, load fragment with data
                                     else {
-                                        Log.d("IN IF", "H");
                                         setUpEventsNearMeFragmentWithData();
                                     }
                                     break;
@@ -238,12 +227,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     }
 
     private void getData(){
-        // Database does its own thing
-        // Listener set up in onStart which gets initial data
-        // Updates itself anytime after that data has been changed
-
-        // Facebook however...
-        // May need to make this wait for a bit
+        // Database does its own thing so we only need to retrieve info from FB here
 
         // Get initial info from FB
         GraphRequest request = GraphRequest.newMeRequest(
@@ -256,8 +240,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                 new GetEvents(workCounter, object.getJSONObject("events")).execute();
                             }
                             // Else no FB events were retrieved move on
-
-                            Log.d("FINISHED", "getEventDetails()");
                         } catch (JSONException e) { e.printStackTrace(); }
                     }
                 });
@@ -271,21 +253,14 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     public void onStart() {
         super.onStart();
 
-        // Currently these event listeners are grabbing too much data, want to change this
-
         // Gets current id value from DB
         ValueEventListener idListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Get id and update values
                 // dataSnapshot returns a hashmap, eg. {id=0}
-                Log.d("RESULT GOT IS", dataSnapshot.getValue().toString());
                 HashMap idResult  = (HashMap) dataSnapshot.getValue();
 
-                // Why it swaps I do not know
-                Log.d("Result type", idResult.get("id").getClass().toString());
-
-                // Someday I will fix why this fluctuates between Long and String, today is not that day
                 if(idResult.get("id").getClass() == Long.class ){
                     Long id = (Long) idResult.get("id");
                     currentId = id.intValue();
@@ -293,9 +268,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                     int id = Integer.parseInt((String) idResult.get("id"));
                     currentId = id;
                 } else {
-                    Log.d("ERROR", "failed to figure life out");
+                    Log.d("ERROR", "failed to retrieve ID from database");
                 }
-                Log.d("Current id", "is " + currentId);
             }
 
             @Override
@@ -310,17 +284,13 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         mEventReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-//                Log.d("RESULT EVENT", dataSnapshot.getValue().toString());
-//                Log.d("RESULT TYPE", dataSnapshot.getValue().getClass().toString());
                 HashMap results = (HashMap) dataSnapshot.getValue();
-//                Log.d("EVENTS TYPE", results.get("events").getClass().toString());
 
-                // Reset db events
+                // Reset db events list
                 databaseEvents = new ArrayList<Event>();
 
                 // Since DB will update its data anytime there is change let it increment a task to be done
                 if(workCounter.get() == 0) {
-                    Log.d("Incrementing", "onStart");
                     workCounter.incrementAndGet();
                 }
 
@@ -334,24 +304,16 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                 (String) map.get("startTime"), (String) map.get("latitude"), (String) map.get("longitude"));
 
                             databaseEvents.add(submittedEvent);
-
-//                        }
                     }
-                    Log.d("FINISHED", "retrieving db events");
-                    Log.d("DatabaseEvents is", "size" + databaseEvents.size());
                 }
 
                 // Task of retrieving events from Database is complete
                 int remainingTasks = workCounter.decrementAndGet();
-                Log.d("Decrementing", "onStart");
 
                 // If no more tasks remain
                 if(remainingTasks == 0) {
-                    Log.d("NO more tasks", "onStart");
                     setCombinedEvents();
                 }
-
-
             }
 
             @Override
@@ -389,26 +351,19 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
-        Log.d("I HAVE BEEN SUMMONED", "MainActivity");
-        Log.d("GRaNT RESULT SIS NULL", "" + (grantResults == null));
-        Log.d("GRANT RESULTS LENGTH IS", "" + grantResults.length);
         // If request is cancelled, the result arrays are empty.
         if (grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-            Toast.makeText(this, "Permission granted", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.permission_granted), Toast.LENGTH_LONG).show();
 
         } else {
-            Toast.makeText(this, "Permission denied", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.permission_not_granted), Toast.LENGTH_LONG).show();
 
             // If permission denied disable EventsNearMeFragment
-//            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-//            transaction.replace(R.id.my_frame, new ErrorFragment());
-//            transaction.commit();
-
-            permissionDenied = true;
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.my_frame, new ErrorFragment());
+            transaction.commit();
         }
-
         return;
     }
 
@@ -459,26 +414,17 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            // Get a URL to the uploaded content
-                            Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                            Log.d("GOOD JOB", "url is " + downloadUrl.toString());
+                            Log.d("PHOTO UPLOAD", "SUCCESS");
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
-                            // Handle unsuccessful uploads
-                            // ...
-                            Log.d("BAD JOB", "sad sad");
+                            Log.d("PHOTO UPLOAD", "FAILURE");
                         }
                     });
         }
     }
-
-//    private void writeNewEvent(String description, String name, String id, String placeName, String country, String city, String startTime, String latitude, String longitude) {
-//        Event event = new Event(description, name, id, placeName, country, city, startTime, latitude, longitude);
-//        mEventReference.child("events").child(getFreshId().toString()).setValue(event);
-//    }
 
     // Checks locally stored preferences for decision about themes
     private boolean checkThemePref(){
@@ -500,10 +446,8 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     // Gets details like Cover Photo from Events from Facebook
     private void getExtraEventDetails() {
         Bundle bundle = new Bundle();
-        // Add extra fields to this bundle of shit you want to receive
         bundle.putString("fields", "cover");
-        Log.d("IN", "getExtraEventsDetails");
-        // Use public variable parsedEventsList
+
         for(final Event event : facebookEvents){
             new GraphRequest(
                     AccessToken.getCurrentAccessToken(),
@@ -514,26 +458,14 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                         @Override
                         public void onCompleted(GraphResponse response) {
                             JSONObject responseJSONObject = response.getJSONObject();
-                            Log.d("RESPONSE " + event.name, responseJSONObject.toString());
                             if (responseJSONObject != null && responseJSONObject.has("cover")) {
                                 try {
-                                    Log.d("Has", "Cover");
                                     JSONObject cover = responseJSONObject.getJSONObject("cover");
                                     event.coverURL = cover.getString("source");
 
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
-                                Log.d("FINISHED", "getExtraEventDetails");
-
-//                                // Task is finished, decrement the counter
-//                                int remainingTasks = workCounter.decrementAndGet();
-//                                Log.d("Decrementing counter", "GetExtraEventDetails");
-//                                // If all tasks are completed
-//                                if(remainingTasks == 0) {
-//                                    Log.d("No more tasks", "GetExtraEventDetails");
-//                                    setCombinedEvents();
-//                                }
                             }
                         }
                     }
@@ -543,28 +475,26 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
     }
 
     private void setUpMyEventsFragmentWithData() {
-        Log.d("SETUPMYEVENTS", "Started");
         Bundle args = new Bundle();
         args.putSerializable("arraylist", combinedEvents);
+
         eventsFragment = MyEventsFragment.newInstance(args);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.my_frame, eventsFragment);
         transaction.commit();
-        Log.d("FINISHED", "setUpMyEventsFragmentWithData");
     }
 
     private void setUpEventsNearMeFragmentWithData(){
         Bundle args = new Bundle();
         args.putSerializable("arraylist", combinedEvents);
+
         eventsNearFragment = EventsNearMeFragment.newInstance(args);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.my_frame, eventsNearFragment);
         transaction.commit();
-        Log.d("FINISHED", "SetUpEventsNearMeFragmentWithData");
     }
 
     private void setCombinedEvents(){
-        Log.d("IN COMBINED", "start");
 
         combinedEvents = new ArrayList<Event>();
 
@@ -576,21 +506,20 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
             combinedEvents.addAll(databaseEvents);
         }
         
-        // Who requested the data for their fragment?
-        if(MY_EVENTS_REQUESTED){
+        // Set up fragment that requested data
+        if(myEventsRequested){
             setUpMyEventsFragmentWithData();
-            MY_EVENTS_REQUESTED = false;
-        } else if(NEARBY_EVENTS_REQUESTED){
+            myEventsRequested = false;
+        } else if(nearbyEventsRequested){
             setUpEventsNearMeFragmentWithData();
-            NEARBY_EVENTS_REQUESTED = false;
+            nearbyEventsRequested = false;
         }
 
     }
 
-    // Takes in name of fragment that requested fresh data
     public void refreshData() {
         // Only MyEvents can refresh data
-        MY_EVENTS_REQUESTED = true;
+        myEventsRequested = true;
 
         // Database automatically updates data into combinedEvents / databaseEvents
         // Therefore we don't need to call it here for refresh
@@ -621,21 +550,16 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    // Used help from on how to parse
-    // http://www.androidhive.info/2012/01/android-json-parsing-tutorial/
-
     private class GetEvents extends AsyncTask<Void, Void, Void> {
         // Generated data
         public ArrayList<Event> eventsList;
 
         private final AtomicInteger workCounter;
         private JSONObject unparsedData;
-        private int whoRequested;
 
         public GetEvents(AtomicInteger workCounter, JSONObject unparsedData) {
             this.workCounter = workCounter;
             this.unparsedData = unparsedData;
-            this.whoRequested = whoRequested;
         }
 
         @Override
@@ -658,36 +582,30 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
             if(unparsedData.toString() != null) {
                 try {
                     JSONArray events = unparsedData.getJSONArray("data");
-                    //Log.d("events is ", events.toString());
 
                     for (int i = 0; i < events.length(); i++) {
                         JSONObject event = events.optJSONObject(i);
-                        //Log.d("Event is", event.toString());
 
                         if (event.has("description")) {
                             description = event.getString("description");
-//                            Log.d("Description is", description);
                         } else {
                             description = "No description given";
                         }
 
                         if (event.has("name")) {
                             name = event.getString("name");
-//                            Log.d("Name is", name);
                         } else {
                             name = "No title given";
                         }
 
                         if (event.has("start_time")) {
                             startTime = event.getString("start_time");
-//                            Log.d("Start time is", startTime);
                         } else {
                             startTime = "No time given";
                         }
 
                         // Can't be null
                         id = event.getString("id");
-//                        Log.d("id is", id);
 
                         if (event.has("place")) {
                             JSONObject place = event.getJSONObject("place");
@@ -735,11 +653,11 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                         eventsList.add(new Event(description, name, id, placeName, country, city, startTime, latitude, longitude));
                     }
                 } catch (final JSONException e) {
-                    Log.e(TAG, "Json parsing error: " + e.getMessage());
+                    Log.e("GET EVENTS", "Json parsing error: " + e.getMessage());
                 }
             }
             else {
-                Log.e(TAG, "Couldn't get json from server.");
+                Log.e("GET EVENTS", "Couldn't get json from server.");
             }
 
             return null;
@@ -748,8 +666,6 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-            Log.d("FINISHED", "getEvents.execute");
-//            setParsedEventsList(eventsList);
             facebookEvents = eventsList;
 
             // Call extra event details
@@ -757,14 +673,12 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
             // Task is finished, decrement the counter
             int remainingTasks = this.workCounter.decrementAndGet();
-            Log.d("Decrementing counter", "GetEvents");
+
             // If all tasks are completed
             if(remainingTasks == 0) {
-                Log.d("No more tasks", "GetEVents");
                 setCombinedEvents();
             }
         }
     }
-
 
 }

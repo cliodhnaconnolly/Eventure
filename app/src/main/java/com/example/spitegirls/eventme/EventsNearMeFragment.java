@@ -100,25 +100,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        // If request is cancelled, the result arrays are empty.
-        if (grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(mContext, getString(R.string.permission_granted), Toast.LENGTH_LONG).show();
-
-        } else {
-            Toast.makeText(mContext, getString(R.string.permission_not_granted), Toast.LENGTH_LONG).show();
-
-            // If permission denied disable EventsNearMeFragment
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.my_frame, new ErrorFragment());
-            transaction.commit();
-        }
-        return;
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
