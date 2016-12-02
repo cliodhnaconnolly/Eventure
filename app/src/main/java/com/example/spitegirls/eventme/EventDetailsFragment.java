@@ -106,8 +106,6 @@ public class EventDetailsFragment extends Fragment{
                     eventPhotos.setVisibility(View.GONE);
                     getFirebasePhotos();
                 }
-
-                Log.d("CALENDAR IS", details.getCalendarDate().toString());
             }
         }
 
@@ -115,13 +113,12 @@ public class EventDetailsFragment extends Fragment{
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Resources resources = getResources();
 
                 String shareBody = getString(R.string.share_interested) +
-                        getString(R.string.share_event_name) + title.getText().toString()
-                        + getString(R.string.text_description)
-                        + description.getText().toString() + getString(R.string.share_start_time)
-                        + startDate.getText().toString() + "\n\n"
+                        "\n\n" + getString(R.string.share_event_name) + " " +  title.getText().toString()
+                        + "\n\n" + getString(R.string.share_description) + " "
+                        + description.getText().toString() + "\n\n" + getString(R.string.share_start_time)
+                        + " " + startDate.getText().toString() + "\n\n"
                         + getString(R.string.share_find_out_more);
 
                 String shareSubject = getString(R.string.share_subject);
