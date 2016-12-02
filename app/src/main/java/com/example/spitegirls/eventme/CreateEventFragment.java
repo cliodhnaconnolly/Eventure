@@ -243,7 +243,6 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         String startTime = date.get(Calendar.YEAR) + "-" + (date.get(Calendar.MONTH)+1) + "-"
                 + date.get(Calendar.DAY_OF_MONTH) + "T" + date.get(Calendar.HOUR_OF_DAY) + ":"
                 + date.get(Calendar.MINUTE) + ":" + date.get(Calendar.SECOND);
-        Log.d("START TIME IS", startTime);
 
         return new Event(description, name, ((MainActivity) getActivity()).getFreshId().toString(), placeName, country,
                 city, startTime, latitude, longitude);
@@ -282,11 +281,9 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
     private boolean isInFuture(String date, String time){
         // Today's date
         Calendar today = Calendar.getInstance();
-        Log.d("TOdays date", today.toString());
 
         // Inputted date
         Calendar input = parseDateTime(date, time);
-        Log.d("Inputted date", input.toString());
 
         return !today.after(input);
     }
@@ -350,7 +347,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
         }
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-
+            // Gives the button a readable time format
             if(hourOfDay > 9 && minute > 9) {
                 timeButton.setText(hourOfDay + ":" + minute);
             } else if(hourOfDay > 9 && minute < 9) {
