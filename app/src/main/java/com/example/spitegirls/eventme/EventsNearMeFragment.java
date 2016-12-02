@@ -10,16 +10,13 @@ import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +26,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.drive.Drive;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -42,7 +38,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-
 
 public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
@@ -64,6 +59,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     private static final int MIN_ZOOM_AT_CITY_LEVEL = 10;
     private static final int ZOOM_TO_STREET_LEVEL = 17;
+    private static final int LOCATION_PERMISSION = 0;
 
 
     public static EventsNearMeFragment newInstance(Bundle bundle) {
@@ -97,7 +93,7 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
                 ActivityCompat.requestPermissions(getActivity(),
                         new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                        0);  // MAKE THIS A CONSTANT PLZ LIKE LOCATION_IS_NOT_ON
+                        LOCATION_PERMISSION);
             }
 
         }
@@ -106,17 +102,13 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
-        Log.d("I HAVE BEEN SUMMONED", "MainActivity");
-        Log.d("GRaNT RESULT SIS NULL", "" + (grantResults == null));
-        Log.d("GRANT RESULTS LENGTH IS", "" + grantResults.length);
         // If request is cancelled, the result arrays are empty.
         if (grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-            Toast.makeText(mContext, "Permission granted", Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, getString(R.string.permission_granted), Toast.LENGTH_LONG).show();
 
         } else {
-            Toast.makeText(mContext, "Permission denied", Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, getString(R.string.permission_not_granted), Toast.LENGTH_LONG).show();
 
             // If permission denied disable EventsNearMeFragment
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
@@ -129,7 +121,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        //checkGPS(LOCATION_IS_NOT_ON);
 
         View view = inflater.inflate(R.layout.fragment_events_near_me, container, false);
 
@@ -155,24 +146,18 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         return view;
     }
 
-//    @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         Bundle bundle = this.getArguments();
-        // Got a null pointer exception here when I went straight to here from my account (no my events)
         if(bundle != null) {
-            Log.d("BUNDLE GIVEN", "YES");
+            // Retrieves arraylist from bundle containing all user events
             if (bundle.getSerializable("arraylist") != null) {
                 eventList = (ArrayList<Event>) bundle.getSerializable("arraylist");
             }
 
             // Add info to marker
-            // https://developers.google.com/maps/documentation/android-api/marker
-            // Info on infoWindowClickListener also on that page
-            for (int i = 0; i < eventList.size(); i++) {
-                Event currEvent = eventList.get(i);
+            for(Event currEvent : eventList) {
                 if (eventCheck(currEvent)) {
-                    Log.d("STARTING TO ADD MARKER", currEvent.name);
                     try {
                         Double latitude = Double.parseDouble(currEvent.latitude);
                         Double longitude = Double.parseDouble(currEvent.longitude);
@@ -191,23 +176,20 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
                             marker.setTag(currEvent);
                         }
 
-                        Log.d("ADDED MARKER", currEvent.name);
                     } catch (NumberFormatException e) {
                         e.printStackTrace();
                     }
-                } else {
-                    Log.d("NO MARKER, YEAR IS:", currEvent.startTime.substring(0, 4));
                 }
             }
 
-            getLocation();
+            // Sets camera to user location
+            moveCameraUserLocation();
 
             if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                     && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
 
-            Log.d("LOCATION ENABLED", "YES");
             mMap.setMyLocationEnabled(true);
 
             mMap.setOnInfoWindowClickListener(this);
@@ -215,20 +197,18 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         }
     }
 
-    private void getLocation(){
+    private void moveCameraUserLocation(){
         try {
             // Set up Location Manager
             lm = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
+
+            // Check GPS is enabled if lm indicates problem
             if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                Log.d("LOCATION IS", "NULL");
                 checkGPS();
             }
-            Log.d("LOCATION IS", "NOT NULL? " + lm.toString());
-            // IF LOCATION MANAGER THROWS SECURITY EXCEPTION SET CHECK HERE
 
             // If GPS Provider has a last known location use this
             if (lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
-                Log.d("IN IF", "YES");
                 mapView.setVisibility(View.VISIBLE);
                 spinner.setVisibility(View.INVISIBLE);
                 loadingMessage.setVisibility(View.INVISIBLE);
@@ -236,9 +216,9 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
                 Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_TO_STREET_LEVEL));
             }
+
             // If Network Provider has a last known location use this
             else if (lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
-                Log.d("IN IF", "YEAH");
                 mapView.setVisibility(View.VISIBLE);
                 spinner.setVisibility(View.INVISIBLE);
                 loadingMessage.setVisibility(View.INVISIBLE);
@@ -246,15 +226,13 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
                 Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_TO_STREET_LEVEL));
             }
+
             // If none of the above have a last known location go about it the slow way
             else {
                 // Look for Updates on Location
                 lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0.0f, this);
-                Log.d("IN ELSE", "HELLO");
             }
-            Log.d("Nothing", "skipped thing if map didnt load");
 
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getCoords(), ZOOM_TO_STREET_LEVEL));
 
 
         }catch (SecurityException e){
@@ -269,16 +247,10 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         Bundle detailsBundle = new Bundle();
         detailsBundle.putSerializable("event", (Event) marker.getTag());
         EventDetailsFragment eventFrag = EventDetailsFragment.newInstance(detailsBundle);
+
         if(marker.isVisible()) {    // if marker source is visible (i.e. marker created)
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.my_frame, eventFrag);
-
-            //transaction.addToBackStack(null);   // Since we're in a tab we want to be able to go back internally
-            // BUG ALERT
-            // Ideally we want the user to be able to back to the map but Google has a bug where it counts
-            // this as having multiple map fragments. Below is an article detailing workarounds
-            // I've not implemented them yet but if anyone else wants to try go ahead
-            // http://www.aphex.cx/the_google_maps_api_is_broken_on_android_5_here_s_a_workaround_for_multiple_map_fragments/
 
             transaction.commit();
         }
@@ -287,7 +259,6 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     // Checks year of event to see should it show up on map
     private boolean eventCheck(Event currEvent){
         String year = currEvent.startTime.substring(0, 4);
-        Log.d("YEAR", year);
 
         Calendar myCal = Calendar.getInstance();
         int currYear = myCal.get(Calendar.YEAR);
@@ -299,10 +270,8 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         }
     }
 
-
     // Location Listener Methods
     public void onLocationChanged(Location location) {
-        Log.d("LOCATION", "CHANGED");
         // Set up map to have camera at user location
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), ZOOM_TO_STREET_LEVEL));
 
@@ -333,37 +302,36 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
     
     private void checkGPS() {
         LocationManager manager = (LocationManager) (getActivity().getSystemService(Context.LOCATION_SERVICE));
-            if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-                alertDialog.setMessage("Cannot show Nearby events until GPS is switched on")
-                        .setCancelable(false)
-                        .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-                            public void onClick(final DialogInterface dialog, final int id) {
-                                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                                dialog.cancel();
 
-                            }
-                        })
-                        .setNegativeButton("Continue", new DialogInterface.OnClickListener() {
-                            public void onClick(final DialogInterface dialog, final int id) {
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            // Launch Alert dialog if user does not have location turned on
+            final AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+            alertDialog.setMessage(getString(R.string.error_message))
+                    .setCancelable(false)
+                    .setPositiveButton(getString(R.string.settings_option), new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, final int id) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                            dialog.cancel();
 
-                                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                        }
+                    })
+                    .setNegativeButton(getString(R.string.continue_option), new DialogInterface.OnClickListener() {
+                        public void onClick(final DialogInterface dialog, final int id) {
 
-                                Bundle bundle = new Bundle();
-                                bundle.putInt("appearance", ErrorFragment.NO_LOCATION_APPEARANCE);
-                                ErrorFragment fragment = ErrorFragment.newInstance(bundle);
-                                transaction.replace(R.id.my_frame, fragment);
-                                transaction.commit();
-                                dialog.cancel();
-                            }
-                        });
-                alertMessage = alertDialog.create();
-                alertMessage.show();
-            }
+                            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("appearance", ErrorFragment.NO_LOCATION_APPEARANCE);
+                            ErrorFragment fragment = ErrorFragment.newInstance(bundle);
+                            transaction.replace(R.id.my_frame, fragment);
+                            transaction.commit();
+                            dialog.cancel();
+                        }
+                    });
+            alertMessage = alertDialog.create();
+            alertMessage.show();
         }
-
-
-
+    }
 
     @Override
     public void onConnected(Bundle connectionHint) {
@@ -383,7 +351,9 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
 
     @Override
     public void onResume() {
-        //Needed to close dialog when coming back from settings on older versions of Android
+        super.onResume();
+
+        // Needed to close dialog when coming back from settings on older versions of Android
         if(alertMessage != null && alertMessage.isShowing()){
             alertMessage.cancel();
         }
@@ -391,12 +361,9 @@ public class EventsNearMeFragment extends Fragment implements OnMapReadyCallback
         if(this.getArguments() != null) {
             mapView.onResume();
             if(mMap != null){
-                getLocation();
+                moveCameraUserLocation();
             }
         }
-
-        // Should this be at top of here's good
-        super.onResume();
     }
 
     @Override

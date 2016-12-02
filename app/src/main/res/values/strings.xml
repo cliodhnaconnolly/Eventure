@@ -9,7 +9,6 @@
     <string name="text_events_near_me">Nearby Events</string>
     <string name="text_create_event">Create Events</string>
     <string name="text_my_account">My Account</string>
-    <!--<string name="title_activity_my_account">MyAccount</string>-->
 
     <!--Create Event Strings-->
     <string name="text_create_your_event">Create your event&#8230;</string>
@@ -44,6 +43,11 @@
 
     <!--Events Near Me Strings-->
     <string name="loading_message">Finding your location&#8230;</string>
+    <string name="error_message">Cannot show Nearby Events until GPS is switched on</string>
+    <string name="settings_option">Settings</string>
+    <string name="continue_option">Continue</string>
+    <string name="permission_granted">Permission granted</string>
+    <string name="permission_not_granted">Permissions not granted</string>
 
     <!--Event Details Strings-->
     <string name="event_photos">Event Photos</string>
@@ -57,6 +61,8 @@
     <string name="share_start_time">Start Time:</string>
     <string name="share_subject">"Event you might be interested in! - Eventure"</string>
     <string name="share_find_out_more">Go to Eventure to find out more!</string>
-
     <string name="share_via">Share via...</string>
+
+    <!--Login Activity-->
+    <string name="logging_in">Logging in...</string>
 </resources>

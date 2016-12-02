@@ -23,13 +23,8 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.Profile;
 import com.facebook.ProfileTracker;
-import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-
-import java.util.Arrays;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -54,7 +49,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         checkInternetConnection();
-        Log.d("IN LOG ACTIVITY", "show meh");
 
         FacebookSdk.sdkInitialize(getApplicationContext());
 
@@ -75,14 +69,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
 
-//        profileTracker = new ProfileTracker() {
-//            @Override
-//            protected void onCurrentProfileChanged(Profile oldProfile, Profile newProfile) {
-//                nextActivity(newProfile);
-//            }
-//        };
         accessTokenTracker.startTracking();
-//        profileTracker.startTracking();
 
         LoginButton loginButton = (LoginButton)findViewById(R.id.login_button);
         callback = new FacebookCallback<LoginResult>() {
@@ -91,10 +78,10 @@ public class LoginActivity extends AppCompatActivity {
                 if(Profile.getCurrentProfile() == null) {
                     final ProgressBar spinner = (ProgressBar) findViewById(R.id.spinnerLogin);
                     spinner.setVisibility(View.VISIBLE);
+                    // If Facebook does not returned a photo fast enough we track for updates
                     profileTracker = new ProfileTracker() {
                         @Override
                         protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
-                            Log.d("Got new profile", currentProfile.getFirstName());
                             profileTracker.stopTracking();
                             nextActivity(currentProfile);
                             spinner.setVisibility(View.INVISIBLE);
@@ -104,7 +91,8 @@ public class LoginActivity extends AppCompatActivity {
                     Profile profile = Profile.getCurrentProfile();
                     nextActivity(profile);
                 }
-                Toast.makeText(getApplicationContext(), "Logging in...", Toast.LENGTH_SHORT).show();    }
+                Toast.makeText(getApplicationContext(), getString(R.string.logging_in), Toast.LENGTH_SHORT).show();
+            }
 
             @Override
             public void onCancel() {
@@ -122,7 +110,6 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //Facebook login
         Profile profile = Profile.getCurrentProfile();
         nextActivity(profile);
     }
@@ -134,15 +121,12 @@ public class LoginActivity extends AppCompatActivity {
 
     protected void onStop() {
         super.onStop();
-        //Facebook login
         accessTokenTracker.stopTracking();
-//        profileTracker.stopTracking();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int responseCode, Intent intent) {
         super.onActivityResult(requestCode, responseCode, intent);
-        //Facebook login
         callbackManager.onActivityResult(requestCode, responseCode, intent);
 
     }
@@ -161,8 +145,6 @@ public class LoginActivity extends AppCompatActivity {
             main.putExtra("surname", profile.getLastName());
             main.putExtra("imageUrl", profile.getProfilePictureUri(200,200).toString());
             startActivity(main);
-        } else {
-            Log.d("PROFILE WAS", "NULL");
         }
     }
 
@@ -172,9 +154,9 @@ public class LoginActivity extends AppCompatActivity {
         if(!(cm.getActiveNetworkInfo() != null &&
                 cm.getActiveNetworkInfo().isConnectedOrConnecting())){
             final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-            alertDialog.setMessage("No internet connection detected")
+            alertDialog.setMessage(getString(R.string.no_internet))
                     .setCancelable(false)
-                    .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(getString(R.string.settings_option), new DialogInterface.OnClickListener() {
                         public void onClick(final DialogInterface dialog, final int id) {
                             startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
                             return; //Dialog box will disappear after user comes back for settings
