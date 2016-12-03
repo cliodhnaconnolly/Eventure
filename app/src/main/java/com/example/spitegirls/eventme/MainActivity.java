@@ -560,7 +560,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
 
     private class GetEvents extends AsyncTask<Void, Void, Void> {
         // Generated data
-        public ArrayList<Event> eventsList;
+        private ArrayList<Event> eventsList;
 
         private final AtomicInteger workCounter;
         private JSONObject unparsedData;
