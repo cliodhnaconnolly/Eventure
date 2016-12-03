@@ -139,13 +139,7 @@ public class CreateEventFragment extends android.support.v4.app.Fragment {
                 // Only want images
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                getActivity().startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
-
-                Button button = (Button) view.findViewById(R.id.uploadButton);
-                if(((MainActivity) getActivity()).isPhotoSubmitted){
-
-                    button.setText(getString(R.string.photo_selected));
-                }
+                getActivity().startActivityForResult(Intent.createChooser(intent, getString(R.string.select_photo)), PICK_IMAGE_REQUEST);
             }
         });
 

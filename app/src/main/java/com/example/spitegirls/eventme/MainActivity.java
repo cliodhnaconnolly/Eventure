@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                                     }
                                     break;
                                 case R.id.create_event:
-                                    transaction.replace(R.id.my_frame, new CreateEventFragment());
+                                    transaction.replace(R.id.my_frame, new CreateEventFragment(), "create");
                                     transaction.commit();
                                     break;
                                 case R.id.my_account:
@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                     int id = Integer.parseInt((String) idResult.get("id"));
                     currentId = id;
                 } else {
-                    Log.d("ERROR", "failed to retrieve ID from database");
+                    Log.i("ERROR", "failed to retrieve ID from database");
                 }
             }
 
@@ -345,6 +345,10 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                 photo = byteArrayOutputStream.toByteArray();
                 isPhotoSubmitted = true;
 
+                // Update fragment that photo was retrieved successfully
+                CreateEventFragment fragment = (CreateEventFragment) getSupportFragmentManager().findFragmentByTag("create");
+                fragment.uploadButton.setText(getString(R.string.photo_selected));
+
             } catch (FileNotFoundException e) { e.printStackTrace(); }
 
         }
@@ -417,13 +421,13 @@ public class MainActivity extends AppCompatActivity implements MyAccountFragment
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            Log.d("PHOTO UPLOAD", "SUCCESS");
+                            Log.i("PHOTO UPLOAD", "SUCCESS");
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception exception) {
-                            Log.d("PHOTO UPLOAD", "FAILURE");
+                            Log.i("PHOTO UPLOAD", "FAILURE");
                         }
                     });
             isPhotoSubmitted = false;
